@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 
 app.get("/api", (req, res) => {
-  return res.json({ message: "This is fron backedn" });
+  return res.json({ message: "This is from backend" });
 });
 
 app.listen(8081, () => {
