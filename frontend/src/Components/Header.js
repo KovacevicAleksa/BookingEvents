@@ -7,22 +7,22 @@ function Header() {
             href="http://localhost:8081"
             className="text-2xl no-underline text-grey-darkest hover:text-blue-dark"
           >
-            Home
+            Rezervacija dogadjaja
           </a>
         </div>
         <div>
           <a
             href="http://localhost:8081/api"
-            className="text-lg no-underline text-grey-darkest hover:text-blue-dark ml-2"
+            className="text-lg no-underline text-grey-darkest hover:text-sky-700 ml-2"
           >
-            Check Server
+            Prijava
           </a>
 
           <a
             href="/api"
-            className="text-lg no-underline text-grey-darkest hover:text-blue-dark ml-2"
+            className="text-lg no-underline text-grey-darkest hover:text-sky-700 ml-2 "
           >
-            Two
+            Napravite nalog
           </a>
         </div>
       </nav>

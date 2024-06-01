@@ -7,7 +7,7 @@ function Card(props) {
   const isExpired = eventDate < today;
 
   const formattedDate = isExpired
-    ? "Expired"
+    ? "Isteklo"
     : eventDate.toLocaleDateString("sr-Latn-RS", {
         weekday: "long",
         year: "numeric",
@@ -20,16 +20,15 @@ function Card(props) {
       <a href="/src"></a>
       <div className="relative">
         <a href="/api">
-          <img
-            className="w-full"
-            src="https://images.pexels.com/photos/61180/pexels-photo-61180.jpeg?auto=compress&amp;cs=tinysrgb&amp;dpr=1&amp;w=500"
-            alt="Sunset in the mountains"
-          />
+          <img className="w-full" src={props.photo} alt="Conference" />
           <div className="hover:bg-transparent transition duration-300 absolute bottom-0 top-0 right-0 left-0 bg-gray-900 opacity-25"></div>
         </a>
         <a href="#!">
           <div className="text-l absolute top-0 right-0 bg-indigo-600 px-4 py-2 text-white mt-3 mr-3 hover:bg-white hover:text-indigo-600 transition duration-500 ease-in-out">
             {props.price}
+          </div>
+          <div className="text-l absolute top-0 left-0 bg-indigo-600 px-4 py-2 text-white mt-3 hover:bg-white hover:text-indigo-600 transition duration-500 ease-in-out">
+            {props.attendees}
           </div>
         </a>
       </div>
