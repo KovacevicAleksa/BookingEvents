@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/anchor-has-content */
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -43,28 +42,21 @@ function Registration() {
       return;
     }
 
-    const data = {
-      email: email,
-      password: password,
-    };
+    const data = { email, password };
 
     try {
-      const response = await fetch("http://localhost:8080/login", {
+      const response = await fetch("http://localhost:8080/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        throw new Error("Network problem");
       }
 
-      const result = await response.json();
       navigate("/events");
       localStorage.setItem("token", "Ez");
-      console.log("Success:", result);
     } catch (error) {
       console.error("Error:", error);
     }

@@ -11,21 +11,26 @@ function Login() {
     event.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:8080/login");
+      const response = await fetch("http://localhost:8080/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        alert("Niste ukacili dobro sifru i email");
+        throw new Error("Network response nije ok / bad parametars");
       }
-      const users = await response.json();
 
-      const user = users.find(
-        (user) => user.email === email && user.password === password
-      );
+      const result = await response.json();
 
-      if (user) {
+      if (result.message === "Login successful") {
         localStorage.setItem("token", "Ez");
         navigate("/events");
       } else {
-        alert("Invalid email or password");
+        alert("Nije dobar email ili password  ");
       }
     } catch (error) {
       console.error("Error:", error);
