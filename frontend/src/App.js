@@ -1,8 +1,13 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
 import { useEffect, useState } from "react";
+// eslint-disable-next-line no-unused-vars
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+
 import Header from "./Components/Header";
 import Card from "./Components/Card";
 import konferencija from "./Components/assets/Konferencija.jpg";
+import Login from "./routes/Login";
+import PrivateRoute from "./Components/PrivateRoute";
 
 function Data() {
   const [data, setData] = useState(null);
@@ -17,13 +22,21 @@ function Data() {
   return (
     <div>
       <h1 className="mt-6 text-gray-500 dark:text-gray-400">
-        {data ? `${data.attendees}/${data.totalInvited}` : "Loading..."}
+        {data ? (
+          <ul>
+            {data.map((item, index) => (
+              <li key={index}>{item}</li>
+            ))}
+          </ul>
+        ) : (
+          "Loading..."
+        )}
       </h1>
     </div>
   );
 }
 
-function App() {
+function Events() {
   return (
     <div>
       <Header />
@@ -59,6 +72,23 @@ function App() {
       </div>
       <Data />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/events"
+        element={
+          <PrivateRoute>
+            <Events />
+          </PrivateRoute>
+        }
+      />
+      <Route path="/" element={<Login />} />
+    </Routes>
   );
 }
 
