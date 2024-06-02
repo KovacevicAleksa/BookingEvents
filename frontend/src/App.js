@@ -15,11 +15,11 @@ function Data() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:8081/api/data")
+    fetch("http://localhost:8080/events")
       .then((res) => res.json())
       .then((data) => setData(data))
       .catch((err) => console.log(err));
-  }, []); // Dodaj prazan niz zavisnosti da se useEffect poziva samo jednom
+  }, []);
 
   return (
     <div>

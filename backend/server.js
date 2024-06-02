@@ -1,3 +1,4 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 const express = require("express");
 const cors = require("cors");
@@ -6,11 +7,14 @@ const Account = require("./models/account");
 
 const app = express();
 
+const dbURI = process.env.MONGODB_URI;
+
 app.use(cors());
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-app.get("/api/data", (req, res) => {
+app.get("/events", (req, res) => {
   var data = ["item1", "item2", "item3"];
   res.json(data);
   console.log("Sent list of items");
@@ -25,7 +29,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/login1", async (req, res) => {
+app.get("/login", async (req, res) => {
   try {
     const accounts = await Account.find({});
     res.status(200).json(accounts);
@@ -34,7 +38,7 @@ app.get("/login1", async (req, res) => {
   }
 });
 
-app.get("/login1/:id", async (req, res) => {
+app.get("/login/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const account = await Account.findById(id);
@@ -43,12 +47,9 @@ app.get("/login1/:id", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-// connect to mongoDB
-const dbURI =
-  "mongodb+srv://aleksakovacevic712:4Ozm0Zt8OTmGcIaK@bookingevent.kzck53c.mongodb.net/Node?retryWrites=true&w=majority&appName=BookingEvent";
 
 mongoose
-  .connect(dbURI)
+  .connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     app.listen(8080, () => {
       console.log("Listening");
