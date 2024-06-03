@@ -16,7 +16,7 @@ This is an Event Management System that allows users to register and log in secu
  - mongoose
  - nodemon
  
-> Start Backend nodemon server.js
+> Start Backend **nodemon server.js**
 
 
 ## Technologies  Frontend
