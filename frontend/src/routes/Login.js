@@ -27,6 +27,8 @@ function Login() {
       const result = await response.json();
 
       if (result.message === "Login successful") {
+        console.log(result.account._id);
+        localStorage.setItem("accountid", result.account._id);
         localStorage.setItem("token", "Ez");
         navigate("/events");
       } else {

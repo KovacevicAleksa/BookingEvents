@@ -35,8 +35,8 @@ function Card(props) {
     }
   };
 
-  const handleRegisterClick = () => {
-    updateTotalPeople(props.eventId, props.totalPeople + 1); // Increment totalPeople by 1
+  const handleClick = () => {
+    isExpired || updateTotalPeople(props.eventId, props.totalPeople + 1); // Increment totalPeople by 1
   };
 
   return (
@@ -62,17 +62,16 @@ function Card(props) {
         >
           {props.title}
         </a>
-        <p>
-          <span>
-            {props.description}{" "}
-            <p
-              onClick={handleRegisterClick}
-              className="font-ms text-lg text-right text-indigo-600 transition duration-500 ease-in-out mb-2 cursor-pointer"
-            >
-              {"PRIJAVI SE"}
-            </p>
-          </span>
-        </p>
+
+        <span>
+          {props.description}{" "}
+          <p
+            onClick={handleClick}
+            className="font-ms text-lg text-right text-indigo-600 transition duration-500 ease-in-out mb-2 cursor-pointer"
+          >
+            {"PRIJAVI SE"}
+          </p>
+        </span>
       </div>
       <div className="px-6 py-3 flex flex-row items-center justify-between bg-gray-100">
         <span

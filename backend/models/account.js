@@ -11,6 +11,9 @@ const AccountSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    events: {
+      type: [String],
+    },
   },
   {
     timestamps: true,

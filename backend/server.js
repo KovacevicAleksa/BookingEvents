@@ -102,6 +102,7 @@ app.post("/admin/add/events", async (req, res) => {
   }
 });
 
+//view events
 app.get("/view/events", async (req, res) => {
   try {
     const events = await Event.find({});
@@ -110,7 +111,7 @@ app.get("/view/events", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-//view
+//view event
 app.get("/view/events/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -138,6 +139,34 @@ app.patch("/edit/events/:id", async (req, res) => {
     }
 
     res.status(200).json(updatedEvent);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// edit account
+app.patch("/edit/account/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { events, ...otherUpdates } = req.body; // Destructure events and other updates
+
+    const update = { $push: { events } }; // Use $push for adding new event
+
+    // If other updates are present, combine them with the $push operation
+    if (Object.keys(otherUpdates).length > 0) {
+      update.$set = otherUpdates; // Use $set for other field updates
+    }
+
+    const updatedAccount = await Account.findByIdAndUpdate(id, update, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedAccount) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    res.status(200).json(updatedAccount);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
