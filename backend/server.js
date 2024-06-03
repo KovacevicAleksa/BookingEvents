@@ -110,6 +110,39 @@ app.get("/view/events", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+//view
+app.get("/view/events/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const events = await Event.findById(id);
+    res.status(200).json(events);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// edit events
+app.patch("/edit/events/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+
+    // Find the event by ID and update it with the new data
+    const updatedEvent = await Event.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedEvent) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    res.status(200).json(updatedEvent);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 mongoose
   .connect(dbURI)
   .then(() => {
