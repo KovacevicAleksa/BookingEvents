@@ -5,7 +5,23 @@ const EventSchema = new mongoose.Schema(
     id: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      auto: true, // Automatically generate ObjectId
+      auto: true,
+    },
+    price: {
+      type: String,
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    location: {
+      type: String,
+      required: true,
     },
     maxPeople: {
       type: Number,
@@ -15,22 +31,15 @@ const EventSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    price: {
-      type: Number,
-      required: true,
-    },
     date: {
       type: Date,
-      required: true,
-    },
-    location: {
-      type: String,
       required: true,
     },
   },
   {
     timestamps: true,
-  }
+  },
+  { collection: "events" }
 );
 
 const Event = mongoose.model("Event", EventSchema);

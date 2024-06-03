@@ -14,6 +14,7 @@ const AccountSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    collection: "accounts",
   }
 );
 

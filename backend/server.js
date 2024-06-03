@@ -5,6 +5,7 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 const path = require("path");
 const Account = require("./models/account");
+const Event = require("./models/event");
 
 const app = express();
 
@@ -14,12 +15,6 @@ app.use(cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-app.get("/events", (req, res) => {
-  var data = ["item1", "item2", "item3"];
-  res.json(data);
-  console.log("Sent list of items");
-});
 
 app.post("/register", async (req, res) => {
   try {
@@ -75,8 +70,48 @@ app.get("/accounts/:id", async (req, res) => {
   }
 });
 
+app.post("/admin/add/events", async (req, res) => {
+  try {
+    const {
+      price,
+      title,
+      description,
+      location,
+      maxPeople,
+      totalPeople,
+      date,
+    } = req.body;
+
+    // Create and save the new event
+    const newEvent = new Event({
+      price,
+      title,
+      description,
+      location,
+      maxPeople,
+      totalPeople,
+      date: new Date(date),
+    });
+
+    const savedEvent = await newEvent.save();
+    console.log("Event saved:", savedEvent);
+
+    res.status(201).json({ event: savedEvent });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+app.get("/view/events", async (req, res) => {
+  try {
+    const events = await Event.find({});
+    res.status(200).json(events);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 mongoose
-  .connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(dbURI)
   .then(() => {
     app.listen(8080, () => {
       console.log("Listening");

@@ -40,7 +40,15 @@ function Card(props) {
           {props.title}
         </a>
         <p>
-          <span>{props.description}</span>
+          <span>
+            {props.description}{" "}
+            <a
+              href={"/api"}
+              className="font-ms text-lg text-right text-indigo-600 transition duration-500 ease-in-out mb-2"
+            >
+              {"PRIJAVI SE"}
+            </a>
+          </span>
         </p>
       </div>
       <div className="px-6 py-3 flex flex-row items-center justify-between bg-gray-100">

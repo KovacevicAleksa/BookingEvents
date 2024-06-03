@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 // eslint-disable-next-line no-unused-vars
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
@@ -12,66 +12,54 @@ import Registration from "./routes/Registration";
 import PrivateRoute from "./Components/PrivateRoute";
 
 function Data() {
-  const [data, setData] = useState(null);
+  const [eventData, setEventData] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/events")
-      .then((res) => res.json())
-      .then((data) => setData(data))
-      .catch((err) => console.log(err));
-  }, []);
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:8080/view/events", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) {
+          throw new Error("Network problem");
+        }
+
+        const data = await response.json();
+        setEventData(data);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchData();
+  }, []); // empty dependency array to run only once after initial render
 
   return (
     <div>
-      <h1 className="mt-6 text-gray-500 dark:text-gray-400">
-        {data ? (
-          <ul>
-            {data.map((item, index) => (
-              <li key={index}>{item}</li>
-            ))}
-          </ul>
-        ) : (
-          "Loading..."
-        )}
-      </h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+        {Array.isArray(eventData) &&
+          eventData.map((event, index) => (
+            <Card
+              key={event.id}
+              price={event.price}
+              title={event.title}
+              description={event.description}
+              location={event.location}
+              photo={konferencija}
+              attendees={`${event.totalPeople}/${event.maxPeople}`}
+              date={event.date}
+            />
+          ))}
+      </div>
     </div>
   );
 }
-
 function Events() {
   return (
     <div>
       <Header />
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-        <Card
-          price="$$$"
-          title="Bitcoin meetup"
-          description="Bitcoin je jedina prava decentralizovana kriptovaluta. Kroz ovu grupu mi stvaramo bitcoin-only zajednicu kojom utičemo i motivišemo ljude da, kroz bitcoin, menjaju svet.
-          Ovaj meetup je stvoren sa tim ciljem, imamo slobodnu diskusiju i planiramo projekte (edukacija, filozofija, ekonomija, startup ideje itd.)"
-          location="Belgrade, Serbia"
-          photo={konferencija}
-          attendees="190/220"
-          date="2025-05-11"
-        />
-        <Card
-          price="$$"
-          title="Ethereum Workshop"
-          description="Bitcoin je jedina prava decentralizovana kriptovaluta. Kroz ovu grupu mi stvaramo bitcoin-only zajednicu kojom utičemo i motivišemo ljude da, kroz bitcoin, menjaju svet. Ovaj meetup je stvoren sa tim ciljem, imamo slobodnu diskusiju i planiramo projekte (edukacija, filozofija, ekonomija, startup ideje itd.)"
-          location="Novi Sad, Serbia"
-          photo={konferencija}
-          attendees="98/220"
-          date="2025-05-10"
-        />
-        <Card
-          price="FREE"
-          title="Crypto Basics"
-          description="Bitcoin je jedina prava decentralizovana kriptovaluta. Kroz ovu grupu mi stvaramo bitcoin-only zajednicu kojom utičemo i motivišemo ljude da, kroz bitcoin, menjaju svet. Ovaj meetup je stvoren sa tim ciljem, imamo slobodnu diskusiju i planiramo projekte (edukacija, filozofija, ekonomija, startup ideje itd.)"
-          location="Niš, Serbia"
-          photo={konferencija}
-          attendees="220/220"
-          date="2022-05-10"
-        />
-      </div>
       <Data />
     </div>
   );
