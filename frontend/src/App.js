@@ -14,6 +14,7 @@ import PrivateRoute from "./Components/PrivateRoute";
 function Data() {
   const [eventData, setEventData] = useState([]);
 
+  //ispisivanje svih eventa na sajtu
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -34,7 +35,7 @@ function Data() {
     };
 
     fetchData();
-  }, []); // empty dependency array to run only once after initial render
+  }, []); //ne prati zavisnost
 
   return (
     <div>

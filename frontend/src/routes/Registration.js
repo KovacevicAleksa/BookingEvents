@@ -44,6 +44,7 @@ function Registration() {
 
     const data = { email, password };
 
+    // Registracije preko post motode sa podacima sa forme
     try {
       const response = await fetch("http://localhost:8080/register", {
         method: "POST",
@@ -55,8 +56,7 @@ function Registration() {
         throw new Error("Network problem");
       }
 
-      navigate("/events");
-      localStorage.setItem("token", "Ez");
+      navigate("/login");
     } catch (error) {
       console.error("Error:", error);
     }

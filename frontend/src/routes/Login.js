@@ -10,6 +10,7 @@ function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    //login bolje preko get-a ali dobro radi!
     try {
       const response = await fetch("http://localhost:8080/login", {
         method: "POST",
@@ -20,7 +21,7 @@ function Login() {
       });
 
       if (!response.ok) {
-        alert("Niste ukacili dobro sifru i email");
+        alert("Niste ukacali dobro sifru i email");
         throw new Error("Network response nije ok / bad parametars");
       }
 
@@ -28,6 +29,7 @@ function Login() {
 
       if (result.message === "Login successful") {
         console.log(result.account._id);
+        //Bolje koristiti sesije makar svakako je enkriptovan podatak
         localStorage.setItem("accountid", result.account._id);
         localStorage.setItem("token", "Ez");
         navigate("/events");
@@ -92,6 +94,7 @@ function Login() {
                         id="remember"
                         aria-describedby="remember"
                         type="checkbox"
+                        defaultChecked
                         className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"
                       />
                     </div>

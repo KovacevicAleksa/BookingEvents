@@ -5,6 +5,7 @@ function Card(props) {
   const today = new Date();
   const isExpired = eventDate < today;
 
+  //Da li je isetkao event
   const formattedDate = isExpired
     ? "Isteklo"
     : eventDate.toLocaleDateString("sr-Latn-RS", {
@@ -14,21 +15,69 @@ function Card(props) {
         day: "numeric",
       });
 
-  const updateTotalPeople = async (eventId, newTotalPeople) => {
-    try {
-      const response = await fetch(
-        `http://localhost:8080/edit/events/${eventId}`, // Correctly includes the event ID
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ totalPeople: newTotalPeople }),
-        }
-      );
+  //Dodavanje eventa u bazu podataka kada se korisnik prijavi
+  async function updateAccountEvent(id, eventData) {
+    console.log(eventData);
+    console.log(id);
 
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
+    try {
+      const response = await fetch(`http://localhost:8080/edit/account/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          events: eventData,
+        }),
+      });
+
+      const data = await response.json();
+      console.log("Response:", data);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+
+  //update broja ljudi u bazi podataka
+  const updateTotalPeople = async (eventId, newTotalPeople) => {
+    const accountId = localStorage.getItem("accountid");
+    // accountFetchEvent za dohvaćanje eventa
+    const accountFetchEvent = await fetch(
+      `http://localhost:8080/accounts/${accountId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!accountFetchEvent.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const data = await accountFetchEvent.json();
+    console.log("Sadrzaj korisnikovih eventa:", data.events);
+
+    try {
+      // ažuriranje eventa ako korisnik vec nije glasao da dolazi na event
+      console.log(data.events.includes(eventId));
+      if (!data.events.includes(eventId)) {
+        updateAccountEvent(accountId, eventId);
+        const eventUpdateTotalPeople = await fetch(
+          `http://localhost:8080/edit/events/${eventId}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ totalPeople: newTotalPeople }),
+          }
+        );
+
+        if (!eventUpdateTotalPeople.ok) {
+          throw new Error("Network response was not ok");
+        }
       }
     } catch (error) {
       console.error("Error updating event:", error);
@@ -36,7 +85,7 @@ function Card(props) {
   };
 
   const handleClick = () => {
-    isExpired || updateTotalPeople(props.eventId, props.totalPeople + 1); // Increment totalPeople by 1
+    isExpired || updateTotalPeople(props.eventId, props.totalPeople + 1); // Dodavanje ljudi za jedan ako je sve uredu
   };
 
   return (
@@ -62,7 +111,7 @@ function Card(props) {
         >
           {props.title}
         </a>
-
+        <br></br>
         <span>
           {props.description}{" "}
           <p

@@ -16,6 +16,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+//REgistrovanje
 app.post("/register", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -32,6 +33,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
+//Login
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -51,6 +53,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
+//Dobijanje svih naloga
 app.get("/accounts", async (req, res) => {
   try {
     const accounts = await Account.find({});
@@ -60,6 +63,7 @@ app.get("/accounts", async (req, res) => {
   }
 });
 
+//Dobijanje jednog naloga preko id
 app.get("/accounts/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -70,6 +74,7 @@ app.get("/accounts/:id", async (req, res) => {
   }
 });
 
+//Dodavanje eventa novih
 app.post("/admin/add/events", async (req, res) => {
   try {
     const {
@@ -82,7 +87,7 @@ app.post("/admin/add/events", async (req, res) => {
       date,
     } = req.body;
 
-    // Create and save the new event
+    // Kreiranje i cuvanje novog elementa
     const newEvent = new Event({
       price,
       title,
@@ -111,7 +116,7 @@ app.get("/view/events", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-//view event
+//view event preko id
 app.get("/view/events/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -122,13 +127,13 @@ app.get("/view/events/:id", async (req, res) => {
   }
 });
 
-// edit events
+// edit event preko id
 app.patch("/edit/events/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
 
-    // Find the event by ID and update it with the new data
+    // Pretrazivanje eventa preko id i njegov update
     const updatedEvent = await Event.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
@@ -144,17 +149,17 @@ app.patch("/edit/events/:id", async (req, res) => {
   }
 });
 
-// edit account
+// rditovanje naloga preko id
 app.patch("/edit/account/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    const { events, ...otherUpdates } = req.body; // Destructure events and other updates
+    const { events, ...otherUpdates } = req.body;
 
-    const update = { $push: { events } }; // Use $push for adding new event
+    const update = { $push: { events } }; // Dodavanje novih eventa
 
-    // If other updates are present, combine them with the $push operation
+    //Dodavanje novih updatova
     if (Object.keys(otherUpdates).length > 0) {
-      update.$set = otherUpdates; // Use $set for other field updates
+      update.$set = otherUpdates;
     }
 
     const updatedAccount = await Account.findByIdAndUpdate(id, update, {

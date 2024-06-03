@@ -12,6 +12,7 @@ const AccountSchema = new mongoose.Schema(
       required: true,
     },
     events: {
+      //Prijavljeni eventi
       type: [String],
     },
   },
@@ -21,7 +22,7 @@ const AccountSchema = new mongoose.Schema(
   }
 );
 
-// Hash password before saving
+// Hash password
 AccountSchema.pre("save", async function (next) {
   try {
     if (!this.isModified("password")) {
