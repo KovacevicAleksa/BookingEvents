@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/anchor-has-content */
 import React from "react";
 
 function Card(props) {
@@ -18,13 +17,13 @@ function Card(props) {
   const updateTotalPeople = async (eventId, newTotalPeople) => {
     try {
       const response = await fetch(
-        `http://localhost:8080/edit/events/665da11091e51128eedabf3b`,
+        `http://localhost:8080/edit/events/${eventId}`, // Correctly includes the event ID
         {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ totalPeople: 50 }),
+          body: JSON.stringify({ totalPeople: newTotalPeople }),
         }
       );
 
@@ -35,10 +34,13 @@ function Card(props) {
       console.error("Error updating event:", error);
     }
   };
-  updateTotalPeople("665da11091e51128eedabf3b", 100);
+
+  const handleRegisterClick = () => {
+    updateTotalPeople(props.eventId, props.totalPeople + 1); // Increment totalPeople by 1
+  };
+
   return (
     <div className="rounded overflow-hidden shadow-lg flex flex-col">
-      <a href="/src"></a>
       <div className="relative">
         <a href="/api">
           <img className="w-full" src={props.photo} alt="Conference" />
@@ -63,13 +65,12 @@ function Card(props) {
         <p>
           <span>
             {props.description}{" "}
-            <a
-              href="/events"
-              className="font-ms text-lg text-right text-indigo-600 transition duration-500 ease-in-out mb-2"
+            <p
+              onClick={handleRegisterClick}
+              className="font-ms text-lg text-right text-indigo-600 transition duration-500 ease-in-out mb-2 cursor-pointer"
             >
               {"PRIJAVI SE"}
-              {console.log(props.eventId)}
-            </a>
+            </p>
           </span>
         </p>
       </div>
