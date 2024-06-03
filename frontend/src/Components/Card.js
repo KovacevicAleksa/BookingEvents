@@ -15,6 +15,27 @@ function Card(props) {
         day: "numeric",
       });
 
+  const updateTotalPeople = async (eventId, newTotalPeople) => {
+    try {
+      const response = await fetch(
+        `http://localhost:8080/edit/events/665da11091e51128eedabf3b`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ totalPeople: 50 }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+    } catch (error) {
+      console.error("Error updating event:", error);
+    }
+  };
+  updateTotalPeople("665da11091e51128eedabf3b", 100);
   return (
     <div className="rounded overflow-hidden shadow-lg flex flex-col">
       <a href="/src"></a>
@@ -43,10 +64,11 @@ function Card(props) {
           <span>
             {props.description}{" "}
             <a
-              href={"/api"}
+              href="/events"
               className="font-ms text-lg text-right text-indigo-600 transition duration-500 ease-in-out mb-2"
             >
               {"PRIJAVI SE"}
+              {console.log(props.eventId)}
             </a>
           </span>
         </p>

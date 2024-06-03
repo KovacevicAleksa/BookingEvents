@@ -50,6 +50,8 @@ function Data() {
               photo={konferencija}
               attendees={`${event.totalPeople}/${event.maxPeople}`}
               date={event.date}
+              eventId={event._id}
+              totalPeople={event.totalPeople}
             />
           ))}
       </div>
