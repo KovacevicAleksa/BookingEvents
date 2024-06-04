@@ -177,6 +177,36 @@ app.patch("/edit/account/:id", async (req, res) => {
   }
 });
 
+router.delete("/remove/account/event", async (req, res) => {
+  const { id, eventId } = req.body; // Dohvatite ID korisnika i ID događaja iz zahtjeva
+
+  // Provjerite postoji li račun s tim ID-om
+  const account = await Account.findById(id);
+  if (!account) {
+    return res.status(404).send("Račun nije pronađen");
+  }
+
+  // Provjerite postoji li događaj s tim ID-om
+  const event = await Event.findById(eventId);
+  if (!event) {
+    return res.status(404).send("Događaj nije pronađen");
+  }
+
+  // Provjerite je li događaj povezan s tim računom
+  if (!account.events.includes(eventId)) {
+    return res.status(400).send("Događaj nije povezan s tim računom");
+  }
+
+  // Uklonite događaj iz polja events u računu
+  account.events = account.events.filter((eventId) => eventId !== event._id);
+  await account.save();
+
+  // Uklonite događaj iz baze podataka
+  await event.delete();
+
+  res.send("Događaj je uspješno uklonjen iz računa");
+});
+
 mongoose
   .connect(dbURI)
   .then(() => {

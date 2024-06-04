@@ -78,14 +78,24 @@ function Card(props) {
         if (!eventUpdateTotalPeople.ok) {
           throw new Error("Network response was not ok");
         }
+        alert("Uspesna prijava");
       }
     } catch (error) {
       console.error("Error updating event:", error);
     }
   };
 
+  const handleRemoveEvent = (accountId, eventId) => {
+    console.log("ez");
+  };
+
   const handleClick = () => {
     isExpired || updateTotalPeople(props.eventId, props.totalPeople + 1); // Dodavanje ljudi za jedan ako je sve uredu
+  };
+
+  const handleDelete = () => {
+    isExpired ||
+      handleRemoveEvent(localStorage.getItem("accountid"), props.eventId); // Dodavanje ljudi za jedan ako je sve uredu
   };
 
   return (
@@ -114,12 +124,20 @@ function Card(props) {
         <br></br>
         <span>
           {props.description}{" "}
-          <p
-            onClick={handleClick}
-            className="font-ms text-lg text-right text-indigo-600 transition duration-500 ease-in-out mb-2 cursor-pointer"
-          >
-            {"PRIJAVI SE"}
-          </p>
+          <div className="flex justify-between items-center">
+            <p
+              onClick={handleDelete}
+              className="font-ms text-lg text-left text-red-600 transition duration-500 ease-in-out mb-2 cursor-pointer"
+            >
+              ODJAVI SE
+            </p>
+            <p
+              onClick={handleClick}
+              className="font-ms text-lg text-right text-indigo-600 transition duration-500 ease-in-out mb-2 cursor-pointer"
+            >
+              PRIJAVI SE
+            </p>
+          </div>
         </span>
       </div>
       <div className="px-6 py-3 flex flex-row items-center justify-between bg-gray-100">
