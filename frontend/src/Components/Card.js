@@ -39,7 +39,11 @@ function Card(props) {
   }
 
   //update broja ljudi u bazi podataka
-  const updateTotalPeople = async (eventId, newTotalPeople) => {
+  const updateTotalPeople = async (
+    eventId,
+    newTotalPeople,
+    onlyUpdateTotalPeople
+  ) => {
     const accountId = localStorage.getItem("accountid");
     // accountFetchEvent za dohvaćanje eventa
     const accountFetchEvent = await fetch(
@@ -63,7 +67,6 @@ function Card(props) {
       // ažuriranje eventa ako korisnik vec nije glasao da dolazi na event
       console.log(data.events.includes(eventId));
       if (!data.events.includes(eventId)) {
-        updateAccountEvent(accountId, eventId);
         const eventUpdateTotalPeople = await fetch(
           `http://localhost:8080/edit/events/${eventId}`,
           {
@@ -78,24 +81,86 @@ function Card(props) {
         if (!eventUpdateTotalPeople.ok) {
           throw new Error("Network response was not ok");
         }
-        alert("Uspesna prijava");
+        !onlyUpdateTotalPeople && updateAccountEvent(accountId, eventId);
+        !onlyUpdateTotalPeople && alert("Uspesna prijava");
       }
     } catch (error) {
       console.error("Error updating event:", error);
     }
   };
 
-  const handleRemoveEvent = (accountId, eventId) => {
-    console.log("ez");
-  };
+  async function fetchAccountEvents(accountId, eventId) {
+    try {
+      const accountFetchEvent = await fetch(
+        `http://localhost:8080/accounts/${accountId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!accountFetchEvent.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await accountFetchEvent.json();
+      console.log("Sadrzaj korisnikovih eventa:", data.events);
+      return data.events.includes(eventId);
+    } catch (error) {
+      console.error("Failed to fetch account events:", error);
+      throw error;
+    }
+  }
+
+  async function deleteEvent(UserId, eventId) {
+    const url = `http://localhost:8080/remove/account/event/${UserId}`; // Ispravno korišćenje template stringa
+    const data = {
+      EventId: eventId,
+    };
+    try {
+      const response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Success:", result);
+      alert("Uspesna odjava");
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
 
   const handleClick = () => {
-    isExpired || updateTotalPeople(props.eventId, props.totalPeople + 1); // Dodavanje ljudi za jedan ako je sve uredu
+    isExpired || updateTotalPeople(props.eventId, props.totalPeople + 1, false); // Dodavanje ljudi za jedan ako je sve uredu
   };
 
-  const handleDelete = () => {
-    isExpired ||
-      handleRemoveEvent(localStorage.getItem("accountid"), props.eventId); // Dodavanje ljudi za jedan ako je sve uredu
+  const handleDeleteEvent = async () => {
+    try {
+      const accountId = localStorage.getItem("accountid");
+      const eventId = props.eventId;
+
+      const eventExists = await fetchAccountEvents(accountId, eventId);
+
+      if (eventExists) {
+        console.log(eventId);
+        await deleteEvent(accountId, eventId);
+        await updateTotalPeople(eventId, props.totalPeople - 1, true);
+      } else {
+        console.log("Event ID not found in user's events.");
+      }
+    } catch (error) {
+      console.error("Error handling delete event:", error);
+    }
   };
 
   return (
@@ -126,7 +191,7 @@ function Card(props) {
           {props.description}{" "}
           <div className="flex justify-between items-center">
             <p
-              onClick={handleDelete}
+              onClick={handleDeleteEvent}
               className="font-ms text-lg text-left text-red-600 transition duration-500 ease-in-out mb-2 cursor-pointer"
             >
               ODJAVI SE
