@@ -57,6 +57,7 @@ function Registration() {
       }
 
       navigate("/login");
+      alert("Uspesna registracija");
     } catch (error) {
       console.error("Error:", error);
     }
