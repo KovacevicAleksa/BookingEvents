@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 
 function Card(props) {
+  const [totalPeople, setTotalPeople] = useState(props.totalPeople);
+
   const eventDate = new Date(props.date);
   const today = new Date();
   const isExpired = eventDate < today;
@@ -83,6 +85,7 @@ function Card(props) {
         }
         !onlyUpdateTotalPeople && updateAccountEvent(accountId, eventId);
         !onlyUpdateTotalPeople && alert("Uspesna prijava");
+        setTotalPeople(newTotalPeople); // Update the state
       }
     } catch (error) {
       console.error("Error updating event:", error);
@@ -141,7 +144,7 @@ function Card(props) {
   }
 
   const handleClick = () => {
-    isExpired || updateTotalPeople(props.eventId, props.totalPeople + 1, false); // Dodavanje ljudi za jedan ako je sve uredu
+    isExpired || updateTotalPeople(props.eventId, totalPeople + 1, false); // Dodavanje ljudi za jedan ako je sve uredu
   };
 
   const handleDeleteEvent = async () => {
@@ -154,7 +157,7 @@ function Card(props) {
       if (eventExists) {
         console.log(eventId);
         await deleteEvent(accountId, eventId);
-        await updateTotalPeople(eventId, props.totalPeople - 1, true);
+        await updateTotalPeople(eventId, totalPeople - 1, true);
       } else {
         console.log("Event ID not found in user's events.");
       }
@@ -175,7 +178,7 @@ function Card(props) {
             {props.price}
           </div>
           <div className="text-l absolute top-0 left-0 bg-indigo-600 px-4 py-2 text-white mt-3 hover:bg-white hover:text-indigo-600 transition duration-500 ease-in-out">
-            {props.attendees}
+            {totalPeople}
           </div>
         </a>
       </div>
