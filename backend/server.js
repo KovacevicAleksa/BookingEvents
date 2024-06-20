@@ -5,15 +5,20 @@ const cors = require("cors");
 const bcrypt = require("bcrypt");
 const path = require("path");
 const rateLimit = require("express-rate-limit");
+const helmet = require("helmet");
+const nodeLimits = require("limits");
 
 const Account = require("./models/account");
 const Event = require("./models/event");
 
 const app = express();
 
+app.disable("x-powered-by");
+
 const dbURI = process.env.MONGODB_URI;
 
 app.use(cors());
+app.use(helmet());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -24,6 +29,16 @@ const limiter = rateLimit({
   max: 100, // limit each IP to 100 requests per windowMs
   message: "Too many requests from this IP, please try again after 15 minutes",
 });
+
+app.use(
+  nodeLimits({
+    file_uploads: false,
+
+    post_max_size: 2000000, // Limit request sizes to 2MB
+
+    inc_req_timeout: 60000, // Set a timeout of 60 seconds
+  })
+);
 
 app.use(limiter);
 
