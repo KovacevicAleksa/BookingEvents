@@ -7,6 +7,7 @@ const path = require("path");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const nodeLimits = require("limits");
+const bodyParser = require("body-parser");
 
 const Account = require("./models/account");
 const Event = require("./models/event");
@@ -37,6 +38,12 @@ app.use(
     post_max_size: 2000000, // Limit request sizes to 2MB
 
     inc_req_timeout: 60000, // Set a timeout of 60 seconds
+  })
+);
+
+app.use(
+  bodyParser.json({
+    limit: "1mb", // Limiting JSON body size to 1MB
   })
 );
 
