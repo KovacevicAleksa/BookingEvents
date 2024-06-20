@@ -29,7 +29,7 @@ function Login() {
 
       if (result.message === "Login successful") {
         console.log(result.account._id);
-        //Bolje koristiti sesije makar svakako je enkriptovan podatak
+        //add jwt
         localStorage.setItem("accountid", result.account._id);
         localStorage.setItem("token", "Ez");
         navigate("/events");
