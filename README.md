@@ -15,6 +15,11 @@ This is an Event Management System that allows users to register and log in secu
  - mongodb
  - mongoose
  - nodemon
+ - limits
+ - helmet
+ - express-rate-limit
+ - bodyParser
+ - eslint-plugin-security
  
 > Start Backend **nodemon server.js**
 
@@ -29,8 +34,11 @@ This is an Event Management System that allows users to register and log in secu
 ## Folder structure
 ```
 └── 📁backend
+    └── .dockerignore
     └── .env
     └── .gitignore
+    └── Dockerfile
+    └── eslint.config.mjs
     └── 📁models
         └── account.js
         └── event.js
