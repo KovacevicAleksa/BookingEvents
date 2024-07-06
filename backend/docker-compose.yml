@@ -1,0 +1,22 @@
+version: "3"
+services:
+  nest-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: express-api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - MONGO_URI=${MONGO_URI}
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: express-nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - nest-api
