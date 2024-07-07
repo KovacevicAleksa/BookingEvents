@@ -16,7 +16,30 @@ const app = express();
 
 app.disable("x-powered-by");
 
+// Middleware for blocking cloud metadata service
+app.use((req, res, next) => {
+  const metadataUrl = "http://169.254.169.254";
+  if (req.url.startsWith(metadataUrl)) {
+    return res.status(403).send("Access to metadata is forbidden");
+  }
+  next();
+});
+
 const dbURI = process.env.MONGODB_URI;
+
+app.use(cors());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: [],
+      },
+    },
+  })
+);
 
 app.use(cors());
 app.use(helmet());
