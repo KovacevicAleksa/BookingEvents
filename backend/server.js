@@ -14,6 +14,8 @@ const Event = require("./models/event");
 
 const app = express();
 
+const port = 8080;
+
 app.disable("x-powered-by");
 
 // Middleware for blocking cloud metadata service
@@ -255,9 +257,11 @@ app.delete("/remove/account/event/:id", async (req, res) => {
 mongoose
   .connect(dbURI)
   .then(() => {
-    app.listen(8080, () => {
-      console.log("Listening");
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+      console.log("Connected to the database successfully");
+      //console.log(`Database URI: ${dbURI}`);
+      console.log(`Server start time: ${new Date().toLocaleString()}`);
     });
-    console.log("connected to db");
   })
-  .catch((err) => console.log(err));
+  .catch((err) => console.log(`Database connection error: ${err}`));

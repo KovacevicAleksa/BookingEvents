@@ -1,6 +1,11 @@
-version: "3"
+version: "3.8"
+
+networks:
+  my_network:
+    driver: bridge
+
 services:
-  nest-api:
+  express-api:
     build:
       context: .
       dockerfile: Dockerfile
@@ -10,6 +15,8 @@ services:
     environment:
       - NODE_ENV=production
       - MONGODB_URI=${MONGODB_URI}
+    networks:
+      - my_network
 
   nginx:
     build:
@@ -19,4 +26,6 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - nest-api
+      - express-api
+    networks:
+      - my_network
