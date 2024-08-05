@@ -63,3 +63,9 @@ This is an Event Management System that allows users to register and log in secu
             └── Registration.js
     └── tailwind.config.js
 ```
+
+
+
+![Screenshot 2024-08-05 193451](https://github.com/user-attachments/assets/4cc2faba-bf29-4f8a-8874-e4301c469e0c)
+
+![Screenshot 2024-08-05 193507](https://github.com/user-attachments/assets/82cc4bef-1c9f-408b-807e-e6a3ed9607a3)
