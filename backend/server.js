@@ -14,7 +14,10 @@ const Event = require("./models/event");
 
 const app = express();
 
-const port = 8080;
+const port = process.env.PORT || 8080;
+
+// Trust first proxy
+app.set("trust proxy", 1);
 
 app.disable("x-powered-by");
 
@@ -43,9 +46,6 @@ app.use(
   })
 );
 
-app.use(cors());
-app.use(helmet());
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -54,14 +54,14 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   message: "Too many requests from this IP, please try again after 15 minutes",
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
 app.use(
   nodeLimits({
     file_uploads: false,
-
     post_max_size: 2000000, // Limit request sizes to 2MB
-
     inc_req_timeout: 60000, // Set a timeout of 60 seconds
   })
 );
@@ -260,8 +260,19 @@ mongoose
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
       console.log("Connected to the database successfully");
-      //console.log(`Database URI: ${dbURI}`);
       console.log(`Server start time: ${new Date().toLocaleString()}`);
     });
   })
   .catch((err) => console.log(`Database connection error: ${err}`));
+
+// Graceful shutdown
+process.on("SIGTERM", () => {
+  console.log("SIGTERM signal received: closing HTTP server");
+  server.close(() => {
+    console.log("HTTP server closed");
+    mongoose.connection.close(false, () => {
+      console.log("MongoDB connection closed");
+      process.exit(0);
+    });
+  });
+});
