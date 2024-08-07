@@ -18,7 +18,7 @@ function Data() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:8080/view/events", {
+        const response = await fetch("http://localhost:8081/view/events", {
           method: "GET",
           headers: { "Content-Type": "application/json" },
         });

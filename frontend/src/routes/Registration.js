@@ -46,7 +46,7 @@ function Registration() {
 
     // Registracije preko post motode sa podacima sa forme
     try {
-      const response = await fetch("http://localhost:8080/register", {
+      const response = await fetch("http://localhost:8081/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
