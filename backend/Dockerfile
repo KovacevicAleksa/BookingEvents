@@ -15,7 +15,7 @@ RUN npm install --production && mv node_modules ../
 COPY . .
 
 # Expose port
-EXPOSE 8080
+EXPOSE 8081
 
 # Change ownership of application files to non-root user
 RUN chown -R node /usr/src/app

@@ -22,7 +22,7 @@ services:
       dockerfile: Dockerfile.nginx
     container_name: express-nginx
     ports:
-      - "80:80"
+      - "8081:8081"
     depends_on:
       - express-api
     networks:
