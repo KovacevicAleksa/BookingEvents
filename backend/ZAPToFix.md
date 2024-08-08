@@ -1,9 +1,3 @@
-High
-Cloud Metadata Potentially Exposed
-https://www.nginx.com/blog/trust-no-one-perils-of-trusting-user-input/
-
----
-
 CSP: Wildcard Directive
 https://www.w3.org/TR/CSP/
 https://caniuse.com/#search=content+security+policy
