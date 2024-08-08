@@ -17,13 +17,13 @@ function Card(props) {
         day: "numeric",
       });
 
-  //Dodavanje eventa u bazu podataka kada se korisnik prijavi
+  //Dodavanje eventa u bazu podataka kada se korisnik prijavi za event
   async function updateAccountEvent(id, eventData) {
     console.log(eventData);
     console.log(id);
 
     try {
-      const response = await fetch(`http://localhost:8080/edit/account/${id}`, {
+      const response = await fetch(`http://localhost:8081/edit/account/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -49,7 +49,7 @@ function Card(props) {
     const accountId = localStorage.getItem("accountid");
     // accountFetchEvent za dohvaćanje eventa
     const accountFetchEvent = await fetch(
-      `http://localhost:8080/accounts/${accountId}`,
+      `http://localhost:8081/accounts/${accountId}`,
       {
         method: "GET",
         headers: {
@@ -70,7 +70,7 @@ function Card(props) {
       console.log(data.events.includes(eventId));
       if (!data.events.includes(eventId)) {
         const eventUpdateTotalPeople = await fetch(
-          `http://localhost:8080/edit/events/${eventId}`,
+          `http://localhost:8081/edit/events/${eventId}`,
           {
             method: "PATCH",
             headers: {
@@ -83,9 +83,12 @@ function Card(props) {
         if (!eventUpdateTotalPeople.ok) {
           throw new Error("Network response was not ok");
         }
+
         !onlyUpdateTotalPeople && updateAccountEvent(accountId, eventId);
         !onlyUpdateTotalPeople && alert("Uspesna prijava");
         setTotalPeople(newTotalPeople); // Update the state
+      } else {
+        alert("Vec ste se prijavili na event");
       }
     } catch (error) {
       console.error("Error updating event:", error);
@@ -95,7 +98,7 @@ function Card(props) {
   async function fetchAccountEvents(accountId, eventId) {
     try {
       const accountFetchEvent = await fetch(
-        `http://localhost:8080/accounts/${accountId}`,
+        `http://localhost:8081/accounts/${accountId}`,
         {
           method: "GET",
           headers: {
@@ -118,7 +121,7 @@ function Card(props) {
   }
 
   async function deleteEvent(UserId, eventId) {
-    const url = `http://localhost:8080/remove/account/event/${UserId}`; // Ispravno korišćenje template stringa
+    const url = `http://localhost:8081/remove/account/event/${UserId}`;
     const data = {
       EventId: eventId,
     };
@@ -159,6 +162,7 @@ function Card(props) {
         await deleteEvent(accountId, eventId);
         await updateTotalPeople(eventId, totalPeople - 1, true);
       } else {
+        alert("Niste prijavljeni na event");
         console.log("Event ID not found in user's events.");
       }
     } catch (error) {
@@ -169,7 +173,7 @@ function Card(props) {
   return (
     <div className="rounded overflow-hidden shadow-lg flex flex-col">
       <div className="relative">
-        <a href="/api">
+        <a href="/events">
           <img className="w-full" src={props.photo} alt="Conference" />
           <div className="hover:bg-transparent transition duration-300 absolute bottom-0 top-0 right-0 left-0 bg-gray-900 opacity-25"></div>
         </a>
@@ -184,7 +188,7 @@ function Card(props) {
       </div>
       <div className="px-6 py-4 mb-auto">
         <a
-          href="/api"
+          href="/events"
           className="font-medium text-lg inline-block hover:text-indigo-600 transition duration-500 ease-in-out mb-2"
         >
           {props.title}
