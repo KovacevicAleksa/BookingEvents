@@ -1,5 +1,7 @@
 networks:
-  my_network:
+  frontend:
+    driver: bridge
+  backend:
     driver: bridge
 
 services:
@@ -8,13 +10,14 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: express-api
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     environment:
       - NODE_ENV=production
       - MONGODB_URI=${MONGODB_URI}
     networks:
-      - my_network
+      - frontend
+      - backend
 
   nginx:
     build:
@@ -26,4 +29,4 @@ services:
     depends_on:
       - express-api
     networks:
-      - my_network
+      - frontend
