@@ -148,6 +148,7 @@ function Card(props) {
 
   const handleClick = () => {
     isExpired || updateTotalPeople(props.eventId, totalPeople + 1, false); // Dodavanje ljudi za jedan ako je sve uredu
+    isExpired && alert("Event je istekao");
   };
 
   const handleDeleteEvent = async () => {
@@ -161,9 +162,11 @@ function Card(props) {
         console.log(eventId);
         await deleteEvent(accountId, eventId);
         await updateTotalPeople(eventId, totalPeople - 1, true);
-      } else {
+      } else if (!isExpired) {
         alert("Niste prijavljeni na event");
         console.log("Event ID not found in user's events.");
+      } else if (isExpired) {
+        alert("Event je istekao");
       }
     } catch (error) {
       console.error("Error handling delete event:", error);
