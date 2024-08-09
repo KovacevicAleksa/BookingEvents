@@ -1,34 +1,14 @@
----
-HiG
-Content Security Policy (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks. Including (but not limited to) Cross Site Scripting (XSS), and data injection attacks. These attacks are used for everything from data theft to site defacement or distribution of malware. CSP provides a set of standard HTTP headers that allow website owners to declare approved sources of content that browsers should be allowed to load on that page — covered types are JavaScript, CSS, HTML frames, fonts, images and embeddable objects such as Java applets, ActiveX, audio and video files.
+Ensure that sensitive data is not available in an unauthenticated manner (using IP address white-listing, for instance).
+Configure the "Access-Control-Allow-Origin" HTTP header to a more restrictive set of domains, or remove all CORS headers entirely, to allow the web browser to enforce the Same Origin Policy (SOP) in a more restrictive manner.
 
-Ensure that your web server, application server, load balancer, etc. is properly configured to set the Content-Security-Policy header.
+Modern Web browsers support the Content-Security-Policy and X-Frame-Options HTTP headers. Ensure one of them is set on all web pages returned by your site/app.
+If you expect the page to be framed only by pages on your server (e.g. it's part of a FRAMESET) then you'll want to use SAMEORIGIN, otherwise if you never expect the page to be framed, you should use DENY. Alternatively consider implementing Content Security Policy's "frame-ancestors" directive.
 
-frame-ancestors, form-action
+Review the source code of this page. Implement custom error pages. Consider implementing a mechanism to provide a unique error reference/identifier to the client (browser) while logging the details on the server side and not exposing them to the user.
 
-The directive(s): frame-ancestors, form-action are among the directives that do not fallback to default-src, missing/excluding them is the same as allowing anything.
----
+Ensure that your web server, application server, load balancer, etc. is configured to suppress "X-Powered-By" headers.
 
----
+Manually confirm that the timestamp data is not sensitive, and that the data cannot be aggregated to disclose exploitable patterns.
 
-MED
-Content Security Policy (CSP) Header Not Set
-
----
-
-## Cross-Domain Misconfiguration
-
-## Hidden File Found
-
-## Missing Anti-clickjacking Header
-
-LOW
-Server Leaks Information via "X-Powered-By" HTTP Response Header Field(s)
---
-Timestamp Disclosure - Unix
---
-X-Content-Type-Options Header Missing
---
-Information Disclosure - Suspicious Comments
---
-Modern Web Application
+Ensure that the application/web server sets the Content-Type header appropriately, and that it sets the X-Content-Type-Options header to 'nosniff' for all web pages.
+If possible, ensure that the end user uses a standards-compliant and modern web browser that does not perform MIME-sniffing at all, or that can be directed by the web application/web server to not perform MIME-sniffing.
