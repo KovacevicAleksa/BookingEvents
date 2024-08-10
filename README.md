@@ -28,26 +28,27 @@ This is an Event Management System that allows users to register and log in secu
 
 ## Start the application
 
-- **Start Backend :**
-
-  > **nodemon server.js** > **node server.js**
-
-- **Start Frontend:**
-
-  > **npm start**
-
-- **Start All:**
-
-  > **run-all-docker
-  > run-all-k8s
-  > run-all-nodemon
-  > run-all-node**
-
-- **Docker/Kubernetes**
-
-  > docker
-  > k8s
-
+**Start Backend :**
+```
+nodemon server.js
+node server.js
+```
+**Start Frontend:**
+```
+npm start
+```
+**Start All:**
+```
+npm run all-docker
+npm run all-k8s
+npm run all-nodemon
+npm run all-node
+```
+**Docker/Kubernetes**
+```
+npm run docker
+npm run k8s
+```
 ## Folder structure
 
 ```
