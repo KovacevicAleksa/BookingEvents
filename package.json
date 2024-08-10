@@ -1,6 +1,8 @@
 {
   "scripts": {
     "run-all-docker": "concurrently \"npm run docker --prefix ./backend\" \"npm start --prefix ./frontend\"",
-    "run-all-k8s": "concurrently \"npm run k8s --prefix ./backend\" \"npm start --prefix ./frontend\""
+    "run-all-k8s": "concurrently \"npm run k8s --prefix ./backend\" \"npm start --prefix ./frontend\"",
+    "run-all-nodemon": "concurrently \"nodemon server.js --prefix ./backend\" \"npm start --prefix ./frontend\"",
+    "run-all-node": "concurrently \"npm  node server.js \" \"npm start --prefix ./frontend\""
   }
 }
