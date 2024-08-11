@@ -15,6 +15,10 @@ const AccountSchema = new mongoose.Schema(
       //Prijavljeni eventi
       type: [String],
     },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

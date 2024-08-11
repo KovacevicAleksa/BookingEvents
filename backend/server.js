@@ -76,45 +76,56 @@ app.use(limiter);
 
 const adminAuth = async (req, res, next) => {
   try {
-    // Check if the Authorization header is present
-    const authHeader = req.headers.authorization;
+    const authHeader = req.header("Authorization");
     if (!authHeader) {
-      return res.status(401).json({ message: "No token provided" });
+      return res
+        .status(401)
+        .send({ error: "No Authorization header provided." });
     }
-
-    // Extract the token
-    const token = authHeader.split(" ")[1];
+    //need to add JWT
+    const token = authHeader.replace("Bearer ", "");
     if (!token) {
-      return res.status(401).json({ message: "No token provided" });
+      return res.status(401).send({ error: "No token provided." });
     }
 
-    // Verify the token (assuming you're using JWT)
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Check if the user exists and is an admin
-    const user = await Account.findById(decoded.userId);
-    if (!user || !user.isAdmin) {
-      return res.status(403).json({ message: "Access denied. Admin only." });
+    let account;
+    try {
+      account = await Account.findById(token);
+    } catch (err) {
+      console.error("Error finding account:", err);
+      return res.status(400).send({ error: "Invalid token format." });
     }
 
-    // If everything is okay, save the user to the request object and proceed
-    req.user = user;
+    if (!account) {
+      return res.status(404).send({ error: "Account not found." });
+    }
+
+    if (!account.isAdmin) {
+      return res.status(403).send({ error: "User is not an admin." });
+    }
+
+    req.account = account;
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Invalid token" });
+    console.error("adminAuth error:", error);
+    res.status(500).send({ error: "Server error during authentication." });
   }
 };
 
 //REgistrovanje
 app.post("/register", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, isAdmin } = req.body;
     const existingAccount = await Account.findOne({ email });
     if (existingAccount) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    const account = new Account({ email, password });
+    const account = new Account({
+      email,
+      password,
+      isAdmin: isAdmin || false,
+    });
     await account.save();
     res.status(201).json(account);
   } catch (error) {
@@ -136,16 +147,24 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    res.status(200).json({ message: "Login successful", account });
+    res.status(200).json({
+      message: "Login successful",
+      account: {
+        id: account._id,
+        email: account.email,
+        isAdmin: account.isAdmin,
+        events: account.events,
+      },
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
 //Dobijanje svih naloga
-app.get("/accounts", async (req, res) => {
+app.get("/accounts", adminAuth, async (req, res) => {
   try {
-    const accounts = await Account.find({});
+    const accounts = await Account.find({}).select("-password");
     res.status(200).json(accounts);
   } catch (error) {
     res.status(500).json({ message: error.message });
