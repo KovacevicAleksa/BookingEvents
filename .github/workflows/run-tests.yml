@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "14"
+          node-version: "20"
 
       - name: Install root dependencies
         run: npm install
@@ -30,8 +30,14 @@ jobs:
       - name: Install frontend dependencies
         run: npm install --prefix ./frontend
 
-      - name: Run all tests
-        run: npm run all-test
+      - name: Install additional frontend dependencies
+        run: npm install --prefix ./frontend @testing-library/dom
+
+      - name: Run backend tests
+        run: npm test --prefix ./backend
+
+      - name: Run frontend tests
+        run: npm test --prefix ./frontend
 
       - name: Upload test results
         if: failure() # Upload results only if tests fail
