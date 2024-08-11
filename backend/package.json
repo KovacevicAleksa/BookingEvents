@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "npx eslint .",
+    "testEsLint": "npx eslint .",
     "dev": "nodemon server.js",
     "docker": "docker-compose down && docker-compose up --build",
     "k8s": "kubectl apply -f kubernetes/secret.yaml && kubectl apply -f kubernetes/deployment.yaml && kubectl apply -f kubernetes/service.yaml",
-    "k8s-delete": "kubectl delete deployments --all && kubectl delete services --all"
+    "k8s-delete": "kubectl delete deployments --all && kubectl delete services --all",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +30,8 @@
   "devDependencies": {
     "eslint": "^9.5.0",
     "eslint-plugin-security": "^3.0.1",
-    "nodemon": "^3.1.2"
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.2",
+    "supertest": "^7.0.0"
   }
 }
