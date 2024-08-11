@@ -6,15 +6,13 @@ const Account = require("../models/account");
 
 describe("GET /accounts", () => {
   beforeAll(async () => {
-    await mongoose.connect(process.env.MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connection.close();
+
+    await mongoose.connect(process.env.MONGODB_URI);
   });
 
   afterAll(async () => {
     await mongoose.connection.close();
-    await new Promise((resolve) => setTimeout(() => resolve(), 500)); //give time to close connection
   });
 
   it("should return a specific account", async () => {
