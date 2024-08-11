@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "20"
+          node-version: "16"
 
       - name: Install root dependencies
         run: npm install
@@ -30,17 +30,16 @@ jobs:
       - name: Install frontend dependencies
         run: npm install --prefix ./frontend
 
-      - name: Install additional frontend dependencies
-        run: npm install --prefix ./frontend @testing-library/dom
-
       - name: Run backend tests
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
         run: npm test --prefix ./backend
 
       - name: Run frontend tests
         run: npm test --prefix ./frontend
 
       - name: Upload test results
-        if: failure() # Upload results only if tests fail
+        if: failure()
         uses: actions/upload-artifact@v3
         with:
           name: test-results
