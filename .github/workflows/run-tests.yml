@@ -3,33 +3,39 @@ name: Run Tests
 on:
   push:
     branches:
-      - main  # Postavite ovde naziv glavne grane, npr. `main` ili `master`
+      - main
   pull_request:
     branches:
-      - main  # Postavite ovde naziv grane za PR-ove
+      - main
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '14'  # Postavite verziju Node.js koju koristite
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "14"
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install root dependencies
+        run: npm ci --include=dev
 
-    - name: Run all tests
-      run: npm run all-test
+      - name: Install backend dependencies
+        run: npm ci --prefix ./backend
 
-    - name: Upload test results
-      if: failure()  # Upload results only if tests fail
-      uses: actions/upload-artifact@v3
-      with:
-        name: test-results
-        path: ./test-results 
+      - name: Install frontend dependencies
+        run: npm ci --prefix ./frontend
+
+      - name: Run all tests
+        run: npm run all-test
+
+      - name: Upload test results
+        if: failure() # Upload results only if tests fail
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: ./test-results
