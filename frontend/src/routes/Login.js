@@ -1,16 +1,17 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext"; // Import the useAuth hook
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth(); // Use the login function from AuthContext
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    //login bolje preko get-a ali dobro radi!
     try {
       const response = await fetch("http://localhost:8081/login", {
         method: "POST",
@@ -21,20 +22,18 @@ function Login() {
       });
 
       if (!response.ok) {
-        alert("Niste ukacali dobro sifru i email");
+        alert("Niste ukucali dobro šifru i email");
         throw new Error("Network response nije ok / bad parametars");
       }
 
       const result = await response.json();
 
       if (result.message === "Login successful") {
-        console.log(result.account._id);
-        //add jwt
-        localStorage.setItem("accountid", result.account._id);
-        localStorage.setItem("token", "Ez");
+        // Use the login function from AuthContext
+        login(result.account._id, "Ez", result.account.isAdmin); // Assume isAdmin is returned from the server
         navigate("/events");
       } else {
-        alert("Nije dobar email ili password  ");
+        alert("Nije dobar email ili password");
       }
     } catch (error) {
       console.error("Error:", error);

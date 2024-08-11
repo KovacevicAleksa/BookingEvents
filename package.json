@@ -3,12 +3,11 @@
     "all-docker": "concurrently \"npm run docker --prefix ./backend\" \"npm start --prefix ./frontend\"",
     "all-k8s": "concurrently \"npm run k8s --prefix ./backend\" \"npm start --prefix ./frontend\"",
     "all-nodemon": "concurrently \"nodemon server.js --prefix ./backend\" \"npm start --prefix ./frontend\"",
-    "all-node": "concurrently \"node server.js \" \"npm start --prefix ./frontend\"",
+    "all-node": "concurrently \"node backend/server.js\" \"npm start --prefix frontend\"",
     "all-test": "concurrently \"npm test --prefix ./backend\" \"npm test --prefix ./frontend\""
   },
-    "dependencies": {
-      "concurrently": "^8.2.2"
-    },
-    "devDependencies": {
-    } 
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "devDependencies": {}
 }

@@ -1,12 +1,19 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-//osnovna autentifikacija bzv
-const PrivateRoute = ({ children }) => {
-  const isAuthenticated =
-    !!localStorage.getItem("token") || !!localStorage.getItem("accountid");
+const PrivateRoute = ({ children, adminOnly = false }) => {
+  const { user } = useAuth();
 
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
+  if (adminOnly && !user.isAdmin) {
+    return <Navigate to="/unauthorized" />; // Create an unauthorized page
+  }
+
+  return children;
 };
 
 export default PrivateRoute;

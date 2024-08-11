@@ -74,6 +74,37 @@ app.use(
 
 app.use(limiter);
 
+const adminAuth = async (req, res, next) => {
+  try {
+    // Check if the Authorization header is present
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    // Extract the token
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "No token provided" });
+    }
+
+    // Verify the token (assuming you're using JWT)
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Check if the user exists and is an admin
+    const user = await Account.findById(decoded.userId);
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ message: "Access denied. Admin only." });
+    }
+
+    // If everything is okay, save the user to the request object and proceed
+    req.user = user;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid token" });
+  }
+};
+
 //REgistrovanje
 app.post("/register", async (req, res) => {
   try {

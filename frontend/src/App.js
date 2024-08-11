@@ -8,8 +8,9 @@ import Card from "./Components/Card";
 import konferencija from "./Components/assets/Konferencija.jpg";
 import Login from "./routes/Login";
 import Registration from "./routes/Registration";
-
 import PrivateRoute from "./Components/PrivateRoute";
+import AdminAddEvent from "./routes/AdminAddEvent"; // Create this component
+import Unauthorized from "./routes/Unauthorized"; // Create this component
 
 function Data() {
   const [eventData, setEventData] = useState([]);
@@ -73,6 +74,7 @@ function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/registration" element={<Registration />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
 
       <Route
         path="/events"
@@ -82,6 +84,16 @@ function App() {
           </PrivateRoute>
         }
       />
+
+      <Route
+        path="/admin/add-event"
+        element={
+          <PrivateRoute adminOnly={true}>
+            <AdminAddEvent />
+          </PrivateRoute>
+        }
+      />
+
       <Route path="/" element={<Login />} />
     </Routes>
   );
