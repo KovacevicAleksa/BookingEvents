@@ -22,13 +22,13 @@ jobs:
           node-version: "14"
 
       - name: Install root dependencies
-        run: npm ci --include=dev
+        run: npm install
 
       - name: Install backend dependencies
-        run: npm ci --prefix ./backend
+        run: npm install --prefix ./backend
 
       - name: Install frontend dependencies
-        run: npm ci --prefix ./frontend
+        run: npm install --prefix ./frontend
 
       - name: Run all tests
         run: npm run all-test
