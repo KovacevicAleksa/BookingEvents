@@ -34,7 +34,7 @@ jobs:
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
-          JWT_SECRET: ${{ JWT_SECRET }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: npm test --prefix ./backend
 
       - name: Run frontend tests
