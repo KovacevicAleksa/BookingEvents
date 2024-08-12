@@ -27,6 +27,7 @@ function Card(props) {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer 66b932ef45d511aa37c02889`,
         },
         body: JSON.stringify({
           events: eventData,
@@ -47,13 +48,16 @@ function Card(props) {
     onlyUpdateTotalPeople
   ) => {
     const accountId = localStorage.getItem("accountid");
+    console.log(localStorage.getItem("accountid"));
+    console.log(accountId);
     // accountFetchEvent za dohvaćanje eventa
     const accountFetchEvent = await fetch(
-      `http://localhost:8081/accounts/${accountId}`,
+      `http://localhost:8081/accounts/${localStorage.getItem("accountid")}`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer 66b932ef45d511aa37c02889`,
         },
       }
     );
@@ -75,6 +79,7 @@ function Card(props) {
             method: "PATCH",
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer 66b932ef45d511aa37c02889`,
             },
             body: JSON.stringify({ totalPeople: newTotalPeople }),
           }
@@ -98,11 +103,12 @@ function Card(props) {
   async function fetchAccountEvents(accountId, eventId) {
     try {
       const accountFetchEvent = await fetch(
-        `http://localhost:8081/accounts/${accountId}`,
+        `http://localhost:8081/accounts/665ca294d8b615a3303df6f0`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer 66b932ef45d511aa37c02889`,
           },
         }
       );
@@ -130,6 +136,7 @@ function Card(props) {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer 66b932ef45d511aa37c02889`,
         },
         body: JSON.stringify(data),
       });

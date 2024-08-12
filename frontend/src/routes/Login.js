@@ -8,10 +8,8 @@ function Login() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { login } = useAuth(); // Use the login function from AuthContext
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     try {
       const response = await fetch("http://localhost:8081/login", {
         method: "POST",
@@ -29,8 +27,14 @@ function Login() {
       const result = await response.json();
 
       if (result.message === "Login successful") {
+        console.log(result.account.id);
+        // Extract the JWT token from the server's response
+        const token = result.token;
+
+        localStorage.setItem("jwtToken", token);
+
         // Use the login function from AuthContext
-        login(result.account._id, "Ez", result.account.isAdmin); // Assume isAdmin is returned from the server
+        login(token, result.account.id, result.account.isAdmin); // Pass the token to the login function if needed
         navigate("/events");
       } else {
         alert("Nije dobar email ili password");

@@ -8,13 +8,14 @@ const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const nodeLimits = require("limits");
 const bodyParser = require("body-parser");
+const jwt = require("jsonwebtoken");
 
 const Account = require("./models/account");
 const Event = require("./models/event");
 
 const app = express();
 
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8081;
 
 // Trust first proxy
 app.set("trust proxy", 1);
@@ -147,8 +148,16 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
+    // Make sure the secret key is correctly loaded from environment variables
+    const token = jwt.sign(
+      { id: account._id, email: account.email, isAdmin: account.isAdmin },
+      process.env.JWT_SECRET, // This must be defined
+      { expiresIn: "1h" }
+    );
+
     res.status(200).json({
       message: "Login successful",
+      token, // Include the token in the response
       account: {
         id: account._id,
         email: account.email,
@@ -162,9 +171,19 @@ app.post("/login", async (req, res) => {
 });
 
 //Dobijanje svih naloga
-app.get("/accounts", adminAuth, async (req, res) => {
+app.get("/accounts", async (req, res) => {
   try {
-    const accounts = await Account.find({}).select("-password");
+    const accounts = await Account.find({}).select("-password -_id -events");
+    res.status(200).json(accounts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+//Dobijanje svih naloga admin
+app.get("/admin/accounts", adminAuth, async (req, res) => {
+  try {
+    const accounts = await Account.find({});
     res.status(200).json(accounts);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -172,7 +191,7 @@ app.get("/accounts", adminAuth, async (req, res) => {
 });
 
 //Dobijanje jednog naloga preko id
-app.get("/accounts/:id", async (req, res) => {
+app.get("/accounts/:id", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const account = await Account.findById(id);
@@ -183,7 +202,7 @@ app.get("/accounts/:id", async (req, res) => {
 });
 
 //Dodavanje eventa novih
-app.post("/admin/add/events", async (req, res) => {
+app.post("/admin/add/events", adminAuth, async (req, res) => {
   try {
     const {
       price,
@@ -225,7 +244,7 @@ app.get("/view/events", async (req, res) => {
   }
 });
 //view event preko id
-app.get("/view/events/:id", async (req, res) => {
+app.get("/view/events/:id", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const events = await Event.findById(id);
@@ -236,7 +255,7 @@ app.get("/view/events/:id", async (req, res) => {
 });
 
 // edit event preko id
-app.patch("/edit/events/:id", async (req, res) => {
+app.patch("/edit/events/:id", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -258,7 +277,7 @@ app.patch("/edit/events/:id", async (req, res) => {
 });
 
 // Edit account with ID
-app.patch("/edit/account/:id", async (req, res) => {
+app.patch("/edit/account/:id", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { events, ...otherUpdates } = req.body;
@@ -284,7 +303,7 @@ app.patch("/edit/account/:id", async (req, res) => {
   }
 });
 
-app.delete("/remove/account/event/:id", async (req, res) => {
+app.delete("/remove/account/event/:id", adminAuth, async (req, res) => {
   try {
     const { id } = req.params; // Get account ID from URL parameter
     const eventIdToDelete = req.body.EventId; // Assuming EventId is the property name in the request body
