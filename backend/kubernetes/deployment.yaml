@@ -23,6 +23,16 @@ spec:
                 secretKeyRef:
                   name: mongodb-uri
                   key: uri
+            - name: TEST_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: test-email
+                  key: email
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secret
+                  key: jwt_secret
           resources:
             requests:
               cpu: 100m

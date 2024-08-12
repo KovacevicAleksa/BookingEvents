@@ -18,10 +18,7 @@ function Card(props) {
       });
 
   //Dodavanje eventa u bazu podataka kada se korisnik prijavi za event
-  async function updateAccountEvent(id, eventData) {
-    console.log(eventData);
-    console.log(id);
-
+  async function updateAccountEvent(id, eventId) {
     try {
       const response = await fetch(`http://localhost:8081/edit/account/${id}`, {
         method: "PATCH",
@@ -30,7 +27,7 @@ function Card(props) {
           Authorization: `Bearer 66b932ef45d511aa37c02889`,
         },
         body: JSON.stringify({
-          events: eventData,
+          events: eventId,
         }),
       });
 

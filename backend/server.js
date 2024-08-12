@@ -15,7 +15,7 @@ const Event = require("./models/event");
 
 const app = express();
 
-const port = process.env.PORT || 8081;
+const port = process.env.PORT || 8080;
 
 // Trust first proxy
 app.set("trust proxy", 1);
@@ -138,26 +138,36 @@ app.post("/register", async (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log(`Login attempt for email: ${email}`);
+
     const account = await Account.findOne({ email });
     if (!account) {
+      console.log(`No account found for email: ${email}`);
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
     const isMatch = await bcrypt.compare(password, account.password);
     if (!isMatch) {
+      console.log(`Invalid password for email: ${email}`);
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
     // Make sure the secret key is correctly loaded from environment variables
+    if (!process.env.JWT_SECRET) {
+      console.error("JWT_SECRET is not defined in environment variables");
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
     const token = jwt.sign(
       { id: account._id, email: account.email, isAdmin: account.isAdmin },
-      process.env.JWT_SECRET, // This must be defined
+      process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
+    console.log(`Login successful for email: ${email}`);
     res.status(200).json({
       message: "Login successful",
-      token, // Include the token in the response
+      token,
       account: {
         id: account._id,
         email: account.email,
@@ -166,7 +176,10 @@ app.post("/login", async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Login error:", error);
+    res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
   }
 });
 

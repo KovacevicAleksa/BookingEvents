@@ -7,7 +7,8 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth(); // Use the login function from AuthContext
+  const { login } = useAuth();
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
@@ -19,28 +20,24 @@ function Login() {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!response.ok) {
-        alert("Niste ukucali dobro šifru i email");
-        throw new Error("Network response nije ok / bad parametars");
-      }
-
       const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "An error occurred during login");
+      }
 
       if (result.message === "Login successful") {
         console.log(result.account.id);
-        // Extract the JWT token from the server's response
         const token = result.token;
-
         localStorage.setItem("jwtToken", token);
-
-        // Use the login function from AuthContext
-        login(token, result.account.id, result.account.isAdmin); // Pass the token to the login function if needed
+        login(token, result.account.id, result.account.isAdmin);
         navigate("/events");
       } else {
-        alert("Nije dobar email ili password");
+        alert(result.message || "An unexpected error occurred");
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Login error:", error);
+      alert(error.message || "An error occurred during login");
     }
   };
 
