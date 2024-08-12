@@ -1,7 +1,14 @@
 import React from "react";
-import Card from "../src/Components/Card"; // Adjust this path if necessary
+import Card from "../src/Components/Card";
 import "@testing-library/jest-dom";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+
+// Mock the useAuth hook
+jest.mock("../src/context/AuthContext", () => ({
+  useAuth: () => ({
+    user: { token: "mocked-token" },
+  }),
+}));
 
 test("renders Card component with given props", () => {
   const props = {

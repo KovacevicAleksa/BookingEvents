@@ -21,18 +21,18 @@ spec:
             - name: MONGODB_URI
               valueFrom:
                 secretKeyRef:
-                  name: mongodb-uri
+                  name: secrets
                   key: uri
             - name: TEST_EMAIL
               valueFrom:
                 secretKeyRef:
-                  name: test-email
-                  key: email
+                  name: secrets
+                  key: TEST_EMAIL
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: jwt-secret
-                  key: jwt_secret
+                  name: secrets
+                  key: JWT_SECRET
           resources:
             requests:
               cpu: 100m

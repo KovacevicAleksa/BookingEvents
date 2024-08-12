@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext(null);
 
@@ -7,25 +8,25 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const accountId = localStorage.getItem("accountid");
-    const isAdmin = localStorage.getItem("isAdmin") === "true"; // Convert string to boolean
-    if (token && accountId) {
-      // Here you would typically verify the token with your backend
-      setUser({ token, accountId, isAdmin });
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setUser({ token, ...decoded });
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        localStorage.removeItem("token");
+      }
     }
   }, []);
 
-  const login = (token, accountId, isAdmin = false) => {
+  const login = (token) => {
     localStorage.setItem("token", token);
-    localStorage.setItem("accountid", accountId);
-    localStorage.setItem("isAdmin", isAdmin.toString()); // Store isAdmin as a string
-    setUser({ token, accountId, isAdmin });
+    const decoded = jwtDecode(token);
+    setUser({ token, ...decoded });
   };
 
   const logout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("accountid");
-    localStorage.removeItem("isAdmin");
     setUser(null);
   };
 

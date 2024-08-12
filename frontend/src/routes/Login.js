@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext"; // Import the useAuth hook
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -27,9 +27,8 @@ function Login() {
       }
 
       if (result.message === "Login successful") {
-        console.log(result.account.id);
         const token = result.token;
-        localStorage.setItem("jwtToken", token);
+        localStorage.setItem("accountid", result.account.id);
         login(token, result.account.id, result.account.isAdmin);
         navigate("/events");
       } else {

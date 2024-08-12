@@ -12,8 +12,11 @@ import PrivateRoute from "./Components/PrivateRoute";
 import AdminAddEvent from "./routes/AdminAddEvent"; // Create this component
 import Unauthorized from "./routes/Unauthorized"; // Create this component
 
+import { useAuth } from "./context/AuthContext";
+
 function Data() {
   const [eventData, setEventData] = useState([]);
+  const { user } = useAuth();
 
   //ispisivanje svih eventa na sajtu
   useEffect(() => {
@@ -21,7 +24,10 @@ function Data() {
       try {
         const response = await fetch("http://localhost:8081/view/events", {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
         });
 
         if (!response.ok) {
@@ -36,7 +42,7 @@ function Data() {
     };
 
     fetchData();
-  }, []); //ne prati zavisnost
+  }, [user.token]);
 
   return (
     <div>

@@ -1,13 +1,14 @@
 import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 function Card(props) {
   const [totalPeople, setTotalPeople] = useState(props.totalPeople);
+  const { user } = useAuth();
 
   const eventDate = new Date(props.date);
   const today = new Date();
   const isExpired = eventDate < today;
 
-  //Da li je isetkao event
   const formattedDate = isExpired
     ? "Isteklo"
     : eventDate.toLocaleDateString("sr-Latn-RS", {
@@ -17,57 +18,64 @@ function Card(props) {
         day: "numeric",
       });
 
-  //Dodavanje eventa u bazu podataka kada se korisnik prijavi za event
   async function updateAccountEvent(id, eventId) {
     try {
       const response = await fetch(`http://localhost:8081/edit/account/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer 66b932ef45d511aa37c02889`,
+          Authorization: `Bearer ${user.token}`,
         },
         body: JSON.stringify({
           events: eventId,
         }),
       });
 
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
       const data = await response.json();
       console.log("Response:", data);
     } catch (error) {
       console.error("Error:", error);
+      throw error; // Re-throw the error so it can be caught by the caller
     }
   }
 
-  //update broja ljudi u bazi podataka
   const updateTotalPeople = async (
     eventId,
     newTotalPeople,
     onlyUpdateTotalPeople
   ) => {
-    const accountId = localStorage.getItem("accountid");
-    console.log(localStorage.getItem("accountid"));
-    console.log(accountId);
-    // accountFetchEvent za dohvaćanje eventa
-    const accountFetchEvent = await fetch(
-      `http://localhost:8081/accounts/${localStorage.getItem("accountid")}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer 66b932ef45d511aa37c02889`,
-        },
-      }
-    );
-
-    if (!accountFetchEvent.ok) {
-      throw new Error("Network response was not ok");
-    }
-
-    const data = await accountFetchEvent.json();
-    console.log("Sadrzaj korisnikovih eventa:", data.events);
-
     try {
-      // ažuriranje eventa ako korisnik vec nije glasao da dolazi na event
+      const accountId = localStorage.getItem("accountid");
+      console.log(localStorage.getItem("accountid"));
+      console.log(accountId);
+
+      const accountFetchEvent = await fetch(
+        `http://localhost:8081/accounts/${accountId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+
+      if (!accountFetchEvent.ok) {
+        const errorData = await accountFetchEvent.json();
+        throw new Error(
+          `Network response was not ok: ${
+            errorData.message || accountFetchEvent.statusText
+          }`
+        );
+      }
+
+      const data = await accountFetchEvent.json();
+      console.log("Sadrzaj korisnikovih eventa:", data.events);
+
       console.log(data.events.includes(eventId));
       if (!data.events.includes(eventId)) {
         const eventUpdateTotalPeople = await fetch(
@@ -76,7 +84,7 @@ function Card(props) {
             method: "PATCH",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer 66b932ef45d511aa37c02889`,
+              Authorization: `Bearer ${user.token}`,
             },
             body: JSON.stringify({ totalPeople: newTotalPeople }),
           }
@@ -86,9 +94,11 @@ function Card(props) {
           throw new Error("Network response was not ok");
         }
 
-        !onlyUpdateTotalPeople && updateAccountEvent(accountId, eventId);
-        !onlyUpdateTotalPeople && alert("Uspesna prijava");
-        setTotalPeople(newTotalPeople); // Update the state
+        if (!onlyUpdateTotalPeople) {
+          await updateAccountEvent(accountId, eventId);
+          alert("Uspesna prijava");
+        }
+        setTotalPeople(newTotalPeople);
       } else {
         alert("Vec ste se prijavili na event");
       }
@@ -100,12 +110,12 @@ function Card(props) {
   async function fetchAccountEvents(accountId, eventId) {
     try {
       const accountFetchEvent = await fetch(
-        `http://localhost:8081/accounts/665ca294d8b615a3303df6f0`,
+        `http://localhost:8081/accounts/${accountId}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer 66b932ef45d511aa37c02889`,
+            Authorization: `Bearer ${user.token}`,
           },
         }
       );
@@ -133,7 +143,7 @@ function Card(props) {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer 66b932ef45d511aa37c02889`,
+          Authorization: `Bearer ${user.token}`,
         },
         body: JSON.stringify(data),
       });
@@ -151,7 +161,7 @@ function Card(props) {
   }
 
   const handleClick = () => {
-    isExpired || updateTotalPeople(props.eventId, totalPeople + 1, false); // Dodavanje ljudi za jedan ako je sve uredu
+    isExpired || updateTotalPeople(props.eventId, totalPeople + 1, false);
     isExpired && alert("Event je istekao");
   };
 
