@@ -1,20 +1,24 @@
-# Use the official Nginx image
+# Use the official Nginx image from Docker Hub
 FROM nginx:latest
 
 # Remove the default Nginx configuration file
+# This is done to ensure that we use our custom configuration instead
 RUN rm /etc/nginx/conf.d/default.conf
 
-# Copy your Nginx configuration files from the host into the container
+# Copy your custom Nginx configuration files from the host into the container
+# This replaces the default configuration with your own settings
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY default.conf /etc/nginx/conf.d/
 
-# Create necessary directories and set permissions
+# Create necessary directories and set appropriate permissions
+# This ensures that Nginx can write to its cache, log, and run directories
 RUN mkdir -p /var/cache/nginx /var/log/nginx /var/run \
     && chmod -R 755 /var/cache/nginx /var/log/nginx /var/run \
     && chown -R nginx:nginx /var/cache/nginx /var/log/nginx /var/run
 
-# Expose port
+# Expose port 8081 so that the container's Nginx can be accessed externally
 EXPOSE 8081
 
-# Start Nginx
+# Start Nginx in the foreground to keep the container running
+# The '-g daemon off;' option ensures Nginx runs in the foreground
 CMD ["nginx", "-g", "daemon off;"]

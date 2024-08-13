@@ -1,33 +1,33 @@
-name: Deploy to Docker
+name: Deploy to Docker # The name of the GitHub Actions workflow
 
 on:
   push:
     branches:
-      - main
+      - main # Trigger the workflow whenever there is a push to the 'main' branch
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
+  build-and-push: # Name of the job that will build and push Docker images
+    runs-on: ubuntu-latest # The job will run on the latest version of Ubuntu
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout code # Step to checkout the code from the repository
+        uses: actions/checkout@v3 # GitHub Action that checks out your repository code
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      - name: Set up Docker Buildx # Step to set up Docker Buildx (a builder toolkit)
+        uses: docker/setup-buildx-action@v2 # GitHub Action that sets up Docker Buildx
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+      - name: Log in to Docker Hub # Step to log in to Docker Hub registry
+        uses: docker/login-action@v2 # GitHub Action for logging into Docker Hub
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
+          username: ${{ secrets.DOCKER_USERNAME }} # Uses a secret for Docker Hub username
+          password: ${{ secrets.DOCKER_TOKEN }} # Uses a secret for Docker Hub password/token
 
-      - name: Build Docker images
+      - name: Build Docker images # Step to build Docker images for the application
         run: |
-          docker build -t kovacevicaleksa/express-api:latest -f ./backend/Dockerfile ./backend
-          docker build -t kovacevicaleksa/express-nginx:latest -f ./backend/Dockerfile.nginx ./backend
+          docker build -t kovacevicaleksa/express-api:latest -f ./backend/Dockerfile ./backend  # Builds the API image using Dockerfile in the 'backend' folder
+          docker build -t kovacevicaleksa/express-nginx:latest -f ./backend/Dockerfile.nginx ./backend  # Builds the Nginx image using Dockerfile.nginx in the 'backend' folder
 
-      - name: Push Docker images
+      - name: Push Docker images # Step to push the built Docker images to Docker Hub
         run: |
-          docker push kovacevicaleksa/express-api:latest
-          docker push kovacevicaleksa/express-nginx:latest
+          docker push kovacevicaleksa/express-api:latest  # Pushes the API image to Docker Hub
+          docker push kovacevicaleksa/express-nginx:latest  # Pushes the Nginx image to Docker Hub

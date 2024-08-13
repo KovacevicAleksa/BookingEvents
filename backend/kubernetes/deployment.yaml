@@ -1,28 +1,31 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: apps/v1 # Specifies the API version for the Deployment resource
+kind: Deployment # Defines the type of Kubernetes resource (Deployment)
 metadata:
-  name: express-api
+  name: express-api # Name of the Deployment resource
+
 spec:
-  replicas: 1
+  replicas: 1 # Number of pod replicas to run
   selector:
     matchLabels:
-      app: express-api
+      app: express-api # Selector to match the pods with this label
+
   template:
     metadata:
       labels:
-        app: express-api
+        app: express-api # Labels applied to the pod template
+
     spec:
       containers:
-        - name: express-api
-          image: kovacevicaleksa/express-api:latest
+        - name: express-api # Name of the container
+          image: kovacevicaleksa/express-api:latest # Docker image for the container
           ports:
-            - containerPort: 8080
+            - containerPort: 8080 # Exposes port 8080 in the container
           env:
             - name: MONGODB_URI
               valueFrom:
                 secretKeyRef:
-                  name: secrets
-                  key: uri
+                  name: secrets # References a secret named 'secrets'
+                  key: uri # Key in the secret to use for the value
             - name: TEST_EMAIL
               valueFrom:
                 secretKeyRef:
@@ -33,37 +36,40 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: JWT_SECRET
-          resources:
+          resources: # Specifies resource requests and limits
             requests:
-              cpu: 100m
-              memory: 128Mi
+              cpu: 100m # Requests 100 milliCPU (0.1 CPU)
+              memory: 128Mi # Requests 128Mi of memory
             limits:
-              cpu: 500m
-              memory: 256Mi
+              cpu: 500m # Limits CPU usage to 500 milliCPU (0.5 CPU)
+              memory: 256Mi # Limits memory usage to 256Mi
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: apps/v1 # Specifies the API version for the Deployment resource
+kind: Deployment # Defines the type of Kubernetes resource (Deployment)
 metadata:
-  name: nginx
+  name: nginx # Name of the Deployment resource
+
 spec:
-  replicas: 1
+  replicas: 1 # Number of pod replicas to run
   selector:
     matchLabels:
-      app: nginx
+      app: nginx # Selector to match the pods with this label
+
   template:
     metadata:
       labels:
-        app: nginx
+        app: nginx # Labels applied to the pod template
+
     spec:
       containers:
-        - name: nginx
-          image: kovacevicaleksa/express-nginx:latest
+        - name: nginx # Name of the container
+          image: kovacevicaleksa/express-nginx:latest # Docker image for the container
           ports:
-            - containerPort: 8081
-          resources:
+            - containerPort: 8081 # Exposes port 8081 in the container
+          resources: # Specifies resource requests and limits
             requests:
-              cpu: 100m
-              memory: 64Mi
+              cpu: 100m # Requests 100 milliCPU (0.1 CPU)
+              memory: 64Mi # Requests 64Mi of memory
             limits:
-              cpu: 200m
-              memory: 128Mi
+              cpu: 200m # Limits CPU usage to 200 milliCPU (0.2 CPU)
+              memory: 128Mi # Limits memory usage to 128Mi

@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
 
+// Define the schema for the 'Event' collection
 const EventSchema = new mongoose.Schema(
   {
     id: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId, // The type of the id field is ObjectId
       required: true,
-      auto: true,
+      auto: true, // Automatically generate a unique ObjectId for this field (not typically needed if _id is used)
     },
     price: {
       type: String,
@@ -37,11 +38,12 @@ const EventSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true,
+    timestamps: true, // Automatically add 'createdAt' and 'updatedAt' timestamps
   },
-  { collection: "events" }
+  { collection: "events" } // Specifies the collection name in MongoDB
 );
 
+// Create and export the 'Event' model based on the schema
 const Event = mongoose.model("Event", EventSchema);
 
 module.exports = Event;

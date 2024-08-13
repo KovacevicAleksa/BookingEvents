@@ -1,34 +1,33 @@
 networks:
   frontend:
-    driver: bridge
+    driver: bridge # Uses the bridge driver for the frontend network
   backend:
-    driver: bridge
+    driver: bridge # Uses the bridge driver for the backend network
 
 services:
   express-api:
     build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: express-api
+      context: . # Builds the Docker image from the current directory
+      dockerfile: Dockerfile # Uses the Dockerfile located in the root directory
+    container_name: express-api # Names the container "express-api"
     expose:
-      - "8080"
+      - "8080" # Exposes port 8080 to other services in the same network
     environment:
-      - NODE_ENV=production
-      - MONGODB_URI=${MONGODB_URI}
-      - JWT_SECRET=${JWT_SECRET}
-
+      - NODE_ENV=production # Sets the environment variable for Node.js to production
+      - MONGODB_URI=${MONGODB_URI} # Sets the MongoDB URI from an environment variable
+      - JWT_SECRET=${JWT_SECRET} # Sets the JWT secret from an environment variable
     networks:
-      - frontend
-      - backend
+      - frontend # Connects to the frontend network
+      - backend # Connects to the backend network
 
   nginx:
     build:
-      context: .
-      dockerfile: Dockerfile.nginx
-    container_name: express-nginx
+      context: . # Builds the Docker image from the current directory
+      dockerfile: Dockerfile.nginx # Uses the Dockerfile.nginx located in the root directory
+    container_name: express-nginx # Names the container "express-nginx"
     ports:
-      - "8081:8081"
+      - "8081:8081" # Maps port 8081 on the host to port 8081 on the container
     depends_on:
-      - express-api
+      - express-api # Ensures the express-api service is started before nginx
     networks:
-      - frontend
+      - frontend # Connects to the frontend network

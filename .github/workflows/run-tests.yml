@@ -1,48 +1,48 @@
-name: Run Tests
+name: Run Tests # The name of the GitHub Actions workflow for running tests
 
 on:
   push:
     branches:
-      - main
+      - main # Trigger the workflow on pushes to the 'main' branch
   pull_request:
     branches:
-      - main
+      - main # Trigger the workflow on pull requests to the 'main' branch
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  test: # The name of the job that runs the tests
+    runs-on: ubuntu-latest # The job will run on the latest version of Ubuntu
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout code # Step to checkout the code from the repository
+        uses: actions/checkout@v3 # GitHub Action that checks out your repository code
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Set up Node.js # Step to set up Node.js environment
+        uses: actions/setup-node@v3 # GitHub Action that sets up Node.js
         with:
-          node-version: "16"
+          node-version: "16" # Specifies the Node.js version to use (version 16)
 
-      - name: Install root dependencies
-        run: npm install
+      - name: Install root dependencies # Step to install dependencies from the root package.json
+        run: npm install # Runs 'npm install' to install dependencies
 
-      - name: Install backend dependencies
-        run: npm install --prefix ./backend
+      - name: Install backend dependencies # Step to install backend-specific dependencies
+        run: npm install --prefix ./backend # Runs 'npm install' in the 'backend' folder
 
-      - name: Install frontend dependencies
-        run: npm install --prefix ./frontend
+      - name: Install frontend dependencies # Step to install frontend-specific dependencies
+        run: npm install --prefix ./frontend # Runs 'npm install' in the 'frontend' folder
 
-      - name: Run backend tests
+      - name: Run backend tests # Step to run tests for the backend
         env:
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
-          TEST_EMAIL: ${{ secrets.TEST_EMAIL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-        run: npm test --prefix ./backend
+          MONGODB_URI: ${{ secrets.MONGODB_URI }} # Sets MongoDB URI from GitHub Secrets
+          TEST_EMAIL: ${{ secrets.TEST_EMAIL }} # Sets a test email from GitHub Secrets
+          JWT_SECRET: ${{ secrets.JWT_SECRET }} # Sets JWT secret from GitHub Secrets
+        run: npm test --prefix ./backend # Runs 'npm test' in the 'backend' folder
 
-      - name: Run frontend tests
-        run: npm test --prefix ./frontend
+      - name: Run frontend tests # Step to run tests for the frontend
+        run: npm test --prefix ./frontend # Runs 'npm test' in the 'frontend' folder
 
-      - name: Upload test results
-        if: failure()
-        uses: actions/upload-artifact@v3
+      - name: Upload test results # Step to upload test results if tests fail
+        if: failure() # Only runs if previous steps failed
+        uses: actions/upload-artifact@v3 # GitHub Action to upload artifacts
         with:
-          name: test-results
-          path: ./test-results
+          name: test-results # The name of the uploaded artifact
+          path: ./test-results # Path to the test results folder
