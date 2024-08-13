@@ -1,16 +1,18 @@
 import React from "react";
-import Card from "../src/Components/Card";
-import "@testing-library/jest-dom";
-import { render, screen } from "@testing-library/react";
+import Card from "../src/Components/Card"; // Importing the Card component to test
+import "@testing-library/jest-dom"; // Importing custom matchers for Jest
+import { render, screen } from "@testing-library/react"; // Importing render and screen utilities from Testing Library
 
-// Mock the useAuth hook
+// Mock the useAuth hook to provide a mocked user object
 jest.mock("../src/context/AuthContext", () => ({
   useAuth: () => ({
-    user: { token: "mocked-token" },
+    user: { token: "mocked-token" }, // Mocked token for authentication
   }),
 }));
 
+// Test to verify if the Card component renders with the given props
 test("renders Card component with given props", () => {
+  // Define the props to be passed to the Card component
   const props = {
     totalPeople: 5,
     date: "2024-08-15",
@@ -22,15 +24,16 @@ test("renders Card component with given props", () => {
     eventId: "1",
   };
 
+  // Render the Card component with the provided props
   render(<Card {...props} />);
 
-  // Check rendering
-  expect(screen.getByText("React Conference")).toBeInTheDocument();
+  // Assertions to verify that the component renders the expected content
+  expect(screen.getByText("React Conference")).toBeInTheDocument(); // Check title
   expect(
     screen.getByText("Join us for an amazing React conference.")
-  ).toBeInTheDocument();
-  expect(screen.getByText("500 RSD")).toBeInTheDocument();
-  expect(screen.getByText("Belgrade")).toBeInTheDocument();
-  expect(screen.getByText("5")).toBeInTheDocument();
-  expect(screen.getByAltText("Conference")).toBeInTheDocument();
+  ).toBeInTheDocument(); // Check description
+  expect(screen.getByText("500 RSD")).toBeInTheDocument(); // Check price
+  expect(screen.getByText("Belgrade")).toBeInTheDocument(); // Check location
+  expect(screen.getByText("5")).toBeInTheDocument(); // Check totalPeople
+  expect(screen.getByAltText("Conference")).toBeInTheDocument(); // Check alt text for image
 });

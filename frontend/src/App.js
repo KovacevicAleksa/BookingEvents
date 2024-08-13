@@ -1,24 +1,25 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
 import { useState, useEffect } from "react";
-// eslint-disable-next-line no-unused-vars
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+// Disabling eslint for unused imports
+import { BrowserRouter as Route, Routes } from "react-router-dom";
 
-import Header from "./Components/Header";
-import Card from "./Components/Card";
-import konferencija from "./Components/assets/Konferencija.jpg";
-import Login from "./routes/Login";
-import Registration from "./routes/Registration";
-import PrivateRoute from "./Components/PrivateRoute";
-import AdminAddEvent from "./routes/AdminAddEvent"; // Create this component
-import Unauthorized from "./routes/Unauthorized"; // Create this component
+import Header from "./Components/Header"; // Importing the Header component
+import Card from "./Components/Card"; // Importing the Card component to display event details
+import konferencija from "./Components/assets/Konferencija.jpg"; // Importing an image for events
+import Login from "./routes/Login"; // Importing the Login component
+import Registration from "./routes/Registration"; // Importing the Registration component
+import PrivateRoute from "./Components/PrivateRoute"; // Importing PrivateRoute for protected routes
+import AdminAddEvent from "./routes/AdminAddEvent"; // Importing the AdminAddEvent component
+import Unauthorized from "./routes/Unauthorized"; // Importing the Unauthorized component
 
-import { useAuth } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext"; // Importing the AuthContext for authentication
 
 function Data() {
+  // State to store the event data fetched from the server
   const [eventData, setEventData] = useState([]);
-  const { user } = useAuth();
+  const { user } = useAuth(); // Getting the authenticated user from context
 
-  //ispisivanje svih eventa na sajtu
+  // Fetch all events from the server when the component is mounted
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -26,23 +27,24 @@ function Data() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
+            Authorization: `Bearer ${user.token}`, // Passing the JWT token for authorization
           },
         });
 
+        // Handle any errors that occur during the fetch
         if (!response.ok) {
           throw new Error("Network problem");
         }
 
-        const data = await response.json();
-        setEventData(data);
+        const data = await response.json(); // Parse the JSON data from the response
+        setEventData(data); // Update the state with the fetched event data
       } catch (error) {
-        console.error("Error:", error);
+        console.error("Error:", error); // Log any errors to the console
       }
     };
 
-    fetchData();
-  }, [user.token]);
+    fetchData(); // Call the fetchData function
+  }, [user.token]); // Run the effect only when the user's token changes
 
   return (
     <div>
@@ -66,6 +68,7 @@ function Data() {
     </div>
   );
 }
+
 function Events() {
   return (
     <div>
@@ -81,26 +84,25 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/registration" element={<Registration />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
-
       <Route
         path="/events"
         element={
           <PrivateRoute>
-            <Events />
+            <Events /> {/* Protected route for viewing events */}
           </PrivateRoute>
         }
       />
-
       <Route
         path="/admin/add-event"
         element={
           <PrivateRoute adminOnly={true}>
-            <AdminAddEvent />
+            <AdminAddEvent />{" "}
+            {/* Protected route for adding events by admin only */}
           </PrivateRoute>
         }
       />
-
-      <Route path="/" element={<Login />} />
+      <Route path="/" element={<Login />} />{" "}
+      {/* Default route to Login component */}
     </Routes>
   );
 }

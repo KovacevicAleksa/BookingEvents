@@ -2,13 +2,18 @@ import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 
 function Card(props) {
+  // State to track the total number of people registered for the event
   const [totalPeople, setTotalPeople] = useState(props.totalPeople);
+  // Get the current logged-in user from the authentication context
   const { user } = useAuth();
 
+  // Parse the event date from the props
   const eventDate = new Date(props.date);
   const today = new Date();
+  // Check if the event has already expired
   const isExpired = eventDate < today;
 
+  // Format the date to display either "Isteklo" if expired or the event date
   const formattedDate = isExpired
     ? "Isteklo"
     : eventDate.toLocaleDateString("sr-Latn-RS", {
@@ -18,6 +23,7 @@ function Card(props) {
         day: "numeric",
       });
 
+  // Function to update the event in the user's account
   async function updateAccountEvent(id, eventId) {
     try {
       const response = await fetch(`http://localhost:8081/edit/account/${id}`, {
@@ -43,6 +49,7 @@ function Card(props) {
     }
   }
 
+  // Function to update the total number of people for the event
   const updateTotalPeople = async (
     eventId,
     newTotalPeople,
@@ -53,6 +60,7 @@ function Card(props) {
       console.log(localStorage.getItem("accountid"));
       console.log(accountId);
 
+      // Fetch the current user's events to check if they are already registered
       const accountFetchEvent = await fetch(
         `http://localhost:8081/accounts/${accountId}`,
         {
@@ -76,8 +84,10 @@ function Card(props) {
       const data = await accountFetchEvent.json();
       console.log("Sadrzaj korisnikovih eventa:", data.events);
 
+      // If the user is not already registered for the event
       console.log(data.events.includes(eventId));
       if (!data.events.includes(eventId)) {
+        // Update the total number of people registered for the event
         const eventUpdateTotalPeople = await fetch(
           `http://localhost:8081/edit/events/${eventId}`,
           {
@@ -94,6 +104,7 @@ function Card(props) {
           throw new Error("Network response was not ok");
         }
 
+        // If we also want to update the user's account with this event
         if (!onlyUpdateTotalPeople) {
           await updateAccountEvent(accountId, eventId);
           alert("Uspesna prijava");
@@ -107,6 +118,7 @@ function Card(props) {
     }
   };
 
+  // Function to fetch the events of a specific user account
   async function fetchAccountEvents(accountId, eventId) {
     try {
       const accountFetchEvent = await fetch(
@@ -133,6 +145,7 @@ function Card(props) {
     }
   }
 
+  // Function to delete an event from a user's account
   async function deleteEvent(UserId, eventId) {
     const url = `http://localhost:8081/remove/account/event/${UserId}`;
     const data = {
@@ -160,20 +173,24 @@ function Card(props) {
     }
   }
 
+  // Handle the click event for the "PRIJAVI SE" button
   const handleClick = () => {
     isExpired || updateTotalPeople(props.eventId, totalPeople + 1, false);
     isExpired && alert("Event je istekao");
   };
 
+  // Handle the click event for the "ODJAVI SE" button
   const handleDeleteEvent = async () => {
     try {
       const accountId = localStorage.getItem("accountid");
       const eventId = props.eventId;
 
+      // Check if the user is registered for the event
       const eventExists = await fetchAccountEvents(accountId, eventId);
 
       if (eventExists) {
         console.log(eventId);
+        // Delete the event from the user's account and update the total number of people
         await deleteEvent(accountId, eventId);
         await updateTotalPeople(eventId, totalPeople - 1, true);
       } else if (!isExpired) {
