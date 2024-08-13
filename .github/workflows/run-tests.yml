@@ -11,38 +11,42 @@ on:
 jobs:
   test: # The name of the job that runs the tests
     runs-on: ubuntu-latest # The job will run on the latest version of Ubuntu
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x] # Test on both Node.js 14 and 16
+        part: [backend, frontend] # Run tests for backend and frontend in parallel
 
     steps:
       - name: Checkout code # Step to checkout the code from the repository
         uses: actions/checkout@v3 # GitHub Action that checks out your repository code
 
-      - name: Set up Node.js # Step to set up Node.js environment
+      - name: Set up Node.js ${{ matrix.node-version }} # Step to set up Node.js environment
         uses: actions/setup-node@v3 # GitHub Action that sets up Node.js
         with:
-          node-version: "16" # Specifies the Node.js version to use (version 16)
+          node-version: ${{ matrix.node-version }} # Uses the Node.js version from the matrix
 
-      - name: Install root dependencies # Step to install dependencies from the root package.json
-        run: npm install # Runs 'npm install' to install dependencies
+      # Cache npm packages to speed up installation
+      - name: Cache npm packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.OS }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.OS }}-node-
 
-      - name: Install backend dependencies # Step to install backend-specific dependencies
-        run: npm install --prefix ./backend # Runs 'npm install' in the 'backend' folder
+      - name: Install ${{ matrix.part }} dependencies # Step to install dependencies for the specific part
+        run: npm install --prefix ./${{ matrix.part }} # Runs 'npm install' in the specific folder
 
-      - name: Install frontend dependencies # Step to install frontend-specific dependencies
-        run: npm install --prefix ./frontend # Runs 'npm install' in the 'frontend' folder
-
-      - name: Run backend tests # Step to run tests for the backend
+      - name: Run ${{ matrix.part }} tests # Step to run tests for the specific part
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }} # Sets MongoDB URI from GitHub Secrets
           TEST_EMAIL: ${{ secrets.TEST_EMAIL }} # Sets a test email from GitHub Secrets
           JWT_SECRET: ${{ secrets.JWT_SECRET }} # Sets JWT secret from GitHub Secrets
-        run: npm test --prefix ./backend # Runs 'npm test' in the 'backend' folder
-
-      - name: Run frontend tests # Step to run tests for the frontend
-        run: npm test --prefix ./frontend # Runs 'npm test' in the 'frontend' folder
+        run: npm test --prefix ./${{ matrix.part }} # Runs 'npm test' in the specific folder
 
       - name: Upload test results # Step to upload test results if tests fail
         if: failure() # Only runs if previous steps failed
         uses: actions/upload-artifact@v3 # GitHub Action to upload artifacts
         with:
-          name: test-results # The name of the uploaded artifact
-          path: ./test-results # Path to the test results folder
+          name: test-results-${{ matrix.part }} # The name of the uploaded artifact
+          path: ./${{ matrix.part }}/test-results # Path to the test results folder
