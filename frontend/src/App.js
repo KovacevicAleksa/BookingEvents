@@ -1,50 +1,44 @@
-/* eslint-disable jsx-a11y/anchor-has-content */
-import { useState, useEffect } from "react";
-// Disabling eslint for unused imports
-import { BrowserRouter as Route, Routes } from "react-router-dom";
+import React from "react";
+import { Route, Routes } from "react-router-dom";
+import Login from "./routes/Login";
+import Registration from "./routes/Registration";
+import PrivateRoute from "./Components/PrivateRoute";
+import AdminAddEvent from "./routes/AdminAddEvent"; // Ensure this component exists
+import Unauthorized from "./routes/Unauthorized"; // Ensure this component exists
+import Header from "./Components/Header";
+import Card from "./Components/Card";
+import konferencija from "./Components/assets/Konferencija.jpg";
+import { useAuth } from "./context/AuthContext";
 
-import Header from "./Components/Header"; // Importing the Header component
-import Card from "./Components/Card"; // Importing the Card component to display event details
-import konferencija from "./Components/assets/Konferencija.jpg"; // Importing an image for events
-import Login from "./routes/Login"; // Importing the Login component
-import Registration from "./routes/Registration"; // Importing the Registration component
-import PrivateRoute from "./Components/PrivateRoute"; // Importing PrivateRoute for protected routes
-import AdminAddEvent from "./routes/AdminAddEvent"; // Importing the AdminAddEvent component
-import Unauthorized from "./routes/Unauthorized"; // Importing the Unauthorized component
-
-import { useAuth } from "./context/AuthContext"; // Importing the AuthContext for authentication
-
+// Data component to display events
 function Data() {
-  // State to store the event data fetched from the server
-  const [eventData, setEventData] = useState([]);
-  const { user } = useAuth(); // Getting the authenticated user from context
+  const [eventData, setEventData] = React.useState([]);
+  const { user } = useAuth();
 
-  // Fetch all events from the server when the component is mounted
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch("http://localhost:8081/view/events", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`, // Passing the JWT token for authorization
+            Authorization: `Bearer ${user.token}`,
           },
         });
 
-        // Handle any errors that occur during the fetch
         if (!response.ok) {
           throw new Error("Network problem");
         }
 
-        const data = await response.json(); // Parse the JSON data from the response
-        setEventData(data); // Update the state with the fetched event data
+        const data = await response.json();
+        setEventData(data);
       } catch (error) {
-        console.error("Error:", error); // Log any errors to the console
+        console.error("Error:", error);
       }
     };
 
-    fetchData(); // Call the fetchData function
-  }, [user.token]); // Run the effect only when the user's token changes
+    fetchData();
+  }, [user.token]);
 
   return (
     <div>
@@ -69,6 +63,7 @@ function Data() {
   );
 }
 
+// Events component to wrap the Data component and Header
 function Events() {
   return (
     <div>
@@ -78,6 +73,7 @@ function Events() {
   );
 }
 
+// Main App component with Routes
 function App() {
   return (
     <Routes>
@@ -88,7 +84,7 @@ function App() {
         path="/events"
         element={
           <PrivateRoute>
-            <Events /> {/* Protected route for viewing events */}
+            <Events />
           </PrivateRoute>
         }
       />
@@ -96,13 +92,11 @@ function App() {
         path="/admin/add-event"
         element={
           <PrivateRoute adminOnly={true}>
-            <AdminAddEvent />{" "}
-            {/* Protected route for adding events by admin only */}
+            <AdminAddEvent />
           </PrivateRoute>
         }
       />
-      <Route path="/" element={<Login />} />{" "}
-      {/* Default route to Login component */}
+      <Route path="/" element={<Login />} />
     </Routes>
   );
 }
