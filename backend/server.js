@@ -41,10 +41,16 @@ app.set("trust proxy", 1);
 // Disable the 'X-Powered-By' header for security reasons
 app.disable("x-powered-by");
 
-// Middleware to block access to cloud metadata services (often used in cloud environments)
+// Middleware to block access to cloud metadata services
 app.use((req, res, next) => {
-  const metadataUrl = "http://169.254.169.254";
-  if (req.url.startsWith(metadataUrl)) {
+  const metadataIp = "169.254.169.254";
+  const metadataUrl = `http://${metadataIp}`;
+
+  if (
+    req.url.startsWith(metadataUrl) ||
+    req.headers.host === metadataIp ||
+    req.headers["x-forwarded-host"] === metadataIp
+  ) {
     return res.status(403).send("Access to metadata is forbidden");
   }
   next();
