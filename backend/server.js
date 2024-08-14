@@ -13,6 +13,13 @@ const jwt = require("jsonwebtoken"); // JSON Web Token for handling authenticati
 const Account = require("./models/account"); // Importing Account model
 const Event = require("./models/event"); // Importing Event model
 
+const { auth, adminAuth } = require("./middleware/auth");
+
+const authRoutes = require("./routes/authRoutes");
+const accountRoutes = require("./routes/accountRoutes");
+//const eventRoutes = require("./routes/eventRoutes");
+//const adminRoutes = require("./routes/adminRoutes");
+
 const app = express(); // Initializing the Express application
 
 const port = process.env.PORT || 8080; // Set the server port from environment variable or default to 8080
@@ -34,7 +41,16 @@ app.use((req, res, next) => {
 
 const dbURI = process.env.MONGODB_URI; // MongoDB connection URI from environment variables
 
-app.use(cors()); // Enable CORS for all requests
+const corsOptions = {
+  origin: "http://localhost:3000", // Allow only requests from your frontend
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // Allowed methods
+  allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+  credentials: true, // Allow cookies to be sent with requests
+  optionsSuccessStatus: 200, // For legacy browser support
+};
+
+app.use(cors(corsOptions));
+
 app.use(
   helmet({
     // Set various security headers with Helmet
@@ -76,178 +92,14 @@ app.use(
 
 app.use(limiter); // Apply rate limiting middleware
 
-// Middleware for admin authentication
-const adminAuth = async (req, res, next) => {
-  try {
-    const authHeader = req.header("Authorization"); // Get the Authorization header
-    if (!authHeader) {
-      return res
-        .status(401)
-        .send({ error: "No Authorization header provided." });
-    }
-
-    const token = authHeader.replace("Bearer ", ""); // Extract the token from the header
-    if (!token) {
-      return res.status(401).send({ error: "No token provided." });
-    }
-
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify the token
-      const account = await Account.findById(decoded.id); // Find the account associated with the token
-
-      if (!account) {
-        return res.status(404).send({ error: "Account not found." });
-      }
-
-      if (!account.isAdmin) {
-        return res.status(403).send({ error: "User is not an admin." });
-      }
-
-      req.account = account; // Attach the account to the request object
-      req.token = token; // Attach the token to the request object
-      next(); // Move to the next middleware or route handler
-    } catch (err) {
-      console.error("Error verifying token:", err);
-      return res.status(401).send({ error: "Invalid token." });
-    }
-  } catch (error) {
-    console.error("adminAuth error:", error);
-    res.status(500).send({ error: "Server error during authentication." });
-  }
-};
-
-// Middleware for general user authentication
-const auth = async (req, res, next) => {
-  try {
-    const authHeader = req.header("Authorization"); // Get the Authorization header
-    if (!authHeader) {
-      return res
-        .status(401)
-        .send({ error: "No Authorization header provided." });
-    }
-
-    const token = authHeader.replace("Bearer ", ""); // Extract the token from the header
-    if (!token) {
-      return res.status(401).send({ error: "No token provided." });
-    }
-
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify the token
-      const account = await Account.findById(decoded.id); // Find the account associated with the token
-
-      if (!account) {
-        return res.status(404).send({ error: "Account not found." });
-      }
-
-      req.account = account; // Attach the account to the request object
-      req.token = token; // Attach the token to the request object
-      next(); // Move to the next middleware or route handler
-    } catch (err) {
-      console.error("Error verifying token:", err);
-      return res.status(401).send({ error: "Invalid token." });
-    }
-  } catch (error) {
-    console.error("Auth error:", error);
-    res.status(500).send({ error: "Server error during authentication." });
-  }
-};
-
-// Route to register a new account
-app.post("/register", async (req, res) => {
-  try {
-    const { email, password, isAdmin } = req.body;
-    const existingAccount = await Account.findOne({ email });
-    if (existingAccount) {
-      return res.status(400).json({ message: "Email already exists" });
-    }
-
-    const account = new Account({
-      email,
-      password,
-      isAdmin: isAdmin || false,
-    });
-    await account.save(); // Save the new account to the database
-    res.status(201).json(account); // Return the newly created account
-  } catch (error) {
-    res.status(500).json({ message: error.message }); // Return an error if something goes wrong
-  }
-});
-
-// Route to login and generate a JWT token
-app.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    console.log(`Login attempt for email: ${email}`);
-
-    const account = await Account.findOne({ email }); // Find the account by email
-    if (!account) {
-      console.log(`No account found for email: ${email}`);
-      return res.status(400).json({ message: "Invalid email or password" });
-    }
-
-    const isMatch = await bcrypt.compare(password, account.password); // Compare the password with the hashed password
-    if (!isMatch) {
-      console.log(`Invalid password for email: ${email}`);
-      return res.status(400).json({ message: "Invalid email or password" });
-    }
-
-    if (!process.env.JWT_SECRET) {
-      console.error("JWT_SECRET is not defined in environment variables");
-      return res.status(500).json({ message: "Internal server error" });
-    }
-
-    const token = jwt.sign(
-      { id: account._id, email: account.email, isAdmin: account.isAdmin },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
-
-    console.log(`Login successful for email: ${email}`);
-    res.status(200).json({
-      message: "Login successful",
-      token,
-      account: {
-        id: account._id,
-        email: account.email,
-        isAdmin: account.isAdmin,
-        events: account.events,
-      },
-    });
-  } catch (error) {
-    console.error("Login error:", error);
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
-  }
-});
-
-// Route to get all accounts (non-admin users only see non-sensitive information)
-app.get("/accounts", auth, async (req, res) => {
-  try {
-    const accounts = await Account.find({}).select("-password -_id -events");
-    res.status(200).json(accounts); // Return the list of accounts
-  } catch (error) {
-    res.status(500).json({ message: error.message }); // Return an error if something goes wrong
-  }
-});
+app.use("/", authRoutes); //POST /registration,/login
+app.use("/", accountRoutes); //GET /accounts, /accounts/:id, // PATCH /edit/account/:id, /DELETE /remove/account/event/:id
 
 // Route to get all accounts (admin users have full access)
 app.get("/admin/accounts", adminAuth, async (req, res) => {
   try {
     const accounts = await Account.find({});
     res.status(200).json(accounts); // Return the list of accounts
-  } catch (error) {
-    res.status(500).json({ message: error.message }); // Return an error if something goes wrong
-  }
-});
-
-// Route to get a single account by ID
-app.get("/accounts/:id", auth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const account = await Account.findById(id).select("-password"); // Find the account by ID and exclude the password
-
-    res.status(200).json(account); // Return the account
   } catch (error) {
     res.status(500).json({ message: error.message }); // Return an error if something goes wrong
   }
@@ -322,54 +174,6 @@ app.patch("/edit/events/:id", auth, async (req, res) => {
     }
 
     res.status(200).json(updatedEvent); // Return the updated event
-  } catch (error) {
-    res.status(500).json({ message: error.message }); // Return an error if something goes wrong
-  }
-});
-
-// Route to edit an account by ID
-app.patch("/edit/account/:id", auth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { events, ...otherUpdates } = req.body;
-
-    const update = { $push: { events } }; // Add new events to the account's event list
-
-    if (Object.keys(otherUpdates).length > 0) {
-      update.$set = otherUpdates; // Apply other updates to the account
-    }
-
-    const updatedAccount = await Account.findByIdAndUpdate(id, update, {
-      new: true,
-      runValidators: true,
-    }); // Update the account by ID
-
-    if (!updatedAccount) {
-      return res.status(404).json({ message: "Account not found" });
-    }
-
-    res.status(200).json(updatedAccount); // Return the updated account
-  } catch (error) {
-    res.status(500).json({ message: error.message }); // Return an error if something goes wrong
-  }
-});
-
-// Route to remove an event from an account
-app.delete("/remove/account/event/:id", auth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const eventIdToDelete = req.body.EventId;
-
-    const updatedEvent = await Account.findOneAndUpdate(
-      { _id: id },
-      { $pull: { events: eventIdToDelete } }
-    ); // Remove the event from the account's event list
-
-    if (!updatedEvent) {
-      return res.status(404).json({ message: "Event not found" });
-    }
-
-    res.status(200).json(updatedEvent); // Return the updated account after event removal
   } catch (error) {
     res.status(500).json({ message: error.message }); // Return an error if something goes wrong
   }
