@@ -14,6 +14,7 @@ router.get("/accounts", auth, async (req, res) => {
   }
 });
 
+// Route to get a single account by ID
 router.get("/accounts/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -25,6 +26,7 @@ router.get("/accounts/:id", auth, async (req, res) => {
   }
 });
 
+// Route to edit an account by ID
 router.patch("/edit/account/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -51,6 +53,7 @@ router.patch("/edit/account/:id", auth, async (req, res) => {
   }
 });
 
+// Route to remove an event from an account
 router.delete("/remove/account/event/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;

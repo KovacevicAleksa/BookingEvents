@@ -1,4 +1,7 @@
-require("dotenv").config(); // Load environment variables from .env file
+// Load environment variables from .env file
+require("dotenv").config();
+
+// Import dependencies
 const mongoose = require("mongoose"); // Mongoose for MongoDB interaction
 const express = require("express"); // Express framework for creating the server
 const cors = require("cors"); // CORS middleware to allow cross-origin requests
@@ -10,19 +13,27 @@ const nodeLimits = require("limits"); // Limits middleware to control file uploa
 const bodyParser = require("body-parser"); // Body parser for parsing incoming request bodies
 const jwt = require("jsonwebtoken"); // JSON Web Token for handling authentication
 
+// Import models
 const Account = require("./models/account"); // Importing Account model
 const Event = require("./models/event"); // Importing Event model
 
+// Import middleware
 const { auth, adminAuth } = require("./middleware/auth");
 
+// Import routes
 const authRoutes = require("./routes/authRoutes");
 const accountRoutes = require("./routes/accountRoutes");
-//const eventRoutes = require("./routes/eventRoutes");
-//const adminRoutes = require("./routes/adminRoutes");
+const eventRoutes = require("./routes/eventRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
-const app = express(); // Initializing the Express application
+// Initializing the Express application
+const app = express();
 
-const port = process.env.PORT || 8080; // Set the server port from environment variable or default to 8080
+// Set the server port from environment variable or default to 8080
+const port = process.env.PORT || 8080;
+
+// MongoDB connection URI from environment variables
+const dbURI = process.env.MONGODB_URI;
 
 // Trust the first proxy, useful when the app is behind a proxy like Nginx
 app.set("trust proxy", 1);
@@ -39,8 +50,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const dbURI = process.env.MONGODB_URI; // MongoDB connection URI from environment variables
-
+// CORS configuration
 const corsOptions = {
   origin: "http://localhost:3000", // Allow only requests from your frontend
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // Allowed methods
@@ -51,9 +61,9 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Set various security headers with Helmet
 app.use(
   helmet({
-    // Set various security headers with Helmet
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
@@ -65,8 +75,9 @@ app.use(
   })
 );
 
-app.use(express.json()); // Middleware to parse JSON request bodies
-app.use(express.urlencoded({ extended: false })); // Middleware to parse URL-encoded request bodies
+// Middleware to parse JSON and URL-encoded request bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
 // General rate limiter for all incoming requests
 const limiter = rateLimit({
@@ -77,111 +88,30 @@ const limiter = rateLimit({
   legacyHeaders: false, // Disable `X-RateLimit-*` headers
 });
 
+// Set limits on file uploads and request sizes
 app.use(
   nodeLimits({
-    // Set limits on file uploads and request sizes
     file_uploads: false, // Disable file uploads
     post_max_size: 2000000, // Limit request size to 2MB
     inc_req_timeout: 60000, // 60-second timeout for incoming requests
   })
 );
 
-app.use(
-  bodyParser.json({ limit: "1mb" }) // Limit JSON request body size to 1MB
-);
+// Limit JSON request body size to 1MB
+app.use(bodyParser.json({ limit: "1mb" }));
 
-app.use(limiter); // Apply rate limiting middleware
+// Apply rate limiting middleware
+app.use(limiter);
 
-app.use("/", authRoutes); //POST /registration,/login
-app.use("/", accountRoutes); //GET /accounts, /accounts/:id, // PATCH /edit/account/:id, /DELETE /remove/account/event/:id
-
-// Route to get all accounts (admin users have full access)
-app.get("/admin/accounts", adminAuth, async (req, res) => {
-  try {
-    const accounts = await Account.find({});
-    res.status(200).json(accounts); // Return the list of accounts
-  } catch (error) {
-    res.status(500).json({ message: error.message }); // Return an error if something goes wrong
-  }
-});
-
-// Route to add a new event (admin only)
-app.post("/admin/add/events", adminAuth, async (req, res) => {
-  try {
-    const {
-      price,
-      title,
-      description,
-      location,
-      maxPeople,
-      totalPeople,
-      date,
-    } = req.body;
-
-    const newEvent = new Event({
-      price,
-      title,
-      description,
-      location,
-      maxPeople,
-      totalPeople,
-      date: new Date(date),
-    });
-
-    const savedEvent = await newEvent.save(); // Save the new event to the database
-    console.log("Event saved:", savedEvent);
-
-    res.status(201).json({ event: savedEvent }); // Return the newly created event
-  } catch (error) {
-    res.status(500).json({ message: error.message }); // Return an error if something goes wrong
-  }
-});
-
-// Route to view all events
-app.get("/view/events", auth, async (req, res) => {
-  try {
-    const events = await Event.find({});
-    res.status(200).json(events); // Return the list of events
-  } catch (error) {
-    res.status(500).json({ message: error.message }); // Return an error if something goes wrong
-  }
-});
-
-// Route to view a specific event by ID
-app.get("/view/events/:id", auth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const events = await Event.findById(id); // Find the event by ID
-    res.status(200).json(events); // Return the event
-  } catch (error) {
-    res.status(500).json({ message: error.message }); // Return an error if something goes wrong
-  }
-});
-
-// Route to edit an event by ID
-app.patch("/edit/events/:id", auth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updateData = req.body;
-
-    const updatedEvent = await Event.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
-    }); // Update the event by ID with the provided data
-
-    if (!updatedEvent) {
-      return res.status(404).json({ message: "Event not found" });
-    }
-
-    res.status(200).json(updatedEvent); // Return the updated event
-  } catch (error) {
-    res.status(500).json({ message: error.message }); // Return an error if something goes wrong
-  }
-});
+// Apply routes
+app.use("/", authRoutes); //POST /registration, /login
+app.use("/", accountRoutes); //GET /accounts, /accounts/:id, PATCH /edit/account/:id, DELETE /remove/account/event/:id
+app.use("/", eventRoutes); //GET /events, POST /create/event, PATCH /edit/event/:id, DELETE /remove/event/:id
+app.use("/", adminAuth); //Admin routes (protected by adminAuth middleware)
 
 // Connect to MongoDB and start the server
 mongoose
-  .connect(dbURI) // Connect to the MongoDB database
+  .connect(dbURI)
   .then(() => {
     app.listen(port, () => {
       console.log(`Server is running on port ${port}`); // Log the server port
@@ -203,4 +133,5 @@ process.on("SIGTERM", () => {
   });
 });
 
-module.exports = app; // Export the Express app for use in other files
+// Export the Express app for use in other files
+module.exports = app;
