@@ -3,8 +3,8 @@ import { Route, Routes } from "react-router-dom";
 import Login from "./routes/Login";
 import Registration from "./routes/Registration";
 import PrivateRoute from "./Components/PrivateRoute";
-import AdminAddEvent from "./routes/AdminAddEvent"; // Ensure this component exists
-import Unauthorized from "./routes/Unauthorized"; // Ensure this component exists
+import AdminAddEvent from "./routes/AdminAddEvent";
+import Unauthorized from "./routes/Unauthorized";
 import Header from "./Components/Header";
 import Card from "./Components/Card";
 import konferencija from "./Components/assets/Konferencija.jpg";
@@ -64,7 +64,7 @@ function Data() {
 }
 
 // Events component to wrap the Data component and Header
-function Events() {
+export function Events() {
   return (
     <div>
       <Header />
@@ -88,14 +88,7 @@ function App() {
           </PrivateRoute>
         }
       />
-      <Route
-        path="/admin/add-event"
-        element={
-          <PrivateRoute adminOnly={true}>
-            <AdminAddEvent />
-          </PrivateRoute>
-        }
-      />
+      <Route path="/admin/addEvent" element={<AdminAddEvent />} />
       <Route path="/" element={<Login />} />
     </Routes>
   );
