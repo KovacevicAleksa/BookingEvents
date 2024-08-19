@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import Login from "./routes/Login";
 import Registration from "./routes/Registration";
 import PrivateRoute from "./Components/PrivateRoute";
@@ -77,6 +77,8 @@ export function Events() {
 
 // Main App component with Routes
 function App() {
+  const { user } = useAuth();
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
@@ -86,11 +88,22 @@ function App() {
         path="/events"
         element={
           <PrivateRoute>
-            <Events />
+            {user && user.isAdmin ? (
+              <Navigate to="/admin/addEvent" />
+            ) : (
+              <Events />
+            )}
           </PrivateRoute>
         }
       />
-      <Route path="/admin/addEvent" element={<AdminAddEvent />} />
+      <Route
+        path="/admin/addEvent"
+        element={
+          <PrivateRoute adminOnly={true}>
+            <AdminAddEvent />
+          </PrivateRoute>
+        }
+      />
       <Route path="/" element={<Login />} />
     </Routes>
   );
