@@ -65,9 +65,11 @@ function Data() {
 
 // Events component to wrap the Data component and Header
 export function Events() {
+  const { user } = useAuth();
+
   return (
     <div>
-      <Header />
+      <Header userEmail={user.email} />
       <Data />
     </div>
   );

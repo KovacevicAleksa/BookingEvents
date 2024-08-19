@@ -10,6 +10,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Retrieve the token from localStorage when the component mounts
+    // JWT TOKEN later need to store in HttpOnly cookie
     const token = localStorage.getItem("token");
     if (token) {
       try {
