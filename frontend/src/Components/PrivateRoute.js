@@ -3,8 +3,12 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const PrivateRoute = ({ children, adminOnly = false }) => {
-  // Retrieve the current user from the Auth context
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+
+  // If page is loading
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   // If the user is not logged in, redirect to the login page
   if (!user || !user.token) {

@@ -7,6 +7,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   // Initialize state to store the user data
   const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Retrieve the token from localStorage when the component mounts
@@ -23,13 +24,13 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("token");
       }
     }
+    setIsLoading(false);
   }, []);
 
-  // Function to handle user login, saving the token and decoding it
-  const login = (token) => {
+  const login = (token, isAdmin) => {
     localStorage.setItem("token", token);
     const decoded = jwtDecode(token);
-    setUser({ token, ...decoded });
+    setUser({ token, ...decoded, isAdmin });
   };
 
   // Function to handle user logout, clearing the token and user state
@@ -40,7 +41,7 @@ export const AuthProvider = ({ children }) => {
 
   // Provide the user data and authentication functions to the rest of the app
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

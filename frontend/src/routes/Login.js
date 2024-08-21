@@ -40,7 +40,7 @@ function Login() {
       if (result.message === "Login successful") {
         const token = result.token;
         localStorage.setItem("accountid", result.account.id);
-        login(token, result.account.id, result.account.isAdmin); // Call the login function from AuthContext
+        login(token, result.account.isAdmin); // Call the login function from AuthContext
         navigate("/events"); // Navigate to the events page
       } else {
         alert(result.message || "An unexpected error occurred"); // Show an error message if login fails
