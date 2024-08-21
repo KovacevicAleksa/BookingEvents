@@ -7,6 +7,7 @@ const AccountSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
+      index: true, // Add index on the events field
     },
     password: {
       type: String,
@@ -14,6 +15,7 @@ const AccountSchema = new mongoose.Schema(
     },
     events: {
       type: [String],
+      index: true, // Add index on the events field
     },
     isAdmin: {
       type: Boolean,

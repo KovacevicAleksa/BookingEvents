@@ -31,6 +31,7 @@ const EventSchema = new mongoose.Schema(
     totalPeople: {
       type: Number,
       required: true,
+      index: true, // Add index on the totalPeople field
     },
     date: {
       type: Date,
