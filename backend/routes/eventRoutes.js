@@ -11,9 +11,9 @@ router.get("/view/events", auth, async (req, res) => {
     const events = await Event.find({});
 
     await sendEmail(
-      "...",
+      "User@gmail.com",
       "Test e-mail",
-      "Ovo je test e-mail za /view/events rutu."
+      "Ovo je test e-mail za /view/events rutu.test"
     );
 
     console.log("Test e-mail je poslat.");

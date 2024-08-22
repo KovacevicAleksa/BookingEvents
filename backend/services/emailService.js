@@ -1,18 +1,21 @@
 const nodemailer = require("nodemailer");
 
+// Load environment variables from .env file
+require("dotenv").config({ path: __dirname + "/../.env" });
+
 const transporter = nodemailer.createTransport({
   host: "smtp-mail.outlook.com",
   port: 587,
   secure: false,
   auth: {
-    user: "bookingeventapp@outlook.com",
-    pass: "....",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
 const sendEmail = async (to, subject, text) => {
   const mailOptions = {
-    from: "bookingeventapp@outlook.com",
+    from: process.env.EMAIL_USER,
     to,
     subject,
     text,
