@@ -4,6 +4,7 @@ const express = require("express");
 const router = express.Router();
 const Account = require("../models/account");
 const { auth } = require("../middleware/auth");
+const { sendEmail } = require("../services/emailService"); // Import email service
 
 router.get("/accounts", auth, async (req, res) => {
   try {
@@ -50,6 +51,38 @@ router.patch("/edit/account/:id", auth, async (req, res) => {
     res.status(200).json(updatedAccount); // Return the updated account
   } catch (error) {
     res.status(500).json({ message: error.message }); // Return an error if something goes wrong
+  }
+});
+
+router.patch("/edit/password/:id", auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { password } = req.body;
+
+    const updatedAccount = await Account.findByIdAndUpdate(
+      id,
+      { password },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedAccount) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    await sendEmail(
+      updatedAccount.email,
+      "Password was changed",
+      "Your password has been successfully changed."
+    );
+
+    console.log("Password change notification email sent.");
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

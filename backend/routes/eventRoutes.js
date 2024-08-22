@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const Event = require("../models/event");
-const { sendEmail } = require("../services/emailService"); // Import email service
 
 const { auth } = require("../middleware/auth");
 
@@ -9,14 +8,6 @@ const { auth } = require("../middleware/auth");
 router.get("/view/events", auth, async (req, res) => {
   try {
     const events = await Event.find({});
-
-    await sendEmail(
-      "User@gmail.com",
-      "Test e-mail",
-      "Ovo je test e-mail za /view/events rutu.test"
-    );
-
-    console.log("Test e-mail je poslat.");
 
     res.status(200).json(events); // Return the list of events
   } catch (error) {
