@@ -5,7 +5,6 @@ This is an Event Management System that allows users to register and log in secu
 ## Technologies and Tools
 
 - **Backend:**
-
   - **Node.js**: JavaScript runtime for server-side programming.
   - **Express**: Web application framework for Node.js.
   - **MongoDB**: NoSQL database for storing user accounts and events.
@@ -17,14 +16,23 @@ This is an Event Management System that allows users to register and log in secu
   - **Bcrypt**: Library for hashing passwords.
   - **dotenv**: Module for loading environment variables from a `.env` file.
   - **Node Limits**: Module for managing file uploads and request limits.
+  - **JWT (jsonwebtoken)**: Library for handling authentication with JSON Web Tokens.
 
 - **Frontend:**
   - **React**: JavaScript library for building user interfaces.
   - **Tailwind CSS**: Utility-first CSS framework for styling components.
+
 - **DevOps:**
   - **Docker**: Containerization platform for creating and managing containers.
   - **Kubernetes**: Container orchestration platform for automating deployment, scaling, and operations.
   - **Nginx**: Web server and reverse proxy for handling requests and providing additional security.
+
+- **Test:**
+  - **Jest**: A testing framework used for writing and executing tests.
+  - **@testing-library/react**: A library for testing React components, which allows rendering components.
+  - **@testing-library/jest-dom**: An extension for Jest that adds useful matchers for testing DOM elements.
+  - **supertest**: A library that allows making HTTP requests in tests and verifying responses.
+
 
 ## Start the application
 
@@ -49,34 +57,71 @@ npm run all-node
 npm run docker
 npm run k8s
 ```
+**Tests**
+```
+all-test
+```
+
+
+## Tests
+| Workflow    | Status                                                                                                                                  |
+|-------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| Tests       | ![Tests](https://github.com/KovacevicAleksa/BookingEvents/actions/workflows/run-tests.yml/badge.svg)                                     |
+| Deployment  | ![Deployment](https://github.com/KovacevicAleksa/BookingEvents/actions/workflows/deploy.yml/badge.svg)                                   |
+
+
+
 ## Folder structure
 
 ```
-└── 📁backend
-    └── 📁kubernetes
-        └── deployment.yaml
-        └── secret.yaml
-        └── service.yaml
-    └── 📁models
-        └── account.js
-        └── event.js
-    └── .dockerignore
-    └── .env
-    └── .gitignore
-    └── default.conf
-    └── docker-compose.yml
-    └── Dockerfile
-    └── Dockerfile.nginx
-    └── eslint.config.mjs
-    └── nginx.conf
-    └── package-lock.json
-    └── package.json
-    └── server.js
-    └── ZAPToFix.md
+└── 📁BookingEvent
+    └── 📁.github
+        └── 📁workflows
+            └── deploy.yml
+            └── run-tests.yml
+    └── 📁.vscode
+        └── launch.json
+        └── tasks.json
+    └── 📁backend
+        └── 📁__mocks__
+            └── fileMock.js
+        └── 📁kubernetes
+            └── deployment.yaml
+            └── secret.yaml
+            └── service.yaml
+        └── 📁middleware
+            └── auth.js
+        └── 📁models
+            └── account.js
+            └── event.js
+        └── 📁routes
+            └── accountRoutes.js
+            └── adminRoutes.js
+            └── authRoutes.js
+            └── eventRoutes.js
+        └── 📁tests
+            └── event.test.js
+        └── .dockerignore
+        └── .env
+        └── .gitignore
+        └── .prettierignore
+        └── autocannonApiTest.md
+        └── default.conf
+        └── docker-compose.yml
+        └── Dockerfile
+        └── Dockerfile.nginx
+        └── eslint.config.mjs
+        └── nginx.conf
+        └── package-lock.json
+        └── package.json
+        └── server.js
+        └── ZAPToFix.md
 ```
 
 ```
 └── 📁frontend
+    └── 📁__mocks__
+        └── styleMock.js
     └── 📁public
         └── index.html
         └── manifest.json
@@ -88,12 +133,19 @@ npm run k8s
             └── Card.js
             └── Header.js
             └── PrivateRoute.js
+        └── 📁context
+            └── AuthContext.js
         └── 📁routes
+            └── AdminAddEvent.js
             └── Login.js
             └── Registration.js
+            └── Unauthorized.js
         └── App.js
         └── index.css
         └── index.js
+    └── 📁tests
+        └── Card.test.js
+    └── .babelrc
     └── .gitignore
     └── package-lock.json
     └── package.json
@@ -101,8 +153,17 @@ npm run k8s
     └── tailwind.config.js
 ```
 
+```
+└── 📁.github
+    └── 📁workflows
+        └── deploy.yml
+        └── run-tests.yml
+```
+
 <br>
 
 ![Screenshot 2024-08-05 193451](https://github.com/user-attachments/assets/4cc2faba-bf29-4f8a-8874-e4301c469e0c)
 
 ![Screenshot 2024-08-05 193507](https://github.com/user-attachments/assets/82cc4bef-1c9f-408b-807e-e6a3ed9607a3)
+
+![Screenshot 2024-08-22 141704](https://github.com/user-attachments/assets/2e90b4bb-62ed-4d79-a7e7-b270ab1483b8)
