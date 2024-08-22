@@ -105,6 +105,7 @@ function App() {
         }
       />
       <Route path="/" element={<Login />} />
+      <Route path="*" element={<Navigate to="/login" />} />
     </Routes>
   );
 }

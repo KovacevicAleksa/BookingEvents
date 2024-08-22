@@ -1,5 +1,5 @@
 // Load environment variables from .env file
-require("dotenv").config();
+require("dotenv").config({ path: __dirname + "/.env" });
 
 // Import dependencies
 const mongoose = require("mongoose"); // Mongoose for MongoDB interaction
