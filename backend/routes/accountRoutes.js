@@ -59,21 +59,16 @@ router.patch("/edit/password/:id", auth, async (req, res) => {
     const { id } = req.params;
     const { password } = req.body;
 
-    const updatedAccount = await Account.findByIdAndUpdate(
-      id,
-      { password },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-
-    if (!updatedAccount) {
+    const account = await Account.findById(id);
+    if (!account) {
       return res.status(404).json({ message: "Account not found" });
     }
 
+    account.password = password;
+    await account.save();
+
     await sendEmail(
-      updatedAccount.email,
+      account.email,
       "Password was changed",
       "Your password has been successfully changed."
     );
