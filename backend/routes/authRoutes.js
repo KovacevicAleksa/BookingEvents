@@ -7,7 +7,7 @@ const Account = require("../models/account");
 // Route to register a new account
 router.post("/register", async (req, res) => {
   try {
-    const { email, password, isAdmin } = req.body;
+    const { email, password } = req.body;
     const existingAccount = await Account.findOne({ email });
     if (existingAccount) {
       return res.status(400).json({ message: "Email already exists" });
@@ -16,7 +16,7 @@ router.post("/register", async (req, res) => {
     const account = new Account({
       email,
       password,
-      isAdmin: isAdmin || false,
+      isAdmin: false,
     });
     await account.save(); // Save the new account to the database
     res.status(201).json(account); // Return the newly created account

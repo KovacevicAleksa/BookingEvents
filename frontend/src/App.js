@@ -88,6 +88,7 @@ function App() {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/change-password" element={<ChangePassword />} />
+      <Route path="/change-password/*" element={<ChangePassword />} />
       <Route
         path="/events"
         element={

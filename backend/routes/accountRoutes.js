@@ -55,7 +55,7 @@ router.patch("/edit/account/:id", auth, async (req, res) => {
 });
 
 //Edit password
-router.patch("/edit/password/:id", auth, async (req, res) => {
+router.patch("/edit/password/:id", async (req, res) => {
   try {
     const { id } = req.params;
     const { password } = req.body;
@@ -104,13 +104,14 @@ router.get("/edit/password/:email", async (req, res) => {
           <body style="font-family: Arial, sans-serif; line-height: 1.6;">
             <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
               <h2 style="text-align: center; color: #333;">Reset Your Password</h2>
-              <p>Dear ${account.name},</p>
+              <p>Dear User,</p>
               <p>We received a request to reset the password for your account associated with this email address.</p>
               <p>If you requested this password reset, please click the link below to reset your password:</p>
+              <p>http://localhost:8081/change-password/${account.id}</p>
               <div style="text-align: center; margin: 20px 0;">
-                <a href="localhost:8081/edit/password/${account.id}"
-                   style="background-color: #28a745; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
-                   Reset Password
+                <a href="http://localhost:8081/change-password/${account.id}"
+                  style="background-color: #28a745; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                  Reset Password
                 </a>
               </div>
               <p>If you did not request a password reset, please ignore this email or contact support if you have questions.</p>
