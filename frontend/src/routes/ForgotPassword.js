@@ -1,53 +1,50 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
 
 function ForgotPassword() {
-  // State variables for storing email and password input values
+  // State variable for storing email input value
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
   // Hook for navigation to different routes
   const navigate = useNavigate();
 
-  // Access the login function from the AuthContext
-  const { login } = useAuth();
-
-  // Handle form submission for login
+  // Function to handle form submission for forgot password
   const handleSubmit = async (event) => {
     event.preventDefault(); // Prevent default form submission behavior
 
     try {
-      // Make a POST request to the login endpoint with email and password
-      const response = await fetch("http://localhost:8081/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      // Make a GET request to the forgot-password endpoint with the email
+      const response = await fetch(
+        `http://localhost:8081/edit/password/${email}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       // Parse the response JSON
       const result = await response.json();
 
       // Check if the response was successful
       if (!response.ok) {
-        throw new Error(result.message || "An error occurred during login");
+        throw new Error(
+          result.message || "An error occurred while processing your request"
+        );
       }
 
-      // If login was successful, store the token and navigate to the events page
-      if (result.message === "Login successful") {
-        const token = result.token;
-        localStorage.setItem("accountid", result.account.id);
-        login(token, result.account.isAdmin); // Call the login function from AuthContext
-        navigate("/events"); // Navigate to the events page
+      // If the forgot-password process was successful
+      if (result.message === "Password reset link sent") {
+        alert("A password reset link has been sent to your email.");
+        navigate("/login"); // Navigate to the login page
       } else {
-        alert(result.message || "An unexpected error occurred"); // Show an error message if login fails
+        alert(result.message || "An unexpected error occurred"); // Show an error message if the process fails
       }
     } catch (error) {
-      console.error("Login error:", error); // Log the error to the console
-      alert(error.message || "An error occurred during login"); // Display the error to the user
+      console.error("Forgot password error:", error); // Log the error to the console
+      alert(error.message || "An error occurred while processing your request"); // Display the error to the user
     }
   };
 
@@ -58,7 +55,7 @@ function ForgotPassword() {
           <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
             <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
               <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-                Prijavite se na nalog
+                Reset Your Password
               </h1>
               <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
                 <div>
@@ -83,7 +80,7 @@ function ForgotPassword() {
                   type="submit"
                   className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
                 >
-                  Forgot Password
+                  Send Reset Link
                 </button>
               </form>
             </div>

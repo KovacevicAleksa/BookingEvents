@@ -54,6 +54,7 @@ router.patch("/edit/account/:id", auth, async (req, res) => {
   }
 });
 
+//Edit password
 router.patch("/edit/password/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -81,6 +82,7 @@ router.patch("/edit/password/:id", auth, async (req, res) => {
   }
 });
 
+//Get account ID
 router.get("/edit/password/:email", async (req, res) => {
   try {
     const { email } = req.params;
@@ -94,7 +96,31 @@ router.get("/edit/password/:email", async (req, res) => {
       return res.status(400).json({ message: "Account ID not found" });
     }
 
-    await sendEmail(account.email, "Account ID", `Account ID: ${account.id}`);
+    await sendEmail(
+      account.email,
+      "Reset Your Password",
+      `
+        <html>
+          <body style="font-family: Arial, sans-serif; line-height: 1.6;">
+            <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+              <h2 style="text-align: center; color: #333;">Reset Your Password</h2>
+              <p>Dear ${account.name},</p>
+              <p>We received a request to reset the password for your account associated with this email address.</p>
+              <p>If you requested this password reset, please click the link below to reset your password:</p>
+              <div style="text-align: center; margin: 20px 0;">
+                <a href="localhost:8081/edit/password/${account.id}"
+                   style="background-color: #28a745; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                   Reset Password
+                </a>
+              </div>
+              <p>If you did not request a password reset, please ignore this email or contact support if you have questions.</p>
+              <p>Thank you,</p>
+              <p>BookingEvent</p>
+            </div>
+          </body>
+        </html>
+      `
+    );
 
     console.log("Account ID sent to email");
 

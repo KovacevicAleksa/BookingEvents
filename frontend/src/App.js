@@ -6,6 +6,7 @@ import PrivateRoute from "./Components/PrivateRoute";
 import AdminAddEvent from "./routes/AdminAddEvent";
 import Unauthorized from "./routes/Unauthorized";
 import ForgotPassword from "./routes/ForgotPassword";
+import ChangePassword from "./routes/ChangePassword";
 import Header from "./Components/Header";
 import Card from "./Components/Card";
 import konferencija from "./Components/assets/Konferencija.jpg";
@@ -86,6 +87,7 @@ function App() {
       <Route path="/registration" element={<Registration />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/change-password" element={<ChangePassword />} />
       <Route
         path="/events"
         element={
