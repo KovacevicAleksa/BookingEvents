@@ -81,6 +81,30 @@ router.patch("/edit/password/:id", auth, async (req, res) => {
   }
 });
 
+router.get("/edit/password/:email", async (req, res) => {
+  try {
+    const { email } = req.params;
+
+    const account = await Account.findOne({ email: email });
+    if (!account) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    if (!account.id) {
+      return res.status(400).json({ message: "Account ID not found" });
+    }
+
+    await sendEmail(account.email, "Account ID", `Account ID: ${account.id}`);
+
+    console.log("Account ID sent to email");
+
+    res.status(200).json({ message: "Successfully sent ID to email" });
+  } catch (error) {
+    console.error("Error in /edit/password/:email route:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 // Route to remove an event from an account
 router.delete("/remove/account/event/:id", auth, async (req, res) => {
   try {
