@@ -26,16 +26,21 @@ spec:
                 secretKeyRef:
                   name: secrets # References a secret named 'secrets'
                   key: uri # Key in the secret to use for the value
-            - name: TEST_EMAIL
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: TEST_EMAIL
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: secrets
                   key: JWT_SECRET
+            - name: EMAIL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: EMAIL_USER # Key in the secret to use for the value
+            - name: EMAIL_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: EMAIL_PASS # Key in the secret to use for the value
           resources: # Specifies resource requests and limits
             requests:
               cpu: 100m # Requests 100 milliCPU (0.1 CPU)

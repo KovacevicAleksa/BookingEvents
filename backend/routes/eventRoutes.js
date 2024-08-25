@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const Event = require("../models/event");
+
 const { auth } = require("../middleware/auth");
 
 // Route to view all events
 router.get("/view/events", auth, async (req, res) => {
   try {
     const events = await Event.find({});
+
     res.status(200).json(events); // Return the list of events
   } catch (error) {
     res.status(500).json({ message: error.message }); // Return an error if something goes wrong

@@ -111,7 +111,7 @@ app.use(limiter);
 
 // Apply routes
 app.use("/", authRoutes); //POST /registration, /login
-app.use("/", accountRoutes); //GET /accounts, /accounts/:id, PATCH /edit/account/:id, DELETE /remove/account/event/:id
+app.use("/", accountRoutes); //GET /accounts, /accounts/:id, PATCH /edit/account/:id, PATCH /edit/password/:id, DELETE /remove/account/event/:id
 app.use("/", eventRoutes); //GET /events, POST /create/event, PATCH /edit/event/:id, DELETE /remove/event/:id
 app.use("/", adminRoutes); //Admin routes (protected by adminAuth middleware)
 
