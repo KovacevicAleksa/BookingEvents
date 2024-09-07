@@ -90,15 +90,29 @@ function AdminAddEvent() {
         </h1>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Accounts Section */}
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-2 text-gray-700">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-xl mx-auto">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">
               Accounts
             </h2>
+
             <textarea
               readOnly
               value={accountsData}
-              className="w-full h-64 lg:h-96 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200 resize-none"
+              className="w-full h-80 lg:h-96 p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-300 resize-none mb-4"
             ></textarea>
+
+            <input
+              type="text"
+              placeholder="Enter details"
+              className="w-full p-2 mb-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-300"
+            />
+
+            <button
+              // onClick={() => handleDeleteAccount(account.id)}
+              className="w-full text-white bg-red-600 hover:bg-red-700 font-medium py-2 rounded-md shadow-md transition duration-300"
+            >
+              Delete
+            </button>
           </div>
 
           {/* Form Section */}
@@ -133,7 +147,7 @@ function AdminAddEvent() {
                   name="description"
                   value={eventData.description}
                   onChange={handleChange}
-                  rows="3"
+                  rows="4"
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                   required
                 ></textarea>
@@ -223,7 +237,7 @@ function AdminAddEvent() {
                   required
                 />
               </div>
-              <div>
+              <div className="m-2 mt-5 mb-5">
                 <button
                   type="submit"
                   className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
@@ -235,13 +249,29 @@ function AdminAddEvent() {
           </div>
 
           {/* Events Section */}
-          <div className="bg-white p-4 rounded-lg shadow">
-            <h2 className="text-xl font-semibold mb-2 text-gray-700">Events</h2>
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-xl mx-auto">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+              Events
+            </h2>
+
             <textarea
               readOnly
               value={eventsData}
-              className="w-full h-64 lg:h-96 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-200 resize-none"
+              className="w-full h-80 lg:h-96 p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-300 resize-none mb-4"
             ></textarea>
+
+            <input
+              type="text"
+              placeholder="Enter details"
+              className="w-full p-2 mb-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-300"
+            />
+
+            <button
+              // onClick={() => handleDeleteAccount(account.id)}
+              className="w-full text-white bg-red-600 hover:bg-red-700 font-medium py-2 rounded-md shadow-md transition duration-300"
+            >
+              Delete
+            </button>
           </div>
         </div>
       </div>
