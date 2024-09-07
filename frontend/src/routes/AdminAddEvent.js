@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 
 function AdminAddEvent() {
@@ -15,12 +15,7 @@ function AdminAddEvent() {
   const [accountsData, setAccountsData] = useState("");
   const [eventsData, setEventsData] = useState("");
 
-  useEffect(() => {
-    fetchAccounts();
-    fetchEvents();
-  }, []);
-
-  const fetchAccounts = async () => {
+  const fetchAccounts = useCallback(async () => {
     try {
       const response = await fetch("http://localhost:8081/admin/accounts", {
         headers: {
@@ -34,9 +29,9 @@ function AdminAddEvent() {
       console.error("Error fetching accounts:", error);
       setAccountsData("Error fetching accounts");
     }
-  };
+  }, [user.token]);
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     try {
       const response = await fetch("http://localhost:8081/view/events", {
         headers: {
@@ -50,7 +45,12 @@ function AdminAddEvent() {
       console.error("Error fetching events:", error);
       setEventsData("Error fetching events");
     }
-  };
+  }, [user.token]);
+
+  useEffect(() => {
+    fetchAccounts();
+    fetchEvents();
+  }, [fetchAccounts, fetchEvents]);
 
   const handleChange = (e) => {
     setEventData({ ...eventData, [e.target.name]: e.target.value });
