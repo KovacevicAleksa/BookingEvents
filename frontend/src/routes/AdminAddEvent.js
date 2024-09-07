@@ -15,6 +15,9 @@ function AdminAddEvent() {
   const [accountsData, setAccountsData] = useState("");
   const [eventsData, setEventsData] = useState("");
 
+  const [deleteAccountId, setDeleteAccountId] = useState("");
+  const [deleteEventId, setDeleteEventId] = useState("");
+
   const fetchAccounts = useCallback(async () => {
     try {
       const response = await fetch("http://localhost:8081/admin/accounts", {
@@ -82,6 +85,76 @@ function AdminAddEvent() {
     }
   };
 
+  const handleDeleteEvent = async () => {
+    if (!deleteEventId.trim()) {
+      alert("Please enter a valid event ID");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8081/delete/events/${deleteEventId.trim()}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete event");
+      }
+
+      const data = await response.json();
+      console.log(data.message);
+      alert("Event deleted successfully");
+
+      setDeleteEventId(""); // Clear the input after successful deletion
+      fetchEvents(); // Refresh the events list
+      fetchAccounts(); // Refresh the accounts list
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      alert("Error deleting event. Please try again.");
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!deleteAccountId.trim()) {
+      alert("Please enter a valid user account ID");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8081/delete/users/${deleteAccountId.trim()}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete user account");
+      }
+
+      const data = await response.json();
+      console.log(data.message);
+      alert("User account successfully deleted");
+
+      setDeleteAccountId(""); // Clear input after successful deletion
+      fetchAccounts(); // Refresh the accounts list
+    } catch (error) {
+      console.error("Error deleting user account:", error);
+      alert(`Error deleting user account: ${error.message}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 p-4">
       <div className="max-w-7xl mx-auto">
@@ -103,15 +176,17 @@ function AdminAddEvent() {
 
             <input
               type="text"
-              placeholder="Enter details"
+              value={deleteAccountId}
+              onChange={(e) => setDeleteAccountId(e.target.value)}
+              placeholder="Enter Account ID to delete"
               className="w-full p-2 mb-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-300"
             />
 
             <button
-              // onClick={() => handleDeleteAccount(account.id)}
+              onClick={handleDeleteUser}
               className="w-full text-white bg-red-600 hover:bg-red-700 font-medium py-2 rounded-md shadow-md transition duration-300"
             >
-              Delete
+              Delete User Account
             </button>
           </div>
 
@@ -262,15 +337,17 @@ function AdminAddEvent() {
 
             <input
               type="text"
-              placeholder="Enter details"
+              value={deleteEventId}
+              onChange={(e) => setDeleteEventId(e.target.value)}
+              placeholder="Enter event ID to delete"
               className="w-full p-2 mb-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-300"
             />
 
             <button
-              // onClick={() => handleDeleteAccount(account.id)}
+              onClick={handleDeleteEvent}
               className="w-full text-white bg-red-600 hover:bg-red-700 font-medium py-2 rounded-md shadow-md transition duration-300"
             >
-              Delete
+              Delete Event
             </button>
           </div>
         </div>
