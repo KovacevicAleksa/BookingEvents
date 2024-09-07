@@ -4,7 +4,9 @@ const express = require("express");
 const router = express.Router();
 const Account = require("../models/account");
 const { auth } = require("../middleware/auth");
+const { resetAccountLimiter } = require("../middleware/resetAccountLimiter");
 const { sendEmail } = require("../services/emailService"); // Import email service
+const rateLimit = require("express-rate-limit");
 
 router.get("/accounts", auth, async (req, res) => {
   try {
@@ -83,7 +85,7 @@ router.patch("/edit/password/:id", async (req, res) => {
 });
 
 //Get account ID
-router.get("/edit/password/:email", async (req, res) => {
+router.get("/edit/password/:email", resetAccountLimiter, async (req, res) => {
   try {
     const { email } = req.params;
 
@@ -107,9 +109,10 @@ router.get("/edit/password/:email", async (req, res) => {
               <p>Dear User,</p>
               <p>We received a request to reset the password for your account associated with this email address.</p>
               <p>If you requested this password reset, please click the link below to reset your password:</p>
-              <p>http://localhost:8081/change-password/${account.id}</p>
+              <p>ID: ${account.id}</p>
+              <p>http://localhost:3000/change-password/${account.id}</p>
               <div style="text-align: center; margin: 20px 0;">
-                <a href="http://localhost:8081/change-password/${account.id}"
+                <a href="http://localhost:3000/change-password/${account.id}"
                   style="background-color: #28a745; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
                   Reset Password
                 </a>

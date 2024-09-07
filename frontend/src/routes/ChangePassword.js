@@ -1,8 +1,11 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 function ChangePassword() {
+  // Get the user ID from the URL params
+  const { id: urlId } = useParams();
+
   // State variables for storing ID and new password input values
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
@@ -11,8 +14,12 @@ function ChangePassword() {
   // Hook for navigation to different routes
   const navigate = useNavigate();
 
-  // Get the user ID from the URL params
-  const { id: routeId } = useParams();
+  useEffect(() => {
+    console.log("URL ID:", urlId);
+    if (urlId) {
+      setId(urlId);
+    }
+  }, [urlId]);
 
   // Function to handle form submission for password change
   const handleSubmit = async (event) => {
@@ -79,8 +86,9 @@ function ChangePassword() {
                     className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     placeholder="Enter your ID"
                     required
-                    value={routeId}
+                    value={id}
                     onChange={(e) => setId(e.target.value)} // Update ID state on change
+                    readOnly={!!id}
                   />
                 </div>
                 <div>
