@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 // Define the schema for the 'Event' collection
 const EventSchema = new mongoose.Schema(
@@ -47,4 +47,4 @@ const EventSchema = new mongoose.Schema(
 // Create and export the 'Event' model based on the schema
 const Event = mongoose.model("Event", EventSchema);
 
-module.exports = Event;
+export default Event;

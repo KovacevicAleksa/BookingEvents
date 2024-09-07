@@ -1,5 +1,5 @@
-const mongoose = require("mongoose"); // Import the Mongoose library for interacting with MongoDB
-const bcrypt = require("bcrypt"); // Import the bcrypt library for hashing passwords
+import mongoose from "mongoose"; // Import the Mongoose library for interacting with MongoDB
+import bcrypt from "bcrypt"; // Import the bcrypt library for hashing passwords
 
 // Define the schema for the 'Account' collection
 const AccountSchema = new mongoose.Schema(
@@ -46,4 +46,4 @@ AccountSchema.pre("save", async function (next) {
 // Create and export the 'Account' model based on the schema
 const Account = mongoose.model("Account", AccountSchema);
 
-module.exports = Account;
+export default Account;

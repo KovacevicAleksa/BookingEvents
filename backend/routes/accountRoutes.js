@@ -1,12 +1,12 @@
 // routes/accountRoutes.js
 
-const express = require("express");
+import express from "express";
+import Account from "../models/account.js";
+import { auth } from "../middleware/auth.js";
+import { resetAccountLimiter } from "../middleware/resetAccountLimiter.js";
+import { sendEmail } from "../services/emailService.js";
+
 const router = express.Router();
-const Account = require("../models/account");
-const { auth } = require("../middleware/auth");
-const { resetAccountLimiter } = require("../middleware/resetAccountLimiter");
-const { sendEmail } = require("../services/emailService"); // Import email service
-const rateLimit = require("express-rate-limit");
 
 router.get("/accounts", auth, async (req, res) => {
   try {
@@ -156,4 +156,4 @@ router.delete("/remove/account/event/:id", auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

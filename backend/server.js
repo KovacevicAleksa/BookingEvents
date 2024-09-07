@@ -1,30 +1,27 @@
 // Load environment variables from .env file
-require("dotenv").config({ path: __dirname + "/.env" });
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+dotenv.config({ path: __dirname + "/.env" });
 
 // Import dependencies
-const mongoose = require("mongoose"); // Mongoose for MongoDB interaction
-const express = require("express"); // Express framework for creating the server
-const cors = require("cors"); // CORS middleware to allow cross-origin requests
-const bcrypt = require("bcrypt"); // bcrypt for hashing passwords
-const path = require("path"); // Path module for handling file paths
-const rateLimit = require("express-rate-limit"); // Rate limiting middleware
-const helmet = require("helmet"); // Helmet middleware for setting various HTTP headers to enhance security
-const nodeLimits = require("limits"); // Limits middleware to control file upload and request sizes
-const bodyParser = require("body-parser"); // Body parser for parsing incoming request bodies
-const jwt = require("jsonwebtoken"); // JSON Web Token for handling authentication
-
-// Import models
-const Account = require("./models/account"); // Importing Account model
-const Event = require("./models/event"); // Importing Event model
-
-// Import middleware
-const { auth, adminAuth } = require("./middleware/auth");
+import mongoose from "mongoose"; // Mongoose for MongoDB interaction
+import express from "express"; // Express framework for creating the server
+import cors from "cors"; // CORS middleware to allow cross-origin requests
+import rateLimit from "express-rate-limit"; // Rate limiting middleware
+import helmet from "helmet"; // Helmet middleware for setting various HTTP headers to enhance security
+import nodeLimits from "limits"; // Limits middleware to control file upload and request sizes
+import bodyParser from "body-parser"; // Body parser for parsing incoming request bodies
 
 // Import routes
-const authRoutes = require("./routes/authRoutes");
-const accountRoutes = require("./routes/accountRoutes");
-const eventRoutes = require("./routes/eventRoutes");
-const adminRoutes = require("./routes/adminRoutes");
+import authRoutes from "./routes/authRoutes.js";
+import accountRoutes from "./routes/accountRoutes.js";
+import eventRoutes from "./routes/eventRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 // Initializing the Express application
 const app = express();
@@ -140,4 +137,4 @@ process.on("SIGTERM", () => {
 });
 
 // Export the Express app for use in other files
-module.exports = app;
+export default app;

@@ -1,9 +1,10 @@
-require("dotenv").config(); // Load environment variables from a .env file
-const request = require("supertest"); // Import supertest for making HTTP requests in tests
-const mongoose = require("mongoose");
-const app = require("../server");
-const Account = require("../models/account"); // Import the Account model
-const jwt = require("jsonwebtoken"); // Import jsonwebtoken for generating JWTs
+import dotenv from "dotenv";
+dotenv.config(); // Load environment variables from a .env file
+import request from "supertest"; // Import supertest for making HTTP requests in tests
+import mongoose from "mongoose";
+import app from "../server";
+import Account from "../models/account.js"; // Import the Account model
+import jwt from "jsonwebtoken"; // Import jsonwebtoken for generating JWTs
 
 describe("API Endpoints", () => {
   let authToken; // Variable to store the authentication token

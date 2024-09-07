@@ -1,4 +1,4 @@
-const rateLimit = require("express-rate-limit");
+import rateLimit from "express-rate-limit";
 
 // Rate limiter for password reset attempts
 const resetAccountLimiter = rateLimit({
@@ -7,4 +7,4 @@ const resetAccountLimiter = rateLimit({
   message: "Too many password reset attempts, please try again later.",
 });
 
-module.exports = { resetAccountLimiter };
+export { resetAccountLimiter };

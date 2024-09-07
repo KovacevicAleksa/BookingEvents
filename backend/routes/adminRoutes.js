@@ -1,10 +1,9 @@
-// routes/adminRoutes.js
+import express from "express";
+import Account from "../models/account.js";
+import Event from "../models/event.js";
+import { adminAuth } from "../middleware/auth.js";
 
-const express = require("express");
 const router = express.Router();
-const Account = require("../models/account");
-const Event = require("../models/event");
-const { adminAuth } = require("../middleware/auth");
 
 // Route to get all accounts (admin users have full access)
 router.get("/admin/accounts", adminAuth, async (req, res) => {
@@ -48,4 +47,4 @@ router.post("/admin/add/events", adminAuth, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

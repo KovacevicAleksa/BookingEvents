@@ -1,5 +1,5 @@
-const jwt = require("jsonwebtoken");
-const Account = require("../models/account");
+import jwt from "jsonwebtoken";
+import Account from "../models/account.js";
 
 // Middleware for general user authentication
 const auth = async (req, res, next) => {
@@ -77,4 +77,4 @@ const adminAuth = async (req, res, next) => {
   }
 };
 
-module.exports = { auth, adminAuth };
+export { auth, adminAuth };

@@ -1,7 +1,8 @@
-const nodemailer = require("nodemailer");
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 
 // Load environment variables from .env file
-require("dotenv").config({ path: __dirname + "/../.env" });
+dotenv.config({ path: new URL("../.env", import.meta.url).pathname });
 
 const transporter = nodemailer.createTransport({
   host: "smtp-mail.outlook.com",
@@ -13,7 +14,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendEmail = async (to, subject, htmlContent) => {
+export const sendEmail = async (to, subject, htmlContent) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to,
@@ -29,4 +30,4 @@ const sendEmail = async (to, subject, htmlContent) => {
   }
 };
 
-module.exports = { sendEmail };
+export default sendEmail;

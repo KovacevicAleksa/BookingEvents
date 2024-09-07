@@ -1,8 +1,8 @@
-const express = require("express");
-const router = express.Router();
-const Event = require("../models/event");
+import express from "express";
+import Event from "../models/event.js";
+import { auth } from "../middleware/auth.js";
 
-const { auth } = require("../middleware/auth");
+const router = express.Router();
 
 // Route to view all events
 router.get("/view/events", auth, async (req, res) => {
@@ -47,4 +47,4 @@ router.patch("/edit/events/:id", auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
