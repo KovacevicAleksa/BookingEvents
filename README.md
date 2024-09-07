@@ -17,6 +17,7 @@ This is an Event Management System that allows users to register and log in secu
   - **dotenv**: Module for loading environment variables from a `.env` file.
   - **Node Limits**: Module for managing file uploads and request limits.
   - **JWT (jsonwebtoken)**: Library for handling authentication with JSON Web Tokens.
+  - **Nodemailer** is a library for sending emails in Node.js applications.
 
 - **Frontend:**
   - **React**: JavaScript library for building user interfaces.
@@ -74,48 +75,42 @@ all-test
 ## Folder structure
 
 ```
-└── 📁BookingEvent
-    └── 📁.github
-        └── 📁workflows
-            └── deploy.yml
-            └── run-tests.yml
-    └── 📁.vscode
-        └── launch.json
-        └── tasks.json
-    └── 📁backend
-        └── 📁__mocks__
-            └── fileMock.js
-        └── 📁kubernetes
-            └── deployment.yaml
-            └── secret.yaml
-            └── service.yaml
-        └── 📁middleware
-            └── auth.js
-        └── 📁models
-            └── account.js
-            └── event.js
-        └── 📁routes
-            └── accountRoutes.js
-            └── adminRoutes.js
-            └── authRoutes.js
-            └── eventRoutes.js
-        └── 📁tests
-            └── event.test.js
-        └── .dockerignore
-        └── .env
-        └── .gitignore
-        └── .prettierignore
-        └── autocannonApiTest.md
-        └── default.conf
-        └── docker-compose.yml
-        └── Dockerfile
-        └── Dockerfile.nginx
-        └── eslint.config.mjs
-        └── nginx.conf
-        └── package-lock.json
-        └── package.json
-        └── server.js
-        └── ZAPToFix.md
+└── 📁backend
+    └── 📁__mocks__
+        └── fileMock.js
+    └── 📁kubernetes
+        └── deployment.yaml
+        └── secret.yaml
+        └── service.yaml
+    └── 📁middleware
+        └── auth.js
+    └── 📁models
+        └── account.js
+        └── event.js
+    └── 📁routes
+        └── accountRoutes.js
+        └── adminRoutes.js
+        └── authRoutes.js
+        └── eventRoutes.js
+    └── 📁services
+        └── emailService.js
+    └── 📁tests
+        └── event.test.js
+    └── .dockerignore
+    └── .env
+    └── .gitignore
+    └── .prettierignore
+    └── autocannonApiTest.md
+    └── default.conf
+    └── docker-compose.yml
+    └── Dockerfile
+    └── Dockerfile.nginx
+    └── eslint.config.mjs
+    └── nginx.conf
+    └── package-lock.json
+    └── package.json
+    └── server.js
+    └── ZAPToFix.md
 ```
 
 ```
@@ -137,6 +132,8 @@ all-test
             └── AuthContext.js
         └── 📁routes
             └── AdminAddEvent.js
+            └── ChangePassword.js
+            └── ForgotPassword.js
             └── Login.js
             └── Registration.js
             └── Unauthorized.js
@@ -162,7 +159,12 @@ all-test
 
 <br>
 
-![Screenshot 2024-08-05 193451](https://github.com/user-attachments/assets/4cc2faba-bf29-4f8a-8874-e4301c469e0c)
+
+![Screenshot 2024-08-25 223617](https://github.com/user-attachments/assets/662b8167-b060-460a-9efd-6fa7d0f8c23a)
+
+![Screenshot 2024-08-25 223612](https://github.com/user-attachments/assets/c3f23d55-30d9-4aae-874b-9ca7875c0741)
+
+![Screenshot 2024-08-25 223604](https://github.com/user-attachments/assets/4371732d-78cb-42d5-b19d-2469cb2dbb68)
 
 ![Screenshot 2024-08-05 193507](https://github.com/user-attachments/assets/82cc4bef-1c9f-408b-807e-e6a3ed9607a3)
 
