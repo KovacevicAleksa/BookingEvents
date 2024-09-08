@@ -17,6 +17,11 @@ import helmet from "helmet"; // Helmet middleware for setting various HTTP heade
 import nodeLimits from "limits"; // Limits middleware to control file upload and request sizes
 import bodyParser from "body-parser"; // Body parser for parsing incoming request bodies
 
+//import for chatRoutes
+import http from "http";
+import { Server } from "socket.io";
+import chatRoutes from "./routes/chatRoutes.js";
+
 // Import routes
 import authRoutes from "./routes/authRoutes.js";
 import accountRoutes from "./routes/accountRoutes.js";
@@ -25,6 +30,9 @@ import adminRoutes from "./routes/adminRoutes.js";
 
 // Initializing the Express application
 const app = express();
+
+// Create HTTP server using the Express app
+const httpServer = http.createServer(app);
 
 // Set the server port from environment variable or default to 8080
 const port = process.env.PORT || 8080;
@@ -61,6 +69,15 @@ const corsOptions = {
   credentials: true, // Allow cookies to be sent with requests
   optionsSuccessStatus: 200, // For legacy browser support
 };
+
+// Initialize Socket.IO
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://localhost:3000", // Replace with your React app's URL
+    methods: ["GET", "POST"],
+    credentials: true, // Allow credentials to be included in Socket.IO requests
+  },
+});
 
 app.use(cors(corsOptions));
 
@@ -112,11 +129,14 @@ app.use("/", accountRoutes); //GET /accounts, /accounts/:id, PATCH /edit/account
 app.use("/", eventRoutes); //GET /events, POST /create/event, PATCH /edit/event/:id, DELETE /remove/event/:id
 app.use("/", adminRoutes); //Admin routes (protected by adminAuth middleware)
 
+// New chat route using the initialized Socket.IO instance
+app.use("/api/chat", chatRoutes(io));
+
 // Connect to MongoDB and start the server
 mongoose
   .connect(dbURI)
   .then(() => {
-    app.listen(port, () => {
+    httpServer.listen(port, () => {
       console.log(`Server is running on port ${port}`); // Log the server port
       console.log("Connected to the database successfully"); // Log successful database connection
       console.log(`Server start time: ${new Date().toLocaleString()}`); // Log the server start time

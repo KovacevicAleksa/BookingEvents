@@ -7,6 +7,7 @@ import AdminAddEvent from "./routes/AdminAddEvent";
 import Unauthorized from "./routes/Unauthorized";
 import ForgotPassword from "./routes/ForgotPassword";
 import ChangePassword from "./routes/ChangePassword";
+import Chat from "./routes/Chat";
 import Header from "./Components/Header";
 import Card from "./Components/Card";
 import konferencija from "./Components/assets/Konferencija.jpg";
@@ -88,6 +89,7 @@ function App() {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/change-password/:id" element={<ChangePassword />} />
+      <Route path="/chat" element={<Chat />} />
       <Route
         path="/events"
         element={
