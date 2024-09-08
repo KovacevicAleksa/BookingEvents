@@ -28,6 +28,8 @@ const Chat = () => {
       if (userEmail) {
         newSocket.emit("user email", userEmail);
       }
+      // Join the specific room
+      newSocket.emit("join room", roomName);
     });
 
     // Event listener for receiving new chat messages
@@ -40,9 +42,10 @@ const Chat = () => {
     return () => {
       newSocket.off("connect");
       newSocket.off("chat message");
+      newSocket.emit("leave room", roomName);
       newSocket.close();
     };
-  }, []);
+  }, [roomName]);
 
   // Initialize the socket connection on component mount
   useEffect(() => {
@@ -55,8 +58,8 @@ const Chat = () => {
     e.preventDefault();
     // Emit the message if socket and message are valid
     if (socket && message) {
-      socket.emit("chat message", message);
-      setMessage(""); // Clear the input field after sending
+      socket.emit("chat message", { room: roomName, message: message });
+      setMessage("");
     }
   };
 
@@ -64,7 +67,7 @@ const Chat = () => {
     <div className="h-screen w-full flex flex-col">
       {/* Display room name in uppercase centered at the top */}
       <p className="text-center text-3xl font-bold py-4 bg-gray-800 text-white">
-        {roomName.toUpperCase()} {/* Display roomName in uppercase */}
+        {decodeURIComponent(roomName).toUpperCase()}
       </p>
       {/* Display the list of messages */}
       <ul className="flex-grow overflow-y-auto p-4 bg-gray-100">
