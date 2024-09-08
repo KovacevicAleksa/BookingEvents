@@ -89,7 +89,7 @@ function App() {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/change-password/:id" element={<ChangePassword />} />
-      <Route path="/chat" element={<Chat />} />
+      <Route path="/chat/:roomName" element={<Chat />} />{" "}
       <Route
         path="/events"
         element={

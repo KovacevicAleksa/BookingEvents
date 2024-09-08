@@ -40,6 +40,7 @@ function Login() {
       if (result.message === "Login successful") {
         const token = result.token;
         localStorage.setItem("accountid", result.account.id);
+        localStorage.setItem("userEmail", email); // Store email for chat
         login(token, result.account.isAdmin); // Call the login function from AuthContext
         navigate("/events"); // Navigate to the events page
       } else {
