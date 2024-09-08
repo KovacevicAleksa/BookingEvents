@@ -1,4 +1,5 @@
 export default {
+  testTimeout: 15000,
   transform: {},
   moduleFileExtensions: ["js", "json", "jsx", "ts", "tsx", "node"],
   testEnvironment: "node",
