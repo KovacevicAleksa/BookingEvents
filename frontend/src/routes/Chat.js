@@ -11,10 +11,9 @@ const Chat = () => {
   const [message, setMessage] = useState("");
   // State to manage the list of chat messages
   const [messages, setMessages] = useState([]);
+  const [activeUsers, setActiveUsers] = useState(0);
 
-  // Function to initialize the socket connection
   const initializeSocket = useCallback(() => {
-    // Create a new socket connection
     const newSocket = io("http://localhost:8081", {
       withCredentials: true,
     });
@@ -38,10 +37,14 @@ const Chat = () => {
       setMessages((prev) => [...prev, { text: msg.text, sender: msg.email }]);
     });
 
-    // Cleanup function to be called on component unmount
+    newSocket.on("active users", (count) => {
+      setActiveUsers(count);
+    });
+
     return () => {
       newSocket.off("connect");
       newSocket.off("chat message");
+      newSocket.off("active users");
       newSocket.emit("leave room", roomName);
       newSocket.close();
     };
@@ -65,11 +68,12 @@ const Chat = () => {
 
   return (
     <div className="h-screen w-full flex flex-col">
-      {/* Display room name in uppercase centered at the top */}
-      <p className="text-center text-3xl font-bold py-4 bg-gray-800 text-white">
-        {decodeURIComponent(roomName).toUpperCase()}
-      </p>
-      {/* Display the list of messages */}
+      <div className="flex justify-between items-center bg-gray-800 text-white py-4 px-6">
+        <p className="text-3xl font-bold">
+          {decodeURIComponent(roomName).toUpperCase()}
+        </p>
+        <p className="text-lg">Active Users: {activeUsers}</p>
+      </div>
       <ul className="flex-grow overflow-y-auto p-4 bg-gray-100">
         {messages.map((msg, index) => (
           <li key={index} className="mb-2 p-2 border-b border-gray-300">
