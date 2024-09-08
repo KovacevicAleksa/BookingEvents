@@ -4,6 +4,9 @@ import { useAuth } from "../context/AuthContext";
 function Card(props) {
   // State to track the total number of people registered for the event
   const [totalPeople, setTotalPeople] = useState(props.totalPeople);
+
+  const [isHovered, setIsHovered] = useState(false);
+
   // Get the current logged-in user from the authentication context
   const { user } = useAuth();
 
@@ -207,8 +210,16 @@ function Card(props) {
   return (
     <div className="rounded overflow-hidden shadow-lg flex flex-col">
       <div className="relative">
-        <a href="/events">
-          <img className="w-full" src={props.photo} alt="Conference" />
+        <a
+          href={`http://localhost:3000/chat/${props.title}`}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <img
+            className="w-full"
+            src={isHovered ? props.hoverPhoto : props.photo}
+            alt="Conference"
+          />
           <div className="hover:bg-transparent transition duration-300 absolute bottom-0 top-0 right-0 left-0 bg-gray-900 opacity-25"></div>
         </a>
         <a href="#!">

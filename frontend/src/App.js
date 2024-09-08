@@ -11,6 +11,8 @@ import Chat from "./routes/Chat";
 import Header from "./Components/Header";
 import Card from "./Components/Card";
 import konferencija from "./Components/assets/Konferencija.jpg";
+import hoverPhoto from "./Components/assets/hoverPhoto.gif";
+
 import { useAuth } from "./context/AuthContext";
 
 // Data component to display events
@@ -55,6 +57,7 @@ function Data() {
               description={event.description}
               location={event.location}
               photo={konferencija}
+              hoverPhoto={hoverPhoto}
               attendees={`${event.totalPeople}/${event.maxPeople}`}
               date={event.date}
               eventId={event._id}
