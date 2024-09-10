@@ -34,8 +34,8 @@ const Chat = () => {
 
     // Event listener for receiving new chat messages
     newSocket.on("chat message", (msg) => {
-      // Update state with the new message
-      setMessages((prev) => [...prev, { text: msg.text, sender: msg.email }]);
+      // Update state with the new message, including the current timestamp
+      setMessages((prev) => [...prev, { ...msg, timestamp: new Date() }]);
     });
 
     newSocket.on("active users", (count) => {
@@ -103,44 +103,72 @@ const Chat = () => {
     fetchAccountData();
   }, [fetchAccountData]);
 
+  // Helper function to format the timestamp
+  const formatTime = (date) => {
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
   return (
-    <div className="h-screen w-full flex flex-col">
-      <div className="flex justify-between items-center bg-gray-800 text-white py-4 px-6">
-        <p className="text-3xl font-bold">
-          {decodeURIComponent(roomName).toUpperCase()}
-        </p>
-        <p className="text-lg">Active Users: {activeUsers}</p>
+    <div className="h-screen w-full flex flex-col bg-gray-100">
+      {/* Header */}
+      <div className="bg-indigo-600 text-white py-4 px-6 shadow-md">
+        <div className="container mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-bold">
+            {decodeURIComponent(roomName).toUpperCase()}
+          </h1>
+          <p className="text-sm bg-indigo-500 px-3 py-1 rounded-full">
+            Active Users: {activeUsers}
+          </p>
+        </div>
       </div>
-      <ul className="flex-grow overflow-y-auto p-4 bg-gray-100">
+
+      {/* Message List */}
+      <ul className="flex-grow overflow-y-auto p-4 bg-gray-200">
         {messages.map((msg, index) => (
-          <li key={index} className="mb-2 p-2 border-b border-gray-300">
-            <strong>
-              {accountData.isAdmin ? (
-                <span style={{ color: "red", backgroundColor: "black" }}>
-                  [ADMIN]
-                </span>
-              ) : (
-                ""
-              )}{" "}
-              {accountData.isAdmin ? "" : msg.sender}:
-            </strong>{" "}
-            {msg.text}
+          <li
+            key={index}
+            className="mb-2 p-3 border rounded-lg shadow-sm bg-white"
+          >
+            <div className="flex items-center mb-1">
+              {accountData?.isAdmin && (
+                <span className="text-red-600 font-bold mr-2">[ADMIN]</span>
+              )}
+              <strong
+                className={
+                  accountData?.isAdmin ? "text-red-600" : "text-blue-700"
+                }
+              >
+                {accountData?.isAdmin ? "Admin" : msg.sender}:
+              </strong>
+            </div>
+            <p className="mb-1 text-gray-700">{msg.text}</p>
+            <span className="text-xs text-gray-500">
+              {formatTime(msg.timestamp)}
+            </span>
           </li>
         ))}
       </ul>
-      {/* Form to send a new message */}
-      <form onSubmit={sendMessage} className="bg-gray-800 p-4 flex">
-        <input
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          className="flex-grow p-2 border rounded-l"
-          placeholder="Type a message..."
-        />
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded-r">
-          Send
-        </button>
-      </form>
+
+      {/* Message Input */}
+      <div className="bg-white border-t border-gray-200 px-4 py-4">
+        <div className="container mx-auto">
+          <form onSubmit={sendMessage} className="flex space-x-4">
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              placeholder="Type a message..."
+            />
+            <button
+              type="submit"
+              className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition duration-300"
+            >
+              Send
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };
