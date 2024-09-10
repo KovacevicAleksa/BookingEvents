@@ -12,7 +12,7 @@ const Chat = () => {
   // State to manage the list of chat messages
   const [messages, setMessages] = useState([]);
   const [activeUsers, setActiveUsers] = useState(0);
-  const [accountData, setAccountData] = useState(null);
+  // const [accountData, setAccountData] = useState(null);
 
   const initializeSocket = useCallback(() => {
     const newSocket = io("http://localhost:8081", {
@@ -68,40 +68,40 @@ const Chat = () => {
   };
 
   // New function to fetch account data
-  const fetchAccountData = useCallback(async () => {
-    try {
-      const accountId = localStorage.getItem("accountid"); // Assuming you store the account ID in localStorage
-      if (!accountId) {
-        console.log("No account ID found in localStorage");
-        return;
-      }
+  // const fetchAccountData = useCallback(async () => {
+  //   try {
+  //     const accountId = localStorage.getItem("accountid"); // Assuming you store the account ID in localStorage
+  //     if (!accountId) {
+  //       console.log("No account ID found in localStorage");
+  //       return;
+  //     }
 
-      const response = await fetch(
-        `http://localhost:8081/accounts/${accountId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // Assuming you store the auth token in localStorage
-          },
-        }
-      );
+  //     const response = await fetch(
+  //       `http://localhost:8081/accounts/${accountId}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${localStorage.getItem("token")}`, // Assuming you store the auth token in localStorage
+  //         },
+  //       }
+  //     );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch account data");
-      }
+  //     if (!response.ok) {
+  //       throw new Error("Failed to fetch account data");
+  //     }
 
-      const data = await response.json();
-      setAccountData(data);
-      console.log("Account data:", data);
-      //console.log(data);
-    } catch (error) {
-      console.error("Error fetching account data:", error);
-    }
-  }, []);
+  //     const data = await response.json();
+  //     setAccountData(data);
+  //     console.log("Account data:", data.isAdmin);
+  //     //console.log(data);
+  //   } catch (error) {
+  //     console.error("Error fetching account data:", error);
+  //   }
+  // }, []);
 
-  // Call fetchAccountData when the component mounts
-  useEffect(() => {
-    fetchAccountData();
-  }, [fetchAccountData]);
+  // // Call fetchAccountData when the component mounts
+  // useEffect(() => {
+  //   fetchAccountData();
+  // }, [fetchAccountData]);
 
   // Helper function to format the timestamp
   const formatTime = (date) => {
@@ -130,16 +130,7 @@ const Chat = () => {
             className="mb-2 p-3 border rounded-lg shadow-sm bg-white"
           >
             <div className="flex items-center mb-1">
-              {accountData?.isAdmin && (
-                <span className="text-red-600 font-bold mr-2">[ADMIN]</span>
-              )}
-              <strong
-                className={
-                  accountData?.isAdmin ? "text-red-600" : "text-blue-700"
-                }
-              >
-                {accountData?.isAdmin ? "Admin" : msg.sender}:
-              </strong>
+              <strong className={"text-blue-700"}>{msg.email}:</strong>
             </div>
             <p className="mb-1 text-gray-700">{msg.text}</p>
             <span className="text-xs text-gray-500">
