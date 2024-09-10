@@ -18,10 +18,15 @@ import { useAuth } from "./context/AuthContext";
 // Data component to display events
 function Data() {
   const [eventData, setEventData] = React.useState([]);
-  const { user } = useAuth();
+  const { user, checkTokenExpiration, logout } = useAuth();
 
   React.useEffect(() => {
     const fetchData = async () => {
+      // Check if the token has expired before making the API call
+      if (!checkTokenExpiration()) {
+        return; // Token has expired, don't make the API call
+      }
+
       try {
         const response = await fetch("http://localhost:8081/view/events", {
           method: "GET",
@@ -32,6 +37,11 @@ function Data() {
         });
 
         if (!response.ok) {
+          if (response.status === 401) {
+            // Unauthorized, token might have expired
+            logout();
+            return;
+          }
           throw new Error("Network problem");
         }
 
@@ -42,49 +52,45 @@ function Data() {
       }
     };
 
-    fetchData();
-  }, [user.token]);
+    if (user && user.token) {
+      fetchData();
+    }
+  }, [user, checkTokenExpiration, logout]);
 
   return (
-    <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-        {Array.isArray(eventData) &&
-          eventData.map((event, index) => (
-            <Card
-              key={event.id}
-              price={event.price}
-              title={event.title}
-              description={event.description}
-              location={event.location}
-              photo={konferencija}
-              hoverPhoto={hoverPhoto}
-              attendees={`${event.totalPeople}/${event.maxPeople}`}
-              date={event.date}
-              eventId={event._id}
-              totalPeople={event.totalPeople}
-            />
-          ))}
-      </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+      {Array.isArray(eventData) &&
+        eventData.map((event) => (
+          <Card
+            key={event._id}
+            price={event.price}
+            title={event.title}
+            description={event.description}
+            location={event.location}
+            photo={konferencija}
+            hoverPhoto={hoverPhoto}
+            attendees={`${event.totalPeople}/${event.maxPeople}`}
+            date={event.date}
+            eventId={event._id}
+            totalPeople={event.totalPeople}
+          />
+        ))}
     </div>
   );
 }
 
-// Events component to wrap the Data component and Header
 export function Events() {
-  const { user } = useAuth();
+  const { logout, user } = useAuth();
 
   return (
     <div>
-      <Header userEmail={user.email} />
+      <Header userEmail={user?.email} onLogout={logout} />
       <Data />
     </div>
   );
 }
 
-// Main App component with Routes
 function App() {
-  const { user } = useAuth();
-
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
@@ -92,16 +98,12 @@ function App() {
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/change-password/:id" element={<ChangePassword />} />
-      <Route path="/chat/:roomName" element={<Chat />} />{" "}
+      <Route path="/chat/:roomName" element={<Chat />} />
       <Route
         path="/events"
         element={
           <PrivateRoute>
-            {user && user.isAdmin ? (
-              <Navigate to="/admin/addEvent" />
-            ) : (
-              <Events />
-            )}
+            <Events />
           </PrivateRoute>
         }
       />
@@ -113,8 +115,8 @@ function App() {
           </PrivateRoute>
         }
       />
-      <Route path="/" element={<Login />} />
-      <Route path="*" element={<Navigate to="/login" />} />
+      <Route path="/" element={<Navigate to="/events" />} />
+      <Route path="*" element={<Navigate to="/events" />} />
     </Routes>
   );
 }
