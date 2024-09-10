@@ -12,6 +12,7 @@ const Chat = () => {
   // State to manage the list of chat messages
   const [messages, setMessages] = useState([]);
   const [activeUsers, setActiveUsers] = useState(0);
+  const [accountData, setAccountData] = useState(null);
 
   const initializeSocket = useCallback(() => {
     const newSocket = io("http://localhost:8081", {
@@ -66,6 +67,42 @@ const Chat = () => {
     }
   };
 
+  // New function to fetch account data
+  const fetchAccountData = useCallback(async () => {
+    try {
+      const accountId = localStorage.getItem("accountid"); // Assuming you store the account ID in localStorage
+      if (!accountId) {
+        console.log("No account ID found in localStorage");
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:8081/accounts/${accountId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // Assuming you store the auth token in localStorage
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch account data");
+      }
+
+      const data = await response.json();
+      setAccountData(data);
+      console.log("Account data:", data);
+      //console.log(data);
+    } catch (error) {
+      console.error("Error fetching account data:", error);
+    }
+  }, []);
+
+  // Call fetchAccountData when the component mounts
+  useEffect(() => {
+    fetchAccountData();
+  }, [fetchAccountData]);
+
   return (
     <div className="h-screen w-full flex flex-col">
       <div className="flex justify-between items-center bg-gray-800 text-white py-4 px-6">
@@ -77,7 +114,17 @@ const Chat = () => {
       <ul className="flex-grow overflow-y-auto p-4 bg-gray-100">
         {messages.map((msg, index) => (
           <li key={index} className="mb-2 p-2 border-b border-gray-300">
-            <strong>{msg.sender}:</strong> {msg.text}
+            <strong>
+              {accountData.isAdmin ? (
+                <span style={{ color: "red", backgroundColor: "black" }}>
+                  [ADMIN]
+                </span>
+              ) : (
+                ""
+              )}{" "}
+              {accountData.isAdmin ? "" : msg.sender}:
+            </strong>{" "}
+            {msg.text}
           </li>
         ))}
       </ul>
