@@ -19,6 +19,7 @@ This is an Event Management System that allows users to register and log in secu
   - **Node Limits**: Module for managing file uploads and request limits.
   - **JWT (jsonwebtoken)**: Library for handling authentication with JSON Web Tokens.
   - **Nodemailer** is a library for sending emails in Node.js applications.
+  - Socket.IO: Library for real-time and live chat functionality.
 
 - **Frontend:**
 
