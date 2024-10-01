@@ -201,6 +201,8 @@ function Card(props) {
         console.log("Event ID not found in user's events.");
       } else if (isExpired) {
         alert("Event je istekao");
+      } else if (totalPeople >= props.maxPeople) {
+        alert("Event is fully booked");
       }
     } catch (error) {
       console.error("Error handling delete event:", error);
@@ -227,7 +229,7 @@ function Card(props) {
             {props.price}
           </div>
           <div className="text-l absolute top-0 left-0 bg-indigo-600 px-4 py-2 text-white mt-3 hover:bg-white hover:text-indigo-600 transition duration-500 ease-in-out">
-            {totalPeople}
+            {props.attendees}
           </div>
         </a>
       </div>
