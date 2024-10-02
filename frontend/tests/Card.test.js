@@ -14,7 +14,7 @@ jest.mock("../src/context/AuthContext", () => ({
 test("renders Card component with given props", () => {
   // Define the props to be passed to the Card component
   const props = {
-    totalPeople: 5,
+    attendees: "5 / 30",
     date: "2024-08-15",
     price: "500 RSD",
     title: "React Conference",
@@ -34,6 +34,6 @@ test("renders Card component with given props", () => {
   ).toBeInTheDocument(); // Check description
   expect(screen.getByText("500 RSD")).toBeInTheDocument(); // Check price
   expect(screen.getByText("Belgrade")).toBeInTheDocument(); // Check location
-  expect(screen.getByText("5")).toBeInTheDocument(); // Check totalPeople
+  expect(screen.getByText("5 / 30")).toBeInTheDocument(); // Check totalPeople
   expect(screen.getByAltText("Conference")).toBeInTheDocument(); // Check alt text for image
 });
