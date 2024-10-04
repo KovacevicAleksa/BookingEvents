@@ -69,7 +69,7 @@ function Data() {
             location={event.location}
             photo={konferencija}
             hoverPhoto={hoverPhoto}
-            attendees={`${event.totalPeople}/${event.maxPeople}`}
+            attendees={`/${event.maxPeople}`}
             date={event.date}
             eventId={event._id}
             totalPeople={event.totalPeople}

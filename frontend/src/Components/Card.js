@@ -52,6 +52,36 @@ function Card(props) {
     }
   }
 
+  // Function to fetch user account data
+  async function fetchAccountData(accountId) {
+    try {
+      const response = await fetch(
+        `http://localhost:8081/accounts/${accountId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          `Network response was not ok: ${
+            errorData.message || response.statusText
+          }`
+        );
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error("Error fetching account data:", error);
+      throw error;
+    }
+  }
+
   // Function to update the total number of people for the event
   const updateTotalPeople = async (
     eventId,
@@ -64,27 +94,7 @@ function Card(props) {
       console.log(accountId);
 
       // Fetch the current user's events to check if they are already registered
-      const accountFetchEvent = await fetch(
-        `http://localhost:8081/accounts/${accountId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-        }
-      );
-
-      if (!accountFetchEvent.ok) {
-        const errorData = await accountFetchEvent.json();
-        throw new Error(
-          `Network response was not ok: ${
-            errorData.message || accountFetchEvent.statusText
-          }`
-        );
-      }
-
-      const data = await accountFetchEvent.json();
+      const data = await fetchAccountData(accountId);
       console.log("Sadrzaj korisnikovih eventa:", data.events);
 
       // If the user is not already registered for the event
@@ -124,22 +134,7 @@ function Card(props) {
   // Function to fetch the events of a specific user account
   async function fetchAccountEvents(accountId, eventId) {
     try {
-      const accountFetchEvent = await fetch(
-        `http://localhost:8081/accounts/${accountId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-        }
-      );
-
-      if (!accountFetchEvent.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const data = await accountFetchEvent.json();
+      const data = await fetchAccountData(accountId);
       console.log("Sadrzaj korisnikovih eventa:", data.events);
       return data.events.includes(eventId);
     } catch (error) {
@@ -229,6 +224,7 @@ function Card(props) {
             {props.price}
           </div>
           <div className="text-l absolute top-0 left-0 bg-indigo-600 px-4 py-2 text-white mt-3 hover:bg-white hover:text-indigo-600 transition duration-500 ease-in-out">
+            {totalPeople}
             {props.attendees}
           </div>
         </a>
