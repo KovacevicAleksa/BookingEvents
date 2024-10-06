@@ -35,7 +35,7 @@ const app = express();
 const httpServer = http.createServer(app);
 
 // Set the server port from environment variable or default to 8080
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8081;
 
 // MongoDB connection URI from environment variables
 const dbURI = process.env.MONGODB_URI;
@@ -138,7 +138,7 @@ mongoose
   .then(() => {
     httpServer.listen(port, () => {
       console.log(`Server is running on port ${port}`); // Log the server port
-      console.log("Connected to the database successfully"); // Log successful database connection
+      console.log("Successfully connected to the MongoDB"); // Log successful database connection
       console.log(`Server start time: ${new Date().toLocaleString()}`); // Log the server start time
     });
   })

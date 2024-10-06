@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
-import io from "socket.io-client";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react"; // Import necessary hooks from React
+import io from "socket.io-client"; // Import Socket.IO client
+import { useParams } from "react-router-dom"; // Import useParams to get URL parameters
 
 const Chat = () => {
   // Get roomName from URL parameters
@@ -11,14 +11,16 @@ const Chat = () => {
   const [message, setMessage] = useState("");
   // State to manage the list of chat messages
   const [messages, setMessages] = useState([]);
+  // State to manage the number of active users in the chat
   const [activeUsers, setActiveUsers] = useState(0);
-  // const [accountData, setAccountData] = useState(null);
 
+  // Initialize the socket connection and set up event listeners
   const initializeSocket = useCallback(() => {
-    const newSocket = io("http://localhost:8081", {
+    // Create a new socket connection
+    const newSocket = io(`http://localhost:8081`, {
       withCredentials: true,
     });
-    setSocket(newSocket);
+    setSocket(newSocket); // Store the socket connection in state
 
     // Event listener for successful connection
     newSocket.on("connect", () => {
@@ -26,7 +28,7 @@ const Chat = () => {
       // Emit user email if available in localStorage
       const userEmail = localStorage.getItem("userEmail");
       if (userEmail) {
-        newSocket.emit("user email", userEmail);
+        newSocket.emit("user email", userEmail); // Send user email to the server
       }
       // Join the specific room
       newSocket.emit("join room", roomName);
@@ -34,78 +36,57 @@ const Chat = () => {
 
     // Event listener for receiving new chat messages
     newSocket.on("chat message", (msg) => {
-      // Update state with the new message, including the current timestamp
-      setMessages((prev) => [...prev, { ...msg, timestamp: new Date() }]);
+      setMessages((prev) => [...prev, msg]); // Update the message list with new messages
     });
 
+    // Event listener for active user count
     newSocket.on("active users", (count) => {
-      setActiveUsers(count);
+      setActiveUsers(count); // Update the count of active users
     });
 
+    // Event listener for receiving previous messages
+    newSocket.on("previous messages", (prevMessages) => {
+      console.log("Received previous messages:", prevMessages);
+      setMessages(
+        prevMessages.map((msg) => ({
+          text: msg.message, // Map the previous messages to the expected format
+          email: msg.email,
+          timestamp: new Date(msg.timestamp), // Convert timestamp to a Date object
+        }))
+      );
+    });
+
+    // Cleanup function to remove event listeners and disconnect socket
     return () => {
       newSocket.off("connect");
       newSocket.off("chat message");
       newSocket.off("active users");
-      newSocket.emit("leave room", roomName);
-      newSocket.close();
+      newSocket.off("previous messages");
+      newSocket.emit("leave room", roomName); // Leave the room when component unmounts
+      newSocket.close(); // Close the socket connection
     };
-  }, [roomName]);
+  }, [roomName]); // Re-run this effect when roomName changes
 
   // Initialize the socket connection on component mount
   useEffect(() => {
     const cleanup = initializeSocket();
-    return cleanup;
+    return cleanup; // Return cleanup function
   }, [initializeSocket]);
 
   // Function to handle sending a message
   const sendMessage = (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent default form submission
     // Emit the message if socket and message are valid
     if (socket && message) {
-      socket.emit("chat message", { room: roomName, message: message });
-      setMessage("");
+      socket.emit("chat message", { room: roomName, message: message }); // Send the message to the server
+      setMessage(""); // Clear the message input
     }
   };
 
-  // New function to fetch account data
-  // const fetchAccountData = useCallback(async () => {
-  //   try {
-  //     const accountId = localStorage.getItem("accountid"); // Assuming you store the account ID in localStorage
-  //     if (!accountId) {
-  //       console.log("No account ID found in localStorage");
-  //       return;
-  //     }
-
-  //     const response = await fetch(
-  //       `http://localhost:8081/accounts/${accountId}`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${localStorage.getItem("token")}`, // Assuming you store the auth token in localStorage
-  //         },
-  //       }
-  //     );
-
-  //     if (!response.ok) {
-  //       throw new Error("Failed to fetch account data");
-  //     }
-
-  //     const data = await response.json();
-  //     setAccountData(data);
-  //     console.log("Account data:", data.isAdmin);
-  //     //console.log(data);
-  //   } catch (error) {
-  //     console.error("Error fetching account data:", error);
-  //   }
-  // }, []);
-
-  // // Call fetchAccountData when the component mounts
-  // useEffect(() => {
-  //   fetchAccountData();
-  // }, [fetchAccountData]);
-
-  // Helper function to format the timestamp
-  const formatTime = (date) => {
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  // Function to format timestamp into a readable time string
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp); // Convert timestamp to a Date object
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); // Format time
   };
 
   return (
@@ -114,10 +95,11 @@ const Chat = () => {
       <div className="bg-indigo-600 text-white py-4 px-6 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">
-            {decodeURIComponent(roomName).toUpperCase()}
+            {decodeURIComponent(roomName).toUpperCase()}{" "}
+            {/* Display room name */}
           </h1>
           <p className="text-sm bg-indigo-500 px-3 py-1 rounded-full">
-            Active Users: {activeUsers}
+            Active Users: {activeUsers} {/* Show count of active users */}
           </p>
         </div>
       </div>
@@ -130,11 +112,12 @@ const Chat = () => {
             className="mb-2 p-3 border rounded-lg shadow-sm bg-white"
           >
             <div className="flex items-center mb-1">
-              <strong className={"text-blue-700"}>{msg.email}:</strong>
+              <strong className="text-blue-700">{msg.email}:</strong>
             </div>
-            <p className="mb-1 text-gray-700">{msg.text}</p>
+            <p className="mb-1 text-gray-700">{msg.text || msg.message}</p>
             <span className="text-xs text-gray-500">
-              {formatTime(msg.timestamp)}
+              {formatTime(msg.timestamp)}{" "}
+              {/* Format and display message timestamp */}
             </span>
           </li>
         ))}
@@ -147,15 +130,15 @@ const Chat = () => {
             <input
               type="text"
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={(e) => setMessage(e.target.value)} // Update message state on input change
               className="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Type a message..."
+              placeholder="Type a message..." // Placeholder for the input field
             />
             <button
               type="submit"
               className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition duration-300"
             >
-              Send
+              Send {/* Button to send the message */}
             </button>
           </form>
         </div>
@@ -164,4 +147,4 @@ const Chat = () => {
   );
 };
 
-export default Chat;
+export default Chat; // Export the Chat component
