@@ -41,6 +41,11 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: EMAIL_PASS # Key in the secret to use for the value
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: DATABASE_URL # Key in the secret to use for the value
           resources: # Specifies resource requests and limits
             requests:
               cpu: 100m # Requests 100 milliCPU (0.1 CPU)
