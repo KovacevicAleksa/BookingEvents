@@ -35,7 +35,7 @@ const app = express();
 const httpServer = http.createServer(app);
 
 // Set the server port from environment variable or default to 8080
-const port = process.env.PORT || 8081;
+const port = process.env.PORT || 8080;
 
 // MongoDB connection URI from environment variables
 const dbURI = process.env.MONGODB_URI;

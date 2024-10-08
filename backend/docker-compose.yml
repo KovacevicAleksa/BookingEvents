@@ -1,8 +1,15 @@
+version: "3.8" # Specify the version of docker-compose
+
 networks:
   frontend:
     driver: bridge # Uses the bridge driver for the frontend network
   backend:
     driver: bridge # Uses the bridge driver for the backend network
+
+# Define volumes for persistent storage
+volumes:
+  pgdata: # Volume for persisting PostgreSQL data
+    driver: local # Uses local Docker storage for saving data
 
 services:
   express-api:
@@ -12,14 +19,22 @@ services:
     container_name: express-api # Names the container "express-api"
     expose:
       - "8080" # Exposes port 8080 to other services in the same network
+    ports:
+      - "8080:8080" # Maps port 8080 on the host to port 8080 on the container
     environment:
       - NODE_ENV=production # Sets the environment variable for Node.js to production
       - MONGODB_URI=${MONGODB_URI} # Sets the MongoDB URI from an environment variable
       - JWT_SECRET=${JWT_SECRET} # Sets the JWT secret from an environment variable
       - EMAIL_USER=${EMAIL_USER} # Sets the email user from an environment variable
       - EMAIL_PASS=${EMAIL_PASS} # Sets the email password from an environment variable
-      - DATABASE_URL=${DATABASE_URL} # Sets the DATABASE_URL from an environment variable
-
+      - PG_USER=${PG_USER} # Sets PostgreSQL user from an environment variable
+      - PG_PASS=${PG_PASS} # Sets PostgreSQL password from an environment variable
+      - PG_DB=${PG_DB} # Sets PostgreSQL database name from an environment variable
+      - PGADMIN_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_PASS=${PGADMIN_PASS}
+      - DATABASE_URL=${DATABASE_URL}
+    depends_on:
+      - postgres # Ensures the postgres service is started before express-api
     networks:
       - frontend # Connects to the frontend network
       - backend # Connects to the backend network
@@ -35,3 +50,28 @@ services:
       - express-api # Ensures the express-api service is started before nginx
     networks:
       - frontend # Connects to the frontend network
+
+  postgres:
+    image: postgres:latest # Use the latest PostgreSQL image
+    container_name: postgres # Names the container "postgres"
+    environment:
+      POSTGRES_USER: ${PG_USER} # Use environment variable for PostgreSQL user
+      POSTGRES_PASSWORD: ${PG_PASS} # Use environment variable for PostgreSQL password
+      POSTGRES_DB: ${PG_DB} # Use environment variable for PostgreSQL database name
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - backend # Connects to the backend network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest # Use the latest pgAdmin image
+    container_name: pgadmin # Names the container "pgadmin"
+    ports:
+      - "8082:80" # Maps port 8082 on the host to port 80 on the container
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL} # Sets the default email for pgAdmin
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASS} # Sets the default password for pgAdmin
+    depends_on:
+      - postgres # Ensures the postgres service is started before pgadmin
+    networks:
+      - backend # Connects to the backend network

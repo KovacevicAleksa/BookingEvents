@@ -39,7 +39,6 @@ jobs:
       - name: Run backend tests # Step to run tests for the backend
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }} # Sets MongoDB URI from GitHub Secrets
-          TEST_EMAIL: ${{ secrets.TEST_EMAIL }} # Sets a test email from GitHub Secrets
           JWT_SECRET: ${{ secrets.JWT_SECRET }} # Sets JWT secret from GitHub Secrets
         run: npm test --prefix ./backend # Runs 'npm test' in the 'backend' folder
 
