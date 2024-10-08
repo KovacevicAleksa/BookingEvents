@@ -51,7 +51,7 @@ const Chat = () => {
         prevMessages.map((msg) => ({
           text: msg.message, // Map the previous messages to the expected format
           email: msg.email,
-          timestamp: new Date(msg.timestamp), // Convert timestamp to a Date object
+          timestamp: new Date(msg.created_at), // Convert timestamp to a Date object
         }))
       );
     });
