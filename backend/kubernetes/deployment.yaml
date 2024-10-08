@@ -1,31 +1,108 @@
-apiVersion: apps/v1 # Specifies the API version for the Deployment resource
-kind: Deployment # Defines the type of Kubernetes resource (Deployment)
+# Persistent Volume for PostgreSQL
+apiVersion: v1
+kind: PersistentVolume
 metadata:
-  name: express-api # Name of the Deployment resource
-
+  name: postgres-storage
 spec:
-  replicas: 1 # Number of pod replicas to run
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/postgres
+
+---
+# Persistent Volume Claim for PostgreSQL
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# PostgreSQL Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+spec:
+  replicas: 1
   selector:
     matchLabels:
-      app: express-api # Selector to match the pods with this label
-
+      app: postgres
   template:
     metadata:
       labels:
-        app: express-api # Labels applied to the pod template
-
+        app: postgres
     spec:
       containers:
-        - name: express-api # Name of the container
-          image: kovacevicaleksa/express-api:latest # Docker image for the container
+        - name: postgres
+          image: postgres:latest
           ports:
-            - containerPort: 8080 # Exposes port 8080 in the container
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: PG_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: PG_PASS
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: PG_DB
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-storage
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        - name: postgres-storage
+          persistentVolumeClaim:
+            claimName: postgres-storage
+
+---
+# Express API Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: express-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: express-api
+  template:
+    metadata:
+      labels:
+        app: express-api
+    spec:
+      containers:
+        - name: express-api
+          image: kovacevicaleksa/express-api:latest
+          ports:
+            - containerPort: 8080
           env:
             - name: MONGODB_URI
               valueFrom:
                 secretKeyRef:
-                  name: secrets # References a secret named 'secrets'
-                  key: uri # Key in the secret to use for the value
+                  name: secrets
+                  key: uri
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
@@ -35,51 +112,99 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: secrets
-                  key: EMAIL_USER # Key in the secret to use for the value
+                  key: EMAIL_USER
             - name: EMAIL_PASS
               valueFrom:
                 secretKeyRef:
                   name: secrets
-                  key: EMAIL_PASS # Key in the secret to use for the value
-            - name: DATABASE_URL
+                  key: EMAIL_PASS
+            - name: PG_USER
               valueFrom:
                 secretKeyRef:
                   name: secrets
-                  key: DATABASE_URL # Key in the secret to use for the value
-          resources: # Specifies resource requests and limits
+                  key: PG_USER
+            - name: PG_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: PG_PASS
+            - name: PG_DB
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: PG_DB
+          resources: # Adding resource requests and limits
             requests:
-              cpu: 100m # Requests 100 milliCPU (0.1 CPU)
-              memory: 128Mi # Requests 128Mi of memory
+              cpu: 100m # Minimum CPU requested
+              memory: 128Mi # Minimum memory requested
             limits:
-              cpu: 500m # Limits CPU usage to 500 milliCPU (0.5 CPU)
-              memory: 256Mi # Limits memory usage to 256Mi
----
-apiVersion: apps/v1 # Specifies the API version for the Deployment resource
-kind: Deployment # Defines the type of Kubernetes resource (Deployment)
-metadata:
-  name: nginx # Name of the Deployment resource
+              cpu: 500m # Maximum CPU allowed
+              memory: 256Mi # Maximum memory allowed
 
+---
+# Nginx Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
 spec:
-  replicas: 1 # Number of pod replicas to run
+  replicas: 1
   selector:
     matchLabels:
-      app: nginx # Selector to match the pods with this label
-
+      app: nginx
   template:
     metadata:
       labels:
-        app: nginx # Labels applied to the pod template
-
+        app: nginx
     spec:
       containers:
-        - name: nginx # Name of the container
-          image: kovacevicaleksa/express-nginx:latest # Docker image for the container
+        - name: nginx
+          image: kovacevicaleksa/express-nginx:latest
           ports:
-            - containerPort: 8081 # Exposes port 8081 in the container
-          resources: # Specifies resource requests and limits
+            - containerPort: 8081
+          resources: # Adding resource requests and limits
             requests:
-              cpu: 100m # Requests 100 milliCPU (0.1 CPU)
-              memory: 64Mi # Requests 64Mi of memory
+              cpu: 100m # Minimum CPU requested
+              memory: 64Mi # Minimum memory requested
             limits:
-              cpu: 200m # Limits CPU usage to 200 milliCPU (0.2 CPU)
-              memory: 128Mi # Limits memory usage to 128Mi
+              cpu: 200m # Maximum CPU allowed
+              memory: 128Mi # Maximum memory allowed
+---
+# pgAdmin Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      containers:
+        - name: pgadmin
+          image: dpage/pgadmin4:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: PGADMIN_EMAIL
+            - name: PGADMIN_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secrets
+                  key: PGADMIN_PASS
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"

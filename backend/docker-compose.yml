@@ -30,6 +30,7 @@ services:
       - PG_USER=${PG_USER} # Sets PostgreSQL user from an environment variable
       - PG_PASS=${PG_PASS} # Sets PostgreSQL password from an environment variable
       - PG_DB=${PG_DB} # Sets PostgreSQL database name from an environment variable
+      - PG_HOST:${PG_HOST}
       - PGADMIN_EMAIL=${PGADMIN_EMAIL}
       - PGADMIN_PASS=${PGADMIN_PASS}
       - DATABASE_URL=${DATABASE_URL}
