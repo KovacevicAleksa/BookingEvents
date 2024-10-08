@@ -22,102 +22,149 @@ pool.query("SELECT NOW()", (err, res) => {
   }
 });
 
-// Exporting a function that takes io as a parameter
 export default function (io) {
   const rooms = new Map(); // Map to keep track of rooms and connected users
 
-  // Helper function to save messages to the database
-  async function saveMessage(room, email, message) {
-    const query =
-      "INSERT INTO messages (room, email, message, timestamp) VALUES ($1, $2, $3, NOW())"; // SQL query to insert a message
+  // Helper function to get or create a user
+  async function getOrCreateUser(email) {
+    const query = `
+      INSERT INTO message_system.users (email)
+      VALUES ($1)
+      ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
+      RETURNING user_id
+    `;
     try {
-      await pool.query(query, [room, email, message]); // Execute the query
-      console.log(`Saved message in room ${room} from ${email}`); // Log success message
+      const result = await pool.query(query, [email]);
+      return result.rows[0].user_id;
     } catch (error) {
-      console.error("Error saving message:", error); // Log error if saving fails
+      console.error("Error getting or creating user:", error);
+      return null;
+    }
+  }
+
+  // Helper function to get or create a room
+  async function getOrCreateRoom(roomName) {
+    const query = `
+      INSERT INTO message_system.rooms (room_name)
+      VALUES ($1)
+      ON CONFLICT (room_name) DO UPDATE SET room_name = EXCLUDED.room_name
+      RETURNING room_id
+    `;
+    try {
+      const result = await pool.query(query, [roomName]);
+      return result.rows[0].room_id;
+    } catch (error) {
+      console.error("Error getting or creating room:", error);
+      throw error;
+    }
+  }
+
+  // Helper function to save messages to the database
+  async function saveMessage(roomId, userId, message) {
+    const query = `
+      INSERT INTO message_system.messages (message_id, room_id, user_id, message)
+      VALUES (gen_random_uuid(), $1, $2, $3)
+    `;
+    try {
+      await pool.query(query, [roomId, userId, message]);
+      console.log(`Saved message in room ${roomId} from user ${userId}`);
+    } catch (error) {
+      console.error("Error saving message:", error);
+      throw error; // Rethrow the error to be handled by the caller
     }
   }
 
   // Helper function to retrieve messages from the database
-  async function getMessages(room) {
-    const query =
-      "SELECT * FROM messages WHERE room = $1 ORDER BY timestamp ASC"; // SQL query to select messages from a room
+  async function getMessages(roomId) {
+    const query = `
+      SELECT m.message_id, m.message, m.created_at, u.email
+      FROM message_system.messages m
+      JOIN message_system.users u ON m.user_id = u.user_id
+      WHERE m.room_id = $1
+      ORDER BY m.created_at ASC
+    `;
     try {
-      const result = await pool.query(query, [room]); // Execute the query
-      return result.rows; // Return the retrieved messages
+      const result = await pool.query(query, [roomId]);
+      return result.rows;
     } catch (error) {
-      console.error("Error retrieving messages:", error); // Log error if retrieval fails
-      return []; // Return an empty array on error
+      console.error("Error retrieving messages:", error);
+      throw error;
     }
   }
 
   // Socket.io connection handler
-  io.on("connection", (socket) => {
+  io.on("connection", async (socket) => {
     console.log("New user connected"); // Log when a new user connects
 
+    let userId;
+    let roomId;
+
     // Get the user's email from the client
-    socket.on("user email", (email) => {
-      socket.userEmail = email; // Store the user's email in the socket
+    socket.on("user email", async (email) => {
+      userId = await getOrCreateUser(email);
+      socket.userEmail = email;
       console.log(`User ${email} connected`); // Log the connected user's email
     });
 
     // Handle joining a room
-    socket.on("join room", async (room) => {
-      socket.join(room); // Add socket to the specified room
-      if (!rooms.has(room)) {
-        rooms.set(room, new Set()); // Create a new Set for the room if it doesn't exist
+    socket.on("join room", async (roomName) => {
+      roomId = await getOrCreateRoom(roomName);
+      socket.join(roomId);
+      if (!rooms.has(roomId)) {
+        rooms.set(roomId, new Set()); // Create a new Set for the room if it doesn't exist
       }
-      rooms.get(room).add(socket.id); // Add the socket ID to the room's user set
+      rooms.get(roomId).add(socket.id); // Add the socket ID to the room's user set
       console.log(
-        `User ${socket.userEmail || "Anonymous"} joined room ${room}` // Log user joining the room
+        `User ${socket.userEmail || "Anonymous"} joined room ${roomName}`
       );
-      io.to(room).emit("active users", rooms.get(room).size); // Emit the number of active users in the room
+      io.to(roomId).emit("active users", rooms.get(roomId).size); // Emit the number of active users in the room
 
       // Send previous messages to the user
-      const messages = await getMessages(room); // Retrieve messages for the room
-      socket.emit("previous messages", messages); // Send previous messages to the user
+      const messages = await getMessages(roomId);
+      socket.emit("previous messages", messages);
     });
 
     // Handle leaving a room
-    socket.on("leave room", (room) => {
-      socket.leave(room); // Remove socket from the specified room
-      if (rooms.has(room)) {
-        rooms.get(room).delete(socket.id); // Remove the socket ID from the room's user set
-        if (rooms.get(room).size === 0) {
-          rooms.delete(room); // Delete the room if no users are left
+    socket.on("leave room", (roomName) => {
+      if (roomId && rooms.has(roomId)) {
+        socket.leave(roomId);
+        rooms.get(roomId).delete(socket.id); // Remove the socket ID from the room's user set
+        if (rooms.get(roomId).size === 0) {
+          rooms.delete(roomId); // Delete the room if no users are left
         } else {
-          io.to(room).emit("active users", rooms.get(room).size); // Emit the updated number of active users
+          io.to(roomId).emit("active users", rooms.get(roomId).size); // Emit the updated number of active users
         }
       }
-      console.log(`User ${socket.userEmail || "Anonymous"} left room ${room}`); // Log user leaving the room
+      console.log(
+        `User ${socket.userEmail || "Anonymous"} left room ${roomName}`
+      );
     });
 
     // Handle receiving a chat message
     socket.on("chat message", async ({ room, message }) => {
-      const email = socket.userEmail || "Anonymous"; // Get the user's email or use "Anonymous"
-      await saveMessage(room, email, message); // Save the message to the database
-      const messageObject = {
-        text: message,
-        email: email,
-        timestamp: new Date(), // Create a message object with text, email, and timestamp
-      };
-      console.log("Emitting chat message:", messageObject); // Log the message being emitted
-      io.to(room).emit("chat message", messageObject); // Emit the chat message to the room
+      if (userId && roomId) {
+        await saveMessage(roomId, userId, message);
+        const messageObject = {
+          text: message,
+          email: socket.userEmail || "Anonymous",
+          timestamp: new Date(),
+        };
+        console.log("Emitting chat message:", messageObject);
+        io.to(roomId).emit("chat message", messageObject); // Emit the chat message to the room
+      }
     });
 
     // Handle user disconnection
     socket.on("disconnect", () => {
-      rooms.forEach((users, room) => {
-        if (users.has(socket.id)) {
-          users.delete(socket.id); // Remove the socket ID from the room's user set
-          if (users.size === 0) {
-            rooms.delete(room); // Delete the room if no users are left
-          } else {
-            io.to(room).emit("active users", users.size); // Emit the updated number of active users
-          }
+      if (roomId && rooms.has(roomId)) {
+        rooms.get(roomId).delete(socket.id); // Remove the socket ID from the room's user set
+        if (rooms.get(roomId).size === 0) {
+          rooms.delete(roomId); // Delete the room if no users are left
+        } else {
+          io.to(roomId).emit("active users", rooms.get(roomId).size); // Emit the updated number of active users
         }
-      });
-      console.log(`User ${socket.userEmail || "Anonymous"} disconnected`); // Log user disconnection
+      }
+      console.log(`User ${socket.userEmail || "Anonymous"} disconnected`);
     });
   });
 

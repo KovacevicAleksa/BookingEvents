@@ -18,6 +18,8 @@ services:
       - JWT_SECRET=${JWT_SECRET} # Sets the JWT secret from an environment variable
       - EMAIL_USER=${EMAIL_USER} # Sets the email user from an environment variable
       - EMAIL_PASS=${EMAIL_PASS} # Sets the email password from an environment variable
+      - DATABASE_URL=${DATABASE_URL} # Sets the DATABASE_URL from an environment variable
+
     networks:
       - frontend # Connects to the frontend network
       - backend # Connects to the backend network
