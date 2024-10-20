@@ -1,5 +1,3 @@
-version: "3.8" # Specify the version of docker-compose
-
 networks:
   frontend:
     driver: bridge # Uses the bridge driver for the frontend network
@@ -32,12 +30,17 @@ services:
       - PG_USER=${PG_USER} # Sets PostgreSQL user from an environment variable
       - PG_PASS=${PG_PASS} # Sets PostgreSQL password from an environment variable
       - PG_DB=${PG_DB} # Sets PostgreSQL database name from an environment variable
-      - PG_HOST:${PG_HOST}
+      - PG_HOST=${PG_HOST}
       - PGADMIN_EMAIL=${PGADMIN_EMAIL}
       - PGADMIN_PASS=${PGADMIN_PASS}
       - DATABASE_URL=${DATABASE_URL}
     depends_on:
-      - postgres # Ensures the postgres service is started before express-api
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://express-api:8080 || exit 1"] # API health check
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - frontend # Connects to the frontend network
       - backend # Connects to the backend network
@@ -51,6 +54,11 @@ services:
       - "8081:8081" # Maps port 8081 on the host to port 8081 on the container
     depends_on:
       - express-api # Ensures the express-api service is started before nginx
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8081 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - frontend # Connects to the frontend network
 
@@ -63,6 +71,11 @@ services:
       POSTGRES_DB: ${PG_DB} # Use environment variable for PostgreSQL database name
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER} || exit 1"] # PostgreSQL health check
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - backend # Connects to the backend network
 
@@ -78,5 +91,10 @@ services:
       - pgadmin-data:/var/lib/pgadmin # Persistent storage for pgAdmin data
     depends_on:
       - postgres # Ensures the postgres service is started before pgadmin
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     networks:
       - backend # Connects to the backend network
