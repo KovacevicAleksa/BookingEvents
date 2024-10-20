@@ -10,6 +10,8 @@ networks:
 volumes:
   pgdata: # Volume for persisting PostgreSQL data
     driver: local # Uses local Docker storage for saving data
+  pgadmin-data: # Volume for persisting pgAdmin data
+    driver: local # Uses local Docker storage for pgAdmin configuration
 
 services:
   express-api:
@@ -72,6 +74,8 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL} # Sets the default email for pgAdmin
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASS} # Sets the default password for pgAdmin
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin # Persistent storage for pgAdmin data
     depends_on:
       - postgres # Ensures the postgres service is started before pgadmin
     networks:

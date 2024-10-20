@@ -24,7 +24,6 @@ const Chat = () => {
 
     // Event listener for successful connection
     newSocket.on("connect", () => {
-      console.log("Connected to server");
       // Emit user email if available in localStorage
       const userEmail = localStorage.getItem("userEmail");
       if (userEmail) {
@@ -46,7 +45,6 @@ const Chat = () => {
 
     // Event listener for receiving previous messages
     newSocket.on("previous messages", (prevMessages) => {
-      console.log("Received previous messages:", prevMessages);
       setMessages(
         prevMessages.map((msg) => ({
           text: msg.message, // Map the previous messages to the expected format
@@ -85,42 +83,67 @@ const Chat = () => {
 
   // Function to format timestamp into a readable time string
   const formatTime = (timestamp) => {
-    const date = new Date(timestamp); // Convert timestamp to a Date object
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }); // Format time
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  // Formating date
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleDateString([], {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  };
+
+  // Function for grouping messages by days
+  const renderMessages = () => {
+    let lastDate = null;
+
+    return messages.map((msg, index) => {
+      const currentDate = formatDate(msg.timestamp);
+      const showDate = currentDate !== lastDate;
+      lastDate = currentDate;
+
+      return (
+        <div key={index}>
+          {/* Date */}
+          {showDate && (
+            <div className="text-center my-4">
+              <span className="text-sm text-gray-500">{currentDate}</span>
+            </div>
+          )}
+          <div className="mb-2 p-3 border rounded-lg shadow-sm bg-white">
+            <div className="flex items-center mb-1">
+              <strong className="text-blue-700">{msg.email}:</strong>
+            </div>
+            <p className="mb-1 text-gray-700">{msg.text || msg.message}</p>
+            <span className="text-xs text-gray-500">
+              {formatTime(msg.timestamp)}
+            </span>
+          </div>
+        </div>
+      );
+    });
   };
 
   return (
     <div className="h-screen w-full flex flex-col bg-gray-100">
-      {/* Header */}
       <div className="bg-indigo-600 text-white py-4 px-6 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">
-            {decodeURIComponent(roomName).toUpperCase()}{" "}
-            {/* Display room name */}
+            {decodeURIComponent(roomName).toUpperCase()}
           </h1>
           <p className="text-sm bg-indigo-500 px-3 py-1 rounded-full">
-            Active Users: {activeUsers} {/* Show count of active users */}
+            Active Users: {activeUsers}
           </p>
         </div>
       </div>
 
       {/* Message List */}
       <ul className="flex-grow overflow-y-auto p-4 bg-gray-200">
-        {messages.map((msg, index) => (
-          <li
-            key={index}
-            className="mb-2 p-3 border rounded-lg shadow-sm bg-white"
-          >
-            <div className="flex items-center mb-1">
-              <strong className="text-blue-700">{msg.email}:</strong>
-            </div>
-            <p className="mb-1 text-gray-700">{msg.text || msg.message}</p>
-            <span className="text-xs text-gray-500">
-              {formatTime(msg.timestamp)}{" "}
-              {/* Format and display message timestamp */}
-            </span>
-          </li>
-        ))}
+        {renderMessages()}
       </ul>
 
       {/* Message Input */}
@@ -138,7 +161,7 @@ const Chat = () => {
               type="submit"
               className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition duration-300"
             >
-              Send {/* Button to send the message */}
+              Send
             </button>
           </form>
         </div>
@@ -147,4 +170,4 @@ const Chat = () => {
   );
 };
 
-export default Chat; // Export the Chat component
+export default Chat;
