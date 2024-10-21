@@ -39,6 +39,7 @@ spec:
     - protocol: TCP
       port: 5432 # Exposes port 5432 on the Service
       targetPort: 5432 # Forwards traffic to port 5432 on the container
+
 ---
 # pgAdmin Service
 apiVersion: v1
@@ -47,9 +48,9 @@ metadata:
   name: pgadmin
 spec:
   selector:
-    app: pgadmin
+    app: pgadmin # Selects pods labeled with 'app: pgadmin'
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 80
-  type: LoadBalancer
+      port: 80 # Exposes port 80 on the Service
+      targetPort: 80 # Forwards traffic to port 80 on the container
+  type: LoadBalancer # Exposes pgAdmin externally

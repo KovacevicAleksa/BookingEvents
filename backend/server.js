@@ -147,12 +147,20 @@ mongoose
 // Handle graceful shutdown
 process.on("SIGTERM", () => {
   console.log("SIGTERM signal received: closing HTTP server");
-  server.close(() => {
+
+  httpServer.close(() => {
     console.log("HTTP server closed");
-    mongoose.connection.close(false, () => {
-      console.log("MongoDB connection closed");
-      process.exit(0); // Exit the process once the server and database connection are closed
-    });
+
+    mongoose.connection
+      .close()
+      .then(() => {
+        console.log("Mongoose connection closed.");
+        process.exit(0);
+      })
+      .catch((err) => {
+        console.error("Error closing the Mongoose connection:", err);
+        process.exit(1);
+      });
   });
 });
 

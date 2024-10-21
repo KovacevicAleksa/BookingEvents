@@ -71,6 +71,21 @@ spec:
             limits:
               cpu: 500m
               memory: 256Mi
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
       volumes:
         - name: postgres-storage
           persistentVolumeClaim:
@@ -168,7 +183,24 @@ spec:
               memory: 64Mi # Minimum memory requested
             limits:
               cpu: 200m # Maximum CPU allowed
-              memory: 128Mi # Maximum memory allowed
+              memory: 128Mi # Maximum CPU allowed
+          livenessProbe:
+            httpGet:
+              path: /health # Adjust this based on the health check path for your Nginx server
+              port: 8081
+            initialDelaySeconds: 25
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health # Adjust this based on the readiness check path for your Nginx server
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
 ---
 # pgAdmin Deployment
 apiVersion: apps/v1
@@ -208,3 +240,18 @@ spec:
             limits:
               memory: "256Mi"
               cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 5
