@@ -153,8 +153,24 @@ spec:
               cpu: 100m # Minimum CPU requested
               memory: 128Mi # Minimum memory requested
             limits:
-              cpu: 500m # Maximum CPU allowed
-              memory: 256Mi # Maximum memory allowed
+              cpu: 500m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
 
 ---
 # Nginx Deployment

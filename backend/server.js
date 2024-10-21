@@ -27,6 +27,7 @@ import authRoutes from "./routes/authRoutes.js";
 import accountRoutes from "./routes/accountRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import healthCheckRoutes from "./routes/healthCheckRoutes.js";
 
 // Initializing the Express application
 const app = express();
@@ -128,6 +129,7 @@ app.use("/", authRoutes); //POST /registration, /login
 app.use("/", accountRoutes); //GET /accounts, /accounts/:id, PATCH /edit/account/:id, PATCH /edit/password/:id, DELETE /remove/account/event/:id
 app.use("/", eventRoutes); //GET /events, POST /create/event, PATCH /edit/event/:id, DELETE /remove/event/:id
 app.use("/", adminRoutes); //Admin routes (protected by adminAuth middleware)
+app.use("/", healthCheckRoutes); //Health check routes
 
 // New chat route using the initialized Socket.IO instance
 app.use("/api/chat", chatRoutes(io));
