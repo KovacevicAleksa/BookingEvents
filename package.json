@@ -1,17 +1,17 @@
 {
   "scripts": {
-    "all-docker": "concurrently \"npm run docker --prefix ./backend\" \"npm start --prefix ./frontend\"",
-    "all-k8s": "concurrently \"npm run k8s --prefix ./backend\" \"npm start --prefix ./frontend\"",
+    "all-docker": "concurrently \"npm run docker --prefix ./backend\"",
+    "all-k8s": "concurrently \"npm run k8s --prefix ./backend\"",
     "all-nodemon": "concurrently \"nodemon backend/server.js --prefix ./backend\" \"npm start --prefix ./frontend\"",
     "all-node": "concurrently \"node backend/server.js\" \"npm start --prefix frontend\"",
     "all-test": "concurrently \"npm test --prefix ./backend\" \"npm test --prefix ./frontend\"",
     "delete-k8s": "npm run k8s-delete --prefix ./backend",
-    "k8s-build": "concurrently \"cd ./backend && docker build -t express-api:latest -f Dockerfile .\" \"cd ./backend && docker build -t express-nginx:latest -f Dockerfile.nginx .\"",
-    "k8s-tag": "concurrently \"cd ./backend && docker tag express-api:latest kovacevicaleksa/express-api:latest\" \"cd ./backend && docker tag express-nginx:latest kovacevicaleksa/express-nginx:latest\"",
-    "k8s-push": "concurrently \"cd ./backend && docker push kovacevicaleksa/express-api:latest\" \"cd ./backend && docker push kovacevicaleksa/express-nginx:latest\"",
+    "k8s-build": "concurrently \"cd ./backend && docker build -t express-api:latest -f Dockerfile .\" \"cd ./backend && docker build -t express-nginx:latest -f Dockerfile.nginx .\" \"cd ./frontend && docker build -t react-frontend:latest -f Dockerfile .\"",
+    "k8s-tag": "concurrently \"cd ./backend && docker tag express-api:latest kovacevicaleksa/express-api:latest\" \"cd ./backend && docker tag express-nginx:latest kovacevicaleksa/express-nginx:latest\" \"cd ./frontend && docker tag react-frontend:latest kovacevicaleksa/react-frontend:latest\"",
+    "k8s-push": "concurrently \"cd ./backend && docker push kovacevicaleksa/express-api:latest\" \"cd ./backend && docker push kovacevicaleksa/express-nginx:latest\" \"cd ./frontend && docker push kovacevicaleksa/react-frontend:latest\"",
     "k8s-update": "npm run k8s-build && npm run k8s-tag && npm run k8s-push",
-    "docker-update": "cd ./backend && docker-compose down && docker-compose up --build",
-    "update-all": "concurrently \"npm run docker-update\" \"npm run k8s-update\""
+    "docker-update": "cd ./backend && docker-compose build",
+    "update-all": "npm run docker-update && npm run k8s-update"
   },
   "dependencies": {
     "concurrently": "^8.2.2"

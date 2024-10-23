@@ -8,7 +8,7 @@ CREATE TABLE message_system.rooms (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- Add a case-insensitive unique constraint on room_name
+-- Add a unique constraint on room_name
 ALTER TABLE message_system.rooms ADD CONSTRAINT unique_room_name UNIQUE (LOWER(room_name));
 
 -- Create a table for users
@@ -33,3 +33,23 @@ CREATE TABLE message_system.messages (
 CREATE INDEX idx_messages_room_id_global ON message_system.messages (room_id, created_at DESC);
 CREATE INDEX idx_messages_user_id_global ON message_system.messages (user_id, created_at DESC);
 CREATE INDEX idx_messages_created_at_global ON message_system.messages (created_at DESC);
+
+-- Partition for October 2024
+CREATE TABLE message_system.messages_oct_2024
+    PARTITION OF message_system.messages
+    FOR VALUES FROM ('2024-10-01 00:00:00+00') TO ('2024-11-01 00:00:00+00');
+
+-- Partition for November 2024
+CREATE TABLE message_system.messages_nov_2024
+    PARTITION OF message_system.messages
+    FOR VALUES FROM ('2024-11-01 00:00:00+00') TO ('2024-12-01 00:00:00+00');
+
+-- Partition for December 2024
+CREATE TABLE message_system.messages_dec_2024
+    PARTITION OF message_system.messages
+    FOR VALUES FROM ('2024-12-01 00:00:00+00') TO ('2025-01-01 00:00:00+00');
+
+CREATE TABLE message_system.messages_default
+    PARTITION OF message_system.messages
+    DEFAULT;
+
