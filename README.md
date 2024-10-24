@@ -85,85 +85,91 @@ all-test
 ## Folder structure
 
 ```
+
 └── 📁backend
-    └── 📁__mocks__
-        └── fileMock.js
-    └── 📁kubernetes
-        └── deployment.yaml
-        └── secret.yaml
-        └── service.yaml
-    └── 📁middleware
-        └── auth.js
-        └── resetAccountLimiter.js
-    └── 📁models
-        └── account.js
-        └── event.js
-    └── 📁routes
-        └── accountRoutes.js
-        └── adminRoutes.js
-        └── authRoutes.js
-        └── chatRoutes.js
-        └── eventRoutes.js
-    └── 📁services
-        └── emailService.js
-    └── 📁tests
-        └── event.test.js
-    └── .babelrc
-    └── .dockerignore
-    └── .env
-    └── .gitignore
-    └── .prettierignore
-    └── autocannonApiTest.md
-    └── default.conf
-    └── docker-compose.yml
-    └── Dockerfile
-    └── Dockerfile.nginx
-    └── eslint.config.mjs
-    └── jest.config.js
-    └── nginx.conf
-    └── package-lock.json
-    └── package.json
-    └── server.js
-    └── ZAPToFix.md
+	└── 📁__mocks__
+		└── fileMock.js
+	└── 📁kubernetes
+		└── deployment.yaml
+		└── secret.yaml
+		└── service.yaml
+	└── 📁middleware
+		└── auth.js
+		└── resetAccountLimiter.js
+	└── 📁models
+		└── account.js
+		└── event.js
+	└── 📁routes
+		└── accountRoutes.js
+		└── adminRoutes.js
+		└── authRoutes.js
+		└── chatRoutes.js
+		└── eventRoutes.js
+		└── healthCheckRoutes.js
+	└── 📁services
+		└── emailService.js
+	└── 📁sql
+		└── messages.sql
+	└── 📁tests
+		└── event.test.js
+	└── .babelrc
+	└── .dockerignore
+	└── .env
+	└── .gitignore
+	└── .prettierignore
+	└── autocannonApiTest.md
+	└── default.conf
+	└── docker-compose.yml
+	└── Dockerfile
+	└── Dockerfile.nginx
+	└── eslint.config.mjs
+	└── jest.config.js
+	└── nginx.conf
+	└── package-lock.json
+	└── package.json
+	└── server.js
+	└── ZAPToFix.md
 ```
 
 ```
 └── 📁frontend
-    └── 📁__mocks__
-        └── styleMock.js
-    └── 📁public
-        └── index.html
-        └── manifest.json
-        └── robots.txt
-    └── 📁src
-        └── 📁Components
-            └── 📁assets
-	            └── hoverPhoto.gif
-                └── Konferencija.jpg
-            └── Card.js
-            └── Header.js
-            └── PrivateRoute.js
-        └── 📁context
-            └── AuthContext.js
-        └── 📁routes
-            └── AdminAddEvent.js
-            └── ChangePassword.js
-            └── Chat.js
-            └── ForgotPassword.js
-            └── Login.js
-            └── Registration.js
-            └── Unauthorized.js
-        └── App.js
-        └── index.css
-        └── index.js
-    └── 📁tests
-        └── Card.test.js
-    └── .babelrc
-    └── .gitignore
-    └── package-lock.json
-    └── package.json
-    └── README.md
-    └── tailwind.config.js
+	└── 📁__mocks__
+		└── styleMock.js
+	└── 📁public
+		└── index.html
+		└── manifest.json
+		└── robots.txt
+	└── 📁src
+		└── 📁Components
+			└── 📁assets
+				└── hoverPhoto.gif
+				└── Konferencija.jpg
+			└── Card.js
+			└── Header.js
+			└── PrivateRoute.js
+		└── 📁context
+			└── AuthContext.js
+		└── 📁routes
+			└── AdminAddEvent.js
+			└── ChangePassword.js
+			└── Chat.js
+			└── ForgotPassword.js
+			└── Login.js
+			└── Registration.js
+			└── Unauthorized.js
+		└── App.js
+		└── index.css
+		└── index.js
+	└── 📁tests
+		└── Card.test.js
+	└── .babelrc
+	└── .gitignore
+	└── Dockerfile.frontend
+	└── nginx.conf
+	└── package-lock.json
+	└── package.json
+	└── README.md
+	└── tailwind.config.js
 ```
 
 ```
@@ -172,7 +178,14 @@ all-test
         └── deploy.yml
         └── run-tests.yml
 ```
-
+```
+└── 📁node_modules
+└── .env
+└── docker-compose.yml
+└── package-lock.json
+└── package.json
+└── README.md
+```
 <br>
 
 ![Screenshot 2024-09-10 201917](https://github.com/user-attachments/assets/314b13f8-ada2-4b23-bf9f-0db4f29fd5dd)
@@ -187,6 +200,8 @@ all-test
 
 ![Screenshot 2024-09-10 194413](https://github.com/user-attachments/assets/a3658412-25e8-4540-bd11-88c6c88bd12e)
 
-![Screenshot 2024-09-10 201628](https://github.com/user-attachments/assets/c5038651-81df-4476-9c53-4272f204a856)
+![Screenshot 2024-10-24 151549](https://github.com/user-attachments/assets/450adb52-9ed2-4a33-8c10-eeccb8a4334a)
 
 ![Screenshot 2024-09-10 201740](https://github.com/user-attachments/assets/2e0dd792-b3b7-474f-b977-d26239f4f6a4)
+
+![diagram-export-10-24-2024-3_18_06-PM](https://github.com/user-attachments/assets/65680869-6e58-4f14-9296-f4cb46860fdd)
