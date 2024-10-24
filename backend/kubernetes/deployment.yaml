@@ -1,3 +1,32 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pgadmin-storage
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/pgadmin
+  mountOptions:
+    - uid=5050
+    - gid=5050
+
+---
+# PersistentVolumeClaim for pgAdmin
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgadmin-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
 # Persistent Volume for PostgreSQL
 apiVersion: v1
 kind: PersistentVolume
@@ -238,6 +267,7 @@ spec:
           image: dpage/pgadmin4:latest
           ports:
             - containerPort: 80
+              name: http
           env:
             - name: PGADMIN_DEFAULT_EMAIL
               valueFrom:
@@ -249,28 +279,45 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: PGADMIN_PASS
+          volumeMounts:
+            - mountPath: /var/lib/pgadmin
+              name: pgadmin-storage
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
               memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
               cpu: "500m"
+          startupProbe:
+            httpGet:
+              path: /misc/ping
+              port: 80
+            failureThreshold: 30
+            periodSeconds: 10
           livenessProbe:
             httpGet:
-              path: /
+              path: /misc/ping
               port: 80
-            initialDelaySeconds: 120
-            periodSeconds: 10
-            timeoutSeconds: 5
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
             failureThreshold: 3
           readinessProbe:
             httpGet:
-              path: /
+              path: /misc/ping
               port: 80
-            initialDelaySeconds: 120
-            periodSeconds: 10
-            timeoutSeconds: 5
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 10"]
+      volumes:
+        - name: pgadmin-storage
+          persistentVolumeClaim:
+            claimName: pgadmin-storage
 ---
 # Frontend Deployment
 apiVersion: apps/v1

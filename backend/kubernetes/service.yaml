@@ -10,6 +10,7 @@ spec:
     - protocol: TCP
       port: 8080 # Exposes port 8080 on the Service
       targetPort: 8080 # Forwards traffic to port 8080 on the container
+  type: ClusterIP # Internal service, not exposed directly
 
 ---
 # Nginx Service
@@ -39,6 +40,7 @@ spec:
     - protocol: TCP
       port: 5432 # Exposes port 5432 on the Service
       targetPort: 5432 # Forwards traffic to port 5432 on the container
+  type: ClusterIP # Internal database
 
 ---
 # pgAdmin Service
@@ -51,9 +53,10 @@ spec:
     app: pgadmin # Selects pods labeled with 'app: pgadmin'
   ports:
     - protocol: TCP
-      port: 80 # Exposes port 80 on the Service
+      port: 8082 # Exposes port 8082 on the Service
       targetPort: 80 # Forwards traffic to port 80 on the container
-  type: LoadBalancer # Exposes pgAdmin externally
+      nodePort: 30231
+  type: NodePort
 ---
 # Frontend Service
 apiVersion: v1

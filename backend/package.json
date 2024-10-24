@@ -6,7 +6,7 @@
   "scripts": {
     "testEsLint": "npx eslint .",
     "dev": "nodemon server.js",
-    "docker": "docker-compose down && docker-compose up --build",
+    "docker": "docker-compose up",
     "k8s": "kubectl apply -f kubernetes/secret.yaml && kubectl apply -f kubernetes/deployment.yaml && kubectl apply -f kubernetes/service.yaml",
     "k8s-delete": "kubectl delete deployments --all && kubectl delete services --all",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles --forceExit",
