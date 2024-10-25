@@ -10,7 +10,7 @@
     "k8s-tag": "concurrently \"cd ./backend && docker tag express-api:latest kovacevicaleksa/express-api:latest\" \"cd ./backend && docker tag express-nginx:latest kovacevicaleksa/express-nginx:latest\" \"cd ./frontend && docker tag react-frontend:latest kovacevicaleksa/react-frontend:latest\"",
     "k8s-push": "concurrently \"cd ./backend && docker push kovacevicaleksa/express-api:latest\" \"cd ./backend && docker push kovacevicaleksa/express-nginx:latest\" \"cd ./frontend && docker push kovacevicaleksa/react-frontend:latest\"",
     "k8s-update": "npm run k8s-build && npm run k8s-tag && npm run k8s-push",
-    "docker-update": "cd ./backend && docker-compose build",
+    "docker-update": "docker-compose build",
     "docker-build": "docker-compose build",
     "update-all": "npm run docker-update && npm run k8s-update"
   },

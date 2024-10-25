@@ -1,5 +1,3 @@
-version: "3.8"
-
 networks:
   frontend:
     driver: bridge # Uses the bridge driver for the frontend network
