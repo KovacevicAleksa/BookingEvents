@@ -12,3 +12,32 @@ spec:
   mountOptions:
     - uid=472 # Grafana process UID
     - gid=472 # Grafana process GID
+---
+# Persistent Volume for PostgreSQL
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-storage
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/postgres
+---
+# Persistent Volume for pgadmin
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pgadmin-storage
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/pgadmin
+  mountOptions:
+    - uid=5050
+    - gid=5050

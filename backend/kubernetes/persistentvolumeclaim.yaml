@@ -1,7 +1,32 @@
+# PersistentVolumeClaim for grafana
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: grafana-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# Persistent VolumeClaim for PostgreSQL
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+# PersistentVolumeClaim for pgAdmin
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgadmin-storage
 spec:
   accessModes:
     - ReadWriteOnce
