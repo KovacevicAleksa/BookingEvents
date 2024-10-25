@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-config
+data:
+  grafana.ini: |
+    [auth.anonymous]
+    enabled = false
+
+    [security]
+    admin_user = admin
+
+    [dashboards]
+    # Disable default home dashboard requirement
+    default_home_dashboard_path = ""
+
+    [server]
+    root_url = http://localhost:3000
+
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: PostgreSQL
+        type: postgres
+        url: postgres:5432
+        user: $PG_USER
+        secureJsonData:
+          password: $PG_PASS
+        jsonData:
+          database: $PG_DB
+          sslmode: "disable"
+        isDefault: true
