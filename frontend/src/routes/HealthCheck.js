@@ -1,9 +1,21 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Circle } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 function HealthCheck() {
   const { user } = useAuth();
+  const MAX_HISTORY_POINTS = 20;
+
   const [healthStatus, setHealthStatus] = useState({
     accounts: {
       status: "pending",
@@ -23,47 +35,33 @@ function HealthCheck() {
       lastChecked: null,
       error: null,
     },
-    pgadmin: {
-      status: "pending",
-      responseTime: null,
-      lastChecked: null,
-      error: null,
-    },
   });
 
+  const [performanceHistory, setPerformanceHistory] = useState([]);
+
+  const serviceColors = {
+    accounts: "#8884d8",
+    events: "#82ca9d",
+    postgresql: "#ffc658",
+  };
+
   const checkEndpoint = useCallback(
-    async (endpoint, type, baseUrl = "http://localhost:8081") => {
+    async (endpoint, type) => {
       const startTime = performance.now();
       try {
-        const response = await fetch(`${baseUrl}${endpoint}`, {
+        const response = await fetch(`http://localhost:8081${endpoint}`, {
           headers: {
-            Authorization:
-              type !== "pgadmin" ? `Bearer ${user.token}` : undefined,
+            Authorization: `Bearer ${user.token}`,
           },
         });
 
         const endTime = performance.now();
         const responseTime = Math.round(endTime - startTime);
 
-        if (!response.ok && type !== "pgadmin") {
+        if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // For pgAdmin, we just check if we can reach the server
-        if (type === "pgadmin") {
-          setHealthStatus((prev) => ({
-            ...prev,
-            [type]: {
-              status: "healthy",
-              responseTime,
-              lastChecked: new Date().toLocaleTimeString(),
-              error: null,
-            },
-          }));
-          return;
-        }
-
-        // For other endpoints, parse JSON response
         await response.json();
 
         setHealthStatus((prev) => ({
@@ -75,27 +73,11 @@ function HealthCheck() {
             error: null,
           },
         }));
+
+        return responseTime;
       } catch (error) {
         const endTime = performance.now();
         const responseTime = Math.round(endTime - startTime);
-
-        // Special handling for pgAdmin - if it's a CORS error but we got a response, consider it healthy
-        if (
-          type === "pgadmin" &&
-          error.name === "TypeError" &&
-          error.message.includes("CORS")
-        ) {
-          setHealthStatus((prev) => ({
-            ...prev,
-            [type]: {
-              status: "healthy",
-              responseTime,
-              lastChecked: new Date().toLocaleTimeString(),
-              error: null,
-            },
-          }));
-          return;
-        }
 
         setHealthStatus((prev) => ({
           ...prev,
@@ -106,21 +88,40 @@ function HealthCheck() {
             error: error.message,
           },
         }));
+
+        return responseTime;
       }
     },
     [user.token]
   );
 
-  const checkHealth = useCallback(() => {
-    checkEndpoint("/admin/accounts", "accounts");
-    checkEndpoint("/view/events", "events");
-    checkEndpoint("/healthcheck/pg", "postgresql");
-    checkEndpoint("/", "pgadmin", "http://localhost:8082");
+  const checkHealth = useCallback(async () => {
+    const timestamp = new Date().toLocaleTimeString();
+    const [accountsTime, eventsTime, postgresTime] = await Promise.all([
+      checkEndpoint("/admin/accounts", "accounts"),
+      checkEndpoint("/view/events", "events"),
+      checkEndpoint("/healthcheck/pg", "postgresql"),
+    ]);
+
+    setPerformanceHistory((prev) => {
+      const newHistory = [
+        ...prev,
+        {
+          timestamp,
+          accounts: accountsTime,
+          events: eventsTime,
+          postgresql: postgresTime,
+        },
+      ];
+
+      // Keep only the last MAX_HISTORY_POINTS points
+      return newHistory.slice(-MAX_HISTORY_POINTS);
+    });
   }, [checkEndpoint]);
 
   useEffect(() => {
     checkHealth();
-    const interval = setInterval(checkHealth, 30000); // Check every 30 seconds
+    const interval = setInterval(checkHealth, 30000);
     return () => clearInterval(interval);
   }, [checkHealth]);
 
@@ -145,24 +146,18 @@ function HealthCheck() {
     );
   };
 
-  const ServiceCard = ({
-    title,
-    endpoint,
-    status,
-    baseUrl = "http://localhost:8081",
-  }) => (
-    <div className="bg-white p-6 rounded-lg shadow-lg">
+  const ServiceCard = ({ title, endpoint, status, color }) => (
+    <div
+      className="bg-white p-6 rounded-lg shadow-lg"
+      style={{ borderLeft: `4px solid ${color}` }}
+    >
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold text-gray-800">{title}</h2>
         {renderStatus(status)}
       </div>
       <div className="space-y-2">
         <p className="text-gray-600">
-          Endpoint:{" "}
-          <span className="font-mono">
-            {baseUrl}
-            {endpoint}
-          </span>
+          Endpoint: <span className="font-mono">{endpoint}</span>
         </p>
         <p className="text-gray-600">
           Response Time:{" "}
@@ -179,38 +174,132 @@ function HealthCheck() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">
           System Health Status
         </h1>
 
-        <div className="grid gap-6">
-          <ServiceCard
-            title="Accounts API"
-            endpoint="/admin/accounts"
-            status={healthStatus.accounts}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Status Cards Section */}
+          <div className="space-y-6">
+            <ServiceCard
+              title="Accounts API"
+              endpoint="/admin/accounts"
+              status={healthStatus.accounts}
+              color={serviceColors.accounts}
+            />
 
-          <ServiceCard
-            title="Events API"
-            endpoint="/view/events"
-            status={healthStatus.events}
-          />
+            <ServiceCard
+              title="Events API"
+              endpoint="/view/events"
+              status={healthStatus.events}
+              color={serviceColors.events}
+            />
 
-          <ServiceCard
-            title="PostgreSQL"
-            endpoint="/healthcheck/pg"
-            status={healthStatus.postgresql}
-          />
+            <ServiceCard
+              title="PostgreSQL"
+              endpoint="/healthcheck/pg"
+              status={healthStatus.postgresql}
+              color={serviceColors.postgresql}
+            />
 
-          <div className="flex justify-center mt-4">
-            <button
-              onClick={checkHealth}
-              className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300"
-            >
-              Refresh Status
-            </button>
+            <div className="flex justify-center mt-4">
+              <button
+                onClick={checkHealth}
+                className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300"
+              >
+                Refresh Status
+              </button>
+            </div>
+          </div>
+
+          {/* Performance Charts Section */}
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-semibold mb-6 text-gray-800">
+              Response Time History
+            </h2>
+            <div className="h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={performanceHistory}
+                  margin={{
+                    top: 5,
+                    right: 30,
+                    left: 20,
+                    bottom: 5,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis
+                    dataKey="timestamp"
+                    angle={-45}
+                    textAnchor="end"
+                    height={70}
+                  />
+                  <YAxis
+                    label={{
+                      value: "Response Time (ms)",
+                      angle: -90,
+                      position: "insideLeft",
+                    }}
+                  />
+                  <Tooltip />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="accounts"
+                    stroke={serviceColors.accounts}
+                    name="Accounts API"
+                    dot={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="events"
+                    stroke={serviceColors.events}
+                    name="Events API"
+                    dot={false}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="postgresql"
+                    stroke={serviceColors.postgresql}
+                    name="PostgreSQL"
+                    dot={false}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Performance Stats */}
+            <div className="grid grid-cols-3 gap-4 mt-6">
+              {Object.entries(serviceColors).map(([service, color]) => {
+                const times = performanceHistory
+                  .map((h) => h[service])
+                  .filter(Boolean);
+                const avg = times.length
+                  ? Math.round(times.reduce((a, b) => a + b, 0) / times.length)
+                  : 0;
+                const max = times.length ? Math.max(...times) : 0;
+
+                return (
+                  <div
+                    key={service}
+                    className="p-4 rounded-lg"
+                    style={{
+                      backgroundColor: `${color}15`,
+                      borderLeft: `3px solid ${color}`,
+                    }}
+                  >
+                    <h3 className="font-semibold capitalize mb-2">{service}</h3>
+                    <div className="text-sm">
+                      <p>Avg: {avg}ms</p>
+                      <p>Max: {max}ms</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
