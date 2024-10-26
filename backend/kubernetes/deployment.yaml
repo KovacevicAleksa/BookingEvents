@@ -80,6 +80,15 @@ spec:
       labels:
         app: express-api
     spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:latest
+          command:
+            [
+              "sh",
+              "-c",
+              "until pg_isready -h postgres -p 5432; do echo waiting for postgres; sleep 2; done;",
+            ]
       containers:
         - name: express-api
           image: kovacevicaleksa/express-api:latest
@@ -121,10 +130,10 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: PG_DB
-          resources: # Adding resource requests and limits
+          resources:
             requests:
-              cpu: 100m # Minimum CPU requested
-              memory: 128Mi # Minimum memory requested
+              cpu: 100m
+              memory: 128Mi
             limits:
               cpu: 500m
               memory: 256Mi
@@ -310,7 +319,7 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 3
 ---
-# Frontend Deployment
+# Grafana Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
