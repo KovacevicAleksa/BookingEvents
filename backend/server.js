@@ -22,6 +22,13 @@ import http from "http";
 import { Server } from "socket.io";
 import chatRoutes from "./routes/chatRoutes.js";
 
+//import middleware
+import metricsMiddleware, {
+  metricsRouter,
+  monitorSocketIO,
+  monitorMongoDB,
+} from "./middleware/metric.js";
+
 // Import routes
 import authRoutes from "./routes/authRoutes.js";
 import accountRoutes from "./routes/accountRoutes.js";
@@ -46,6 +53,12 @@ app.set("trust proxy", 1);
 
 // Disable the 'X-Powered-By' header for security reasons
 app.disable("x-powered-by");
+
+// Apply metrics middleware
+app.use(metricsMiddleware);
+
+// Add metrics endpoint
+app.use(metricsRouter);
 
 // Middleware to block access to cloud metadata services
 app.use((req, res, next) => {
@@ -138,7 +151,9 @@ app.use("/api/chat", chatRoutes(io));
 mongoose
   .connect(dbURI)
   .then(() => {
+    monitorMongoDB(mongoose);
     httpServer.listen(port, () => {
+      monitorSocketIO(io);
       console.log(`Server is running on port ${port}`); // Log the server port
       console.log("Successfully connected to the MongoDB"); // Log successful database connection
       console.log(`Server start time: ${new Date().toLocaleString()}`); // Log the server start time

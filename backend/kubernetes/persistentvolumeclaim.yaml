@@ -33,3 +33,16 @@ spec:
   resources:
     requests:
       storage: 1Gi
+---
+# PersistentVolumeClaim for Prometheus
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-storage
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: hostpath

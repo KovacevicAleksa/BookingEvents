@@ -1,3 +1,4 @@
+# Grafana PV
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -9,11 +10,9 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: /data/grafana
-  mountOptions:
-    - uid=472 # Grafana process UID
-    - gid=472 # Grafana process GID
+    type: DirectoryOrCreate
 ---
-# Persistent Volume for PostgreSQL
+# PostgreSQL PV
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -25,8 +24,9 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: /data/postgres
+    type: DirectoryOrCreate
 ---
-# Persistent Volume for pgadmin
+# pgAdmin PV
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -38,6 +38,18 @@ spec:
     - ReadWriteOnce
   hostPath:
     path: /data/pgadmin
-  mountOptions:
-    - uid=5050
-    - gid=5050
+    type: DirectoryOrCreate
+---
+# Prometheus PV
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: prometheus-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/prometheus
+    type: DirectoryOrCreate

@@ -1,32 +1,82 @@
+#Grafana configMap
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: grafana-config
 data:
   grafana.ini: |
-    [auth.anonymous]
-    enabled = false
+    [server]
+    protocol = http
+    http_port = 3000
 
     [security]
     admin_user = admin
 
-    [dashboards]
-    # Disable default home dashboard requirement
-    default_home_dashboard_path = ""
+    [users]
+    allow_sign_up = false
 
-    [server]
-    root_url = http://localhost:3000
+    [auth.anonymous]
+    enabled = true
+
+    [log]
+    mode = console
+    level = info
 
   datasources.yaml: |
     apiVersion: 1
     datasources:
-      - name: PostgreSQL
-        type: postgres
-        url: postgres:5432
-        user: $PG_USER
-        secureJsonData:
-          password: $PG_PASS
-        jsonData:
-          database: $PG_DB
-          sslmode: "disable"
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus:9090
+        access: proxy
         isDefault: true
+        jsonData:
+          timeInterval: "15s"
+          queryTimeout: "30s"
+        editable: true
+---
+# Prometheus configMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets:
+
+    rule_files:
+
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+      
+      - job_name: 'express-api'
+        static_configs:
+          - targets: ['express-api:8080']
+        metrics_path: '/metrics'
+        scheme: 'http'
+
+      - job_name: 'kubernetes-pods'
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            action: keep
+            regex: true
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            action: replace
+            target_label: __metrics_path__
+            regex: (.+)
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            action: replace
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__

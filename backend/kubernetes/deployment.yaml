@@ -346,28 +346,13 @@ spec:
                 secretKeyRef:
                   name: secrets
                   key: GRAFANA_PASSWORD
-            - name: PG_USER
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: PG_USER
-            - name: PG_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: PG_PASS
-            - name: PG_DB
-              valueFrom:
-                secretKeyRef:
-                  name: secrets
-                  key: PG_DB
           volumeMounts:
             - name: grafana-storage
               mountPath: /var/lib/grafana
-            - name: grafana-config
+            - name: grafana-config-ini
               mountPath: /etc/grafana/grafana.ini
               subPath: grafana.ini
-            - name: grafana-config
+            - name: grafana-datasources
               mountPath: /etc/grafana/provisioning/datasources/datasources.yaml
               subPath: datasources.yaml
           resources:
@@ -381,18 +366,83 @@ spec:
             httpGet:
               path: /api/health
               port: 3000
-            initialDelaySeconds: 30
-            timeoutSeconds: 5
+            initialDelaySeconds: 60
+            timeoutSeconds: 30
+            failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /api/health
               port: 3000
-            initialDelaySeconds: 30
-            timeoutSeconds: 5
+            initialDelaySeconds: 60
+            timeoutSeconds: 30
+            failureThreshold: 10
       volumes:
         - name: grafana-storage
           persistentVolumeClaim:
             claimName: grafana-storage
-        - name: grafana-config
+        - name: grafana-config-ini
           configMap:
             name: grafana-config
+            items:
+              - key: grafana.ini
+                path: grafana.ini
+        - name: grafana-datasources
+          configMap:
+            name: grafana-config
+            items:
+              - key: datasources.yaml
+                path: datasources.yaml
+---
+# Prometheus Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      serviceAccountName: prometheus
+      initContainers:
+        - name: init-chown-data
+          image: busybox
+          command: ["sh", "-c"]
+          args:
+            - chown -R 65534:65534 /prometheus;
+              chmod -R 755 /prometheus;
+          volumeMounts:
+            - name: prometheus-storage
+              mountPath: /prometheus
+      containers:
+        - name: prometheus
+          image: prom/prometheus:latest
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus"
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            - name: prometheus-config
+              mountPath: /etc/prometheus/
+            - name: prometheus-storage
+              mountPath: /prometheus
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      volumes:
+        - name: prometheus-config
+          configMap:
+            name: prometheus-config
+        - name: prometheus-storage
+          persistentVolumeClaim:
+            claimName: prometheus-storage
