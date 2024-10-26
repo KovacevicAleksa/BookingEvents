@@ -96,23 +96,40 @@ export const monitorSocketIO = (io) => {
 
 // MongoDB monitoring
 export const monitorMongoDB = (mongoose) => {
+  // Monitor connection events
   mongoose.connection.on("connected", () => {
     mongoDbConnections.inc();
+
+    // Get the underlying MongoDB client
+    const client = mongoose.connection.getClient();
+
+    // Monitor MongoDB operations using APM
+    const commandEvents = [
+      [
+        "commandStarted",
+        (event) => {
+          const operation = event.commandName;
+          const collection = event.command?.[operation] || "unknown";
+
+          if (["find", "insert", "update", "delete"].includes(operation)) {
+            mongoDbOperations.labels(operation, collection).inc();
+          }
+        },
+      ],
+    ];
+
+    commandEvents.forEach(([event, handler]) => {
+      client.on(event, handler);
+    });
   });
 
   mongoose.connection.on("disconnected", () => {
     mongoDbConnections.dec();
   });
 
-  // Monitor MongoDB operations
-  mongoose.connection.on("open", () => {
-    const db = mongoose.connection.db;
-
-    ["find", "insert", "update", "delete"].forEach((operation) => {
-      db.on(`${operation}`, (collection) => {
-        mongoDbOperations.labels(operation, collection).inc();
-      });
-    });
+  // Handle errors
+  mongoose.connection.on("error", (err) => {
+    console.error("MongoDB connection error:", err);
   });
 };
 
