@@ -14,9 +14,9 @@ async function testMetrics() {
   const io = new Server(server);
 
   // Import your metrics middleware
-  const metricsMiddleware = (await import("./middleware/metric.js")).default;
+  const metricsMiddleware = (await import("../middleware/metric.js")).default;
   const { metricsRouter, monitorSocketIO, monitorMongoDB } = await import(
-    "./middleware/metric.js"
+    "../middleware/metric.js"
   );
 
   // Apply metrics middleware and router
