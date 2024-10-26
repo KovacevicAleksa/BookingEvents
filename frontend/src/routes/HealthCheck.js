@@ -74,7 +74,7 @@ function HealthCheck() {
           },
         }));
 
-        return responseTime;
+        return { responseTime, status: "healthy" };
       } catch (error) {
         const endTime = performance.now();
         const responseTime = Math.round(endTime - startTime);
@@ -89,7 +89,7 @@ function HealthCheck() {
           },
         }));
 
-        return responseTime;
+        return { responseTime, status: "unhealthy" };
       }
     },
     [user.token]
@@ -97,7 +97,7 @@ function HealthCheck() {
 
   const checkHealth = useCallback(async () => {
     const timestamp = new Date().toLocaleTimeString();
-    const [accountsTime, eventsTime, postgresTime] = await Promise.all([
+    const [accounts, events, postgresql] = await Promise.all([
       checkEndpoint("/admin/accounts", "accounts"),
       checkEndpoint("/view/events", "events"),
       checkEndpoint("/healthcheck/pg", "postgresql"),
@@ -108,13 +108,15 @@ function HealthCheck() {
         ...prev,
         {
           timestamp,
-          accounts: accountsTime,
-          events: eventsTime,
-          postgresql: postgresTime,
+          accounts: accounts.responseTime,
+          accountsStatus: accounts.status,
+          events: events.responseTime,
+          eventsStatus: events.status,
+          postgresql: postgresql.responseTime,
+          postgresqlStatus: postgresql.status,
         },
       ];
 
-      // Keep only the last MAX_HISTORY_POINTS points
       return newHistory.slice(-MAX_HISTORY_POINTS);
     });
   }, [checkEndpoint]);
@@ -144,6 +146,17 @@ function HealthCheck() {
         </span>
       </div>
     );
+  };
+
+  const CustomizedDot = (props) => {
+    const { cx, cy, payload, dataKey } = props;
+    const status = payload[`${dataKey}Status`];
+
+    if (status === "unhealthy") {
+      return <circle cx={cx} cy={cy} r={4} fill="red" />;
+    }
+
+    return null; // Return null for healthy status to keep the default line appearance
   };
 
   const ServiceCard = ({ title, endpoint, status, color }) => (
@@ -246,27 +259,21 @@ function HealthCheck() {
                   />
                   <Tooltip />
                   <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="accounts"
-                    stroke={serviceColors.accounts}
-                    name="Accounts API"
-                    dot={false}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="events"
-                    stroke={serviceColors.events}
-                    name="Events API"
-                    dot={false}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="postgresql"
-                    stroke={serviceColors.postgresql}
-                    name="PostgreSQL"
-                    dot={false}
-                  />
+                  {Object.entries(serviceColors).map(([service, color]) => (
+                    <Line
+                      key={service}
+                      type="monotone"
+                      dataKey={service}
+                      stroke={color}
+                      name={`${
+                        service.charAt(0).toUpperCase() + service.slice(1)
+                      } API`}
+                      dot={<CustomizedDot />}
+                      strokeDasharray={(datum) =>
+                        datum[`${service}Status`] === "unhealthy" ? "5 5" : "0"
+                      }
+                    />
+                  ))}
                 </LineChart>
               </ResponsiveContainer>
             </div>

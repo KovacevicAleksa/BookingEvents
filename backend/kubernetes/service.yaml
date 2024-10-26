@@ -55,7 +55,7 @@ spec:
     - protocol: TCP
       port: 8082 # Exposes port 8082 on the Service
       targetPort: 80 # Forwards traffic to port 80 on the container
-      nodePort: 30231
+      nodePort: 30001
   type: NodePort
 ---
 # Frontend Service
@@ -83,5 +83,5 @@ spec:
   ports:
     - port: 3000
       targetPort: 3000
-      nodePort: 8082
+      nodePort: 30002
   type: NodePort
