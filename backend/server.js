@@ -23,10 +23,14 @@ import { Server } from "socket.io";
 import chatRoutes from "./routes/chatRoutes.js";
 
 //import middleware
-import metricsMiddleware, {
-  metricsRouter,
-  monitorSocketIO,
+import {
+  metrics,
+  register,
+  metricsMiddleware,
   monitorMongoDB,
+  monitorSocketIO,
+  errorHandler,
+  metricsRouter,
 } from "./middleware/metric.js";
 
 // Import routes
@@ -77,7 +81,7 @@ app.use((req, res, next) => {
 
 // CORS configuration
 const corsOptions = {
-  origin: "http://localhost:3000", // Allow only requests from your frontend
+  origin: process.env.FRONTEND_URL || "http://localhost:3000", // Allow only requests from your frontend
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // Allowed methods
   allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
   credentials: true, // Allow cookies to be sent with requests
@@ -87,7 +91,7 @@ const corsOptions = {
 // Initialize Socket.IO
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:3000", // Replace with your React app's URL
+    origin: process.env.FRONTEND_URL || "http://localhost:3000", // Replace with your React app's URL
     methods: ["GET", "POST"],
     credentials: true, // Allow credentials to be included in Socket.IO requests
   },
@@ -146,6 +150,8 @@ app.use("/", healthCheckRoutes); //Health check routes
 
 // New chat route using the initialized Socket.IO instance
 app.use("/api/chat", chatRoutes(io));
+
+app.use(errorHandler);
 
 // Connect to MongoDB and start the server
 mongoose

@@ -1,143 +1,199 @@
 import prometheus from "prom-client";
 import express from "express";
+import os from "os";
 
-// Create a Registry
 const register = new prometheus.Registry();
 
-// Add default metrics
+const metrics = {
+  // Process metrics
+  processHeapBytes: new prometheus.Gauge({
+    name: "process_heap_bytes", // Standardized metric name
+    help: "Process heap size in bytes",
+    labelNames: ["type"],
+    collect() {
+      const memUsage = process.memoryUsage();
+      this.set({ type: "used" }, memUsage.heapUsed);
+      this.set({ type: "total" }, memUsage.heapTotal);
+    },
+  }),
+
+  processMemory: new prometheus.Gauge({
+    name: "process_memory_bytes", // Standardized metric name
+    help: "Process memory usage in bytes",
+    labelNames: ["type"],
+    collect() {
+      const memUsage = process.memoryUsage();
+      this.set({ type: "rss" }, memUsage.rss);
+      this.set({ type: "external" }, memUsage.external);
+    },
+  }),
+
+  // System metrics
+  nodeMemory: new prometheus.Gauge({
+    name: "node_memory_bytes", // Standardized metric name
+    help: "Node memory usage in bytes",
+    labelNames: ["type"],
+    collect() {
+      this.set({ type: "total" }, os.totalmem());
+      this.set({ type: "free" }, os.freemem());
+      this.set({ type: "used" }, os.totalmem() - os.freemem());
+    },
+  }),
+
+  nodeCPUUsage: new prometheus.Gauge({
+    name: "node_cpu_usage_percent", // Standardized metric name
+    help: "Node CPU usage percentage",
+    collect() {
+      const startUsage = process.cpuUsage();
+      const startTime = process.hrtime();
+
+      setTimeout(() => {
+        const endUsage = process.cpuUsage(startUsage);
+        const endTime = process.hrtime(startTime);
+
+        const elapsedTime = endTime[0] + endTime[1] / 1e9;
+        const cpuPercent =
+          (endUsage.user + endUsage.system) /
+          (elapsedTime * 1e6) /
+          os.cpus().length;
+
+        this.set(cpuPercent);
+      }, 1000);
+    },
+  }),
+
+  // HTTP metrics
+  httpRequestDuration: new prometheus.Histogram({
+    name: "http_request_duration_seconds",
+    help: "Duration of HTTP requests in seconds",
+    labelNames: ["method", "route", "status_code"],
+    buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5, 7, 10],
+  }),
+
+  httpRequestsTotal: new prometheus.Counter({
+    name: "http_requests_total",
+    help: "Total number of HTTP requests",
+    labelNames: ["method", "route", "status_code"],
+  }),
+
+  // Error metrics
+  errorsTotal: new prometheus.Counter({
+    name: "node_errors_total", // Standardized metric name
+    help: "Total number of application errors",
+    labelNames: ["type"],
+  }),
+};
+
+// Register default metrics with standardized prefix
 prometheus.collectDefaultMetrics({
-  app: "express-api",
-  prefix: "node_",
-  timeout: 10000,
   register,
+  prefix: "node_",
+  gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5],
 });
 
-// Custom metrics
-const httpRequestDurationMicroseconds = new prometheus.Histogram({
-  name: "http_request_duration_seconds",
-  help: "Duration of HTTP requests in seconds",
-  labelNames: ["method", "route", "code"],
-  buckets: [0.1, 0.5, 1, 5],
-});
+// Register all custom metrics
+Object.values(metrics).forEach((metric) => register.registerMetric(metric));
 
-const httpRequestsTotal = new prometheus.Counter({
-  name: "http_requests_total",
-  help: "Total number of HTTP requests",
-  labelNames: ["method", "route", "code"],
-});
-
-// MongoDB specific metrics
-const mongoDbConnections = new prometheus.Gauge({
-  name: "mongodb_connections_total",
-  help: "Number of current MongoDB connections",
-});
-
-const mongoDbOperations = new prometheus.Counter({
-  name: "mongodb_operations_total",
-  help: "Number of MongoDB operations",
-  labelNames: ["operation", "collection"],
-});
-
-// Socket.IO metrics
-const socketConnections = new prometheus.Gauge({
-  name: "socketio_connections_total",
-  help: "Number of current Socket.IO connections",
-});
-
-const socketEvents = new prometheus.Counter({
-  name: "socketio_events_total",
-  help: "Number of Socket.IO events",
-  labelNames: ["event"],
-});
-
-// Register all metrics
-register.registerMetric(httpRequestDurationMicroseconds);
-register.registerMetric(httpRequestsTotal);
-register.registerMetric(mongoDbConnections);
-register.registerMetric(mongoDbOperations);
-register.registerMetric(socketConnections);
-register.registerMetric(socketEvents);
-
-// Metrics middleware
+// Enhanced metrics middleware
 const metricsMiddleware = (req, res, next) => {
-  const start = Date.now();
+  const start = process.hrtime();
+
+  metrics.httpRequestsTotal.inc({
+    method: req.method,
+    route: req.route?.path || req.path,
+    status_code: 0,
+  });
 
   res.on("finish", () => {
-    const duration = Date.now() - start;
+    const duration = process.hrtime(start);
+    const durationSeconds = duration[0] + duration[1] / 1e9;
+    const route = req.route?.path || req.path;
 
-    // Record HTTP metrics
-    httpRequestDurationMicroseconds
-      .labels(req.method, req.route?.path || req.path, res.statusCode)
-      .observe(duration / 1000);
+    metrics.httpRequestDuration.observe(
+      {
+        method: req.method,
+        route,
+        status_code: res.statusCode,
+      },
+      durationSeconds
+    );
 
-    httpRequestsTotal
-      .labels(req.method, req.route?.path || req.path, res.statusCode)
-      .inc();
+    metrics.httpRequestsTotal.inc({
+      method: req.method,
+      route,
+      status_code: res.statusCode,
+    });
   });
 
   next();
 };
 
-// Socket.IO monitoring
-export const monitorSocketIO = (io) => {
-  io.on("connection", (socket) => {
-    socketConnections.inc();
+// Error handling middleware
+const errorHandler = (err, req, res, next) => {
+  // Increment error counter with error type
+  metrics.errorsTotal.inc({
+    type: err.name || "unknown_error",
+  });
 
-    socket.on("disconnect", () => {
-      socketConnections.dec();
-    });
+  // Log error for debugging
+  console.error(`Error occurred: ${err.message}`);
 
-    // Monitor all events
-    socket.onAny((eventName) => {
-      socketEvents.labels(eventName).inc();
-    });
+  // Send error response
+  res.status(err.status || 500).json({
+    error: {
+      message: err.message || "Internal server error",
+      type: err.name || "UnknownError",
+      status: err.status || 500,
+    },
   });
 };
 
-// MongoDB monitoring
-export const monitorMongoDB = (mongoose) => {
-  // Monitor connection events
+// MongoDB monitoring function
+const monitorMongoDB = (mongoose) => {
   mongoose.connection.on("connected", () => {
-    mongoDbConnections.inc();
+    console.log("MongoDB Connected");
+  });
 
-    // Get the underlying MongoDB client
-    const client = mongoose.connection.getClient();
-
-    // Monitor MongoDB operations using APM
-    const commandEvents = [
-      [
-        "commandStarted",
-        (event) => {
-          const operation = event.commandName;
-          const collection = event.command?.[operation] || "unknown";
-
-          if (["find", "insert", "update", "delete"].includes(operation)) {
-            mongoDbOperations.labels(operation, collection).inc();
-          }
-        },
-      ],
-    ];
-
-    commandEvents.forEach(([event, handler]) => {
-      client.on(event, handler);
-    });
+  mongoose.connection.on("error", (err) => {
+    console.error("MongoDB Error:", err);
+    metrics.errorsTotal.inc({ type: "mongodb_error" });
   });
 
   mongoose.connection.on("disconnected", () => {
-    mongoDbConnections.dec();
+    console.log("MongoDB Disconnected");
   });
+};
 
-  // Handle errors
-  mongoose.connection.on("error", (err) => {
-    console.error("MongoDB connection error:", err);
+// Socket.IO monitoring function
+const monitorSocketIO = (io) => {
+  io.on("connection", (socket) => {
+    console.log("New socket connection");
+
+    socket.on("error", (error) => {
+      console.error("Socket.IO Error:", error);
+      metrics.errorsTotal.inc({ type: "socketio_error" });
+    });
   });
 };
 
 // Metrics endpoint
 const metricsRouter = express.Router();
 metricsRouter.get("/metrics", async (req, res) => {
-  res.set("Content-Type", register.contentType);
-  res.end(await register.metrics());
+  try {
+    res.set("Content-Type", register.contentType);
+    const metrics = await register.metrics();
+    res.end(metrics);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
 });
 
-export { metricsMiddleware as default, metricsRouter };
+export {
+  metrics,
+  register,
+  metricsMiddleware,
+  monitorMongoDB,
+  monitorSocketIO,
+  errorHandler,
+  metricsRouter,
+};
