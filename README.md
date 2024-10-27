@@ -209,3 +209,7 @@ all-test
 ![Screenshot 2024-10-26 002030](https://github.com/user-attachments/assets/b8421102-8a11-43f2-adef-c7073e246a34)
 
 ![diagram-export-10-24-2024-3_18_06-PM](https://github.com/user-attachments/assets/65680869-6e58-4f14-9296-f4cb46860fdd)
+
+![Screenshot 2024-10-27 175923](https://github.com/user-attachments/assets/51e94f42-8f51-401e-86d1-c40fbcfffba4)
+
+![Screenshot 2024-10-27 174600](https://github.com/user-attachments/assets/e8f0c30a-4420-40b3-a7dd-f0eed573a463)
