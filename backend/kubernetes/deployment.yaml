@@ -82,12 +82,12 @@ spec:
     spec:
       initContainers:
         - name: wait-for-postgres
-          image: postgres:latest
+          image: busybox
           command:
             [
               "sh",
               "-c",
-              "until pg_isready -h postgres -p 5432; do echo waiting for postgres; sleep 2; done;",
+              "until nc -z -w 2 postgres 5432; do echo waiting for postgres; sleep 2; done;",
             ]
       containers:
         - name: express-api
@@ -338,7 +338,7 @@ spec:
         - name: grafana
           image: grafana/grafana:latest
           ports:
-            - containerPort: 3000
+            - containerPort: 3001
               name: http-grafana
           env:
             - name: GF_SECURITY_ADMIN_PASSWORD
@@ -365,14 +365,14 @@ spec:
           livenessProbe:
             httpGet:
               path: /api/health
-              port: 3000
+              port: 3001
             initialDelaySeconds: 60
             timeoutSeconds: 30
             failureThreshold: 10
           readinessProbe:
             httpGet:
               path: /api/health
-              port: 3000
+              port: 3001
             initialDelaySeconds: 60
             timeoutSeconds: 30
             failureThreshold: 10
