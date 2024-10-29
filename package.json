@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "all-docker": "docker-compose up",
+    "all-docker": "docker compose up",
     "all-k8s": "concurrently \"npm run k8s --prefix ./backend\"",
     "all-nodemon": "concurrently \"nodemon backend/server.js --prefix ./backend\" \"npm start --prefix ./frontend\"",
     "all-node": "concurrently \"node backend/server.js\" \"npm start --prefix frontend\"",
@@ -14,8 +14,8 @@
     "k8s-status": "kubectl get pods && kubectl get deployments",
     "k8s-update": "npm run k8s-build && npm run k8s-tag && npm run k8s-push && npm run k8s-rollout",
     "k8s-update-run": "npm run k8s-build && npm run k8s-tag && npm run k8s-push && npm run k8s-rollout && npm run all-k8s",
-    "docker-update": "docker-compose build",
-    "docker-build": "docker-compose build",
+    "docker-update": "docker compose build",
+    "docker-build": "docker compose build",
     "update-all": "npm run docker-update && npm run k8s-update"
   },
   "dependencies": {
