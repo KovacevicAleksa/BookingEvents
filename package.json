@@ -12,7 +12,7 @@
     "k8s-rollout": "kubectl rollout restart deployment express-api nginx frontend postgres pgadmin grafana prometheus",
     "k8s-rollout-status": "kubectl rollout status deployment/express-api && kubectl rollout status deployment/nginx && kubectl rollout status deployment/frontend && kubectl rollout status deployment/postgres && kubectl rollout status deployment/pgadmin && kubectl rollout status deployment/grafana && kubectl rollout status deployment/prometheus",
     "k8s-status": "kubectl get pods && kubectl get deployments",
-    "k8s-update": "npm run k8s-build && npm run k8s-tag && npm run k8s-push && npm run k8s-rollout",
+    "k8s-update": "npm run k8s-build && npm run k8s-tag && npm run k8s-push",
     "k8s-update-run": "npm run k8s-build && npm run k8s-tag && npm run k8s-push && npm run k8s-rollout && npm run all-k8s",
     "docker-update": "docker compose build",
     "docker-build": "docker compose build",
