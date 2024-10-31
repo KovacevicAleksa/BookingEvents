@@ -9,7 +9,7 @@ CREATE TABLE message_system.rooms (
 );
 
 -- Add a unique constraint on room_name
-ALTER TABLE message_system.rooms ADD CONSTRAINT unique_room_name UNIQUE (LOWER(room_name));
+ALTER TABLE message_system.rooms ADD CONSTRAINT unique_room_name UNIQUE (room_name);
 
 -- Create a table for users
 CREATE TABLE message_system.users (
