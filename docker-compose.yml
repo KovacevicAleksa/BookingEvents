@@ -23,7 +23,7 @@ services:
     depends_on:
       - express-api # Ensures API is running before frontend starts
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:3000 || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:3000 || exit 1"] # Health check using curl to check if frontend is up
       interval: 30s
       timeout: 10s
       retries: 3
@@ -32,7 +32,7 @@ services:
 
   express-api:
     build:
-      context: ./backend # Added: Builds from the backend directory
+      context: ./backend # Builds from the backend directory
       dockerfile: Dockerfile # Uses the Dockerfile located in the backend directory
     container_name: express-api
     expose:
@@ -55,17 +55,17 @@ services:
     depends_on:
       - postgres
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://express-api:8080 || exit 1"] # API health check
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"] # Health check using curl to check if API is up
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
     networks:
       - frontend # Connects to the frontend network
       - backend # Connects to the backend network
 
   nginx:
     build:
-      context: ./backend # Added: Builds from the backend directory
+      context: ./backend # Builds from the backend directory
       dockerfile: Dockerfile.nginx # Uses the Dockerfile.nginx
     container_name: express-nginx
     ports:
@@ -73,10 +73,10 @@ services:
     depends_on:
       - express-api # Ensures the express-api service is started before nginx
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8081 || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8081/health || exit 1"] # Health check using curl to check if nginx is up
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
     networks:
       - frontend # Connects to the frontend network
 
@@ -90,7 +90,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${PG_USER} || exit 1"] # PostgreSQL health check
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER} || exit 1"] # PostgreSQL health check with pg_isready
       interval: 10s
       timeout: 5s
       retries: 5
@@ -110,9 +110,9 @@ services:
     depends_on:
       - postgres # Ensures the postgres service is started before pgadmin
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/misc/ping || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
     networks:
       - backend # Connects to the backend network

@@ -1,6 +1,9 @@
 # Use Node.js LTS version with Alpine Linux to ensure a lightweight and stable environment
 FROM node:lts-alpine
 
+# Install curl
+RUN apk add --no-cache curl
+
 # Set environment to production to optimize performance and exclude development dependencies
 ENV NODE_ENV=production
 
