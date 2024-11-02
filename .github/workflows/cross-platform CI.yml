@@ -1,0 +1,58 @@
+name: Cross-platform CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test-standard:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest] # Define operating systems to test on
+        node-version: [18.x, 20.x, 22.x] # Specify Node.js versions to test against
+    
+    runs-on: ${{ matrix.os }} # Set the OS for the job
+
+    steps:
+    - uses: actions/checkout@v3 # Check out the code from the repository
+
+    - name: Use Node.js ${{ matrix.node-version }} # Set up the specified Node.js version
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }} # Use the Node.js version from the matrix
+        cache: 'npm' # Cache npm dependencies for faster builds
+
+    - name: Install dependencies
+      run: npm ci # Install project dependencies using npm ci for a clean install
+
+    - name: Run tests
+      run: npm run all-k8s # Run the tests defined in the all-k8s script
+      env:
+        CI: true # Set CI environment variable to true
+
+  test-fedora:
+    runs-on: ubuntu-latest # Specify the OS for this job
+    container:
+      image: fedora:latest # Use the latest Fedora container
+      
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x] # Specify Node.js versions for this job
+
+    steps:
+    - uses: actions/checkout@v3 # Check out the code from the repository
+
+    - name: Install dependencies
+      run: |
+        dnf update -y # Update package manager
+        dnf install -y nodejs npm # Install Node.js and npm
+
+    - name: Install project dependencies
+      run: npm ci # Install project dependencies using npm ci for a clean install
+
+    - name: Run tests
+      run: npm run all-k8s # Run the tests defined in the all-k8s script
+      env:
+        CI: true # Set CI environment variable to true
