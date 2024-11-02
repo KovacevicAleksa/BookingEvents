@@ -24,10 +24,12 @@ jobs:
 
       - name: Build Docker images # Step to build Docker images for the application
         run: |
-          docker build -t kovacevicaleksa/express-api:latest -f ./backend/Dockerfile ./backend  # Builds the API image using Dockerfile in the 'backend' folder
-          docker build -t kovacevicaleksa/express-nginx:latest -f ./backend/Dockerfile.nginx ./backend  # Builds the Nginx image using Dockerfile.nginx in the 'backend' folder
+          docker build -t kovacevicaleksa/express-api:latest -f ./backend/Dockerfile ./backend  # Builds the API image
+          docker build -t kovacevicaleksa/express-nginx:latest -f ./backend/Dockerfile.nginx ./backend  # Builds the Nginx image
+          docker build -t kovacevicaleksa/react-frontend:latest -f ./frontend/Dockerfile.frontend ./frontend  # Builds the Frontend image
 
       - name: Push Docker images # Step to push the built Docker images to Docker Hub
         run: |
           docker push kovacevicaleksa/express-api:latest  # Pushes the API image to Docker Hub
           docker push kovacevicaleksa/express-nginx:latest  # Pushes the Nginx image to Docker Hub
+          docker push kovacevicaleksa/react-frontend:latest  # Pushes the Frontend image to Docker Hub
