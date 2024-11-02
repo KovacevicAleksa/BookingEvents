@@ -1,58 +1,90 @@
+# Workflow name and trigger configuration
 name: Cross-platform CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master ]  # Trigger on pushes to main or master
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master ]  # Trigger on PRs to main or master
 
 jobs:
+  # Job for testing on standard operating systems
   test-standard:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest] # Define operating systems to test on
-        node-version: [18.x, 20.x, 22.x] # Specify Node.js versions to test against
-    
-    runs-on: ${{ matrix.os }} # Set the OS for the job
+        # Test across multiple OS and Node.js versions for maximum compatibility
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [18.x, 20.x, 22.x]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v3 # Check out the code from the repository
+    - uses: actions/checkout@v3  # Checkout the repository code
 
-    - name: Use Node.js ${{ matrix.node-version }} # Set up the specified Node.js version
+    # Set up Node.js environment with caching for faster builds
+    - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ matrix.node-version }} # Use the Node.js version from the matrix
-        cache: 'npm' # Cache npm dependencies for faster builds
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
 
+    # Install kubectl CLI for Kubernetes operations
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    # Set up Minikube for local Kubernetes cluster
+    - name: Set up Minikube
+      uses: medyagh/setup-minikube@master
+
+    # Install project dependencies using clean install
     - name: Install dependencies
-      run: npm ci # Install project dependencies using npm ci for a clean install
+      run: npm ci
 
+    # Verify Kubernetes cluster is running properly
+    - name: Wait for Minikube
+      run: |
+        minikube status
+        kubectl get pods -A
+
+    # Run the Kubernetes deployment tests
     - name: Run tests
-      run: npm run all-k8s # Run the tests defined in the all-k8s script
+      run: npm run all-k8s
       env:
-        CI: true # Set CI environment variable to true
+        CI: true
 
+  # Separate job for testing on Fedora Linux
   test-fedora:
-    runs-on: ubuntu-latest # Specify the OS for this job
+    runs-on: ubuntu-latest
     container:
-      image: fedora:latest # Use the latest Fedora container
-      
+      image: fedora:latest  # Use latest Fedora container image
+
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x] # Specify Node.js versions for this job
+        node-version: [18.x, 20.x, 22.x]
 
     steps:
-    - uses: actions/checkout@v3 # Check out the code from the repository
+    - uses: actions/checkout@v3
 
+    # Install required system packages on Fedora
     - name: Install dependencies
       run: |
-        dnf update -y # Update package manager
-        dnf install -y nodejs npm # Install Node.js and npm
+        dnf update -y
+        dnf install -y nodejs npm kubectl minikube
 
+    # Initialize Minikube with Docker driver for container environment
+    - name: Start Minikube
+      run: |
+        minikube start --driver=docker
+        minikube status
+
+    # Install Node.js project dependencies
     - name: Install project dependencies
-      run: npm ci # Install project dependencies using npm ci for a clean install
+      run: npm ci
 
+    # Execute Kubernetes deployment tests
     - name: Run tests
-      run: npm run all-k8s # Run the tests defined in the all-k8s script
+      run: npm run all-k8s
       env:
-        CI: true # Set CI environment variable to true
+        CI: true
