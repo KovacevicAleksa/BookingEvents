@@ -99,3 +99,18 @@ spec:
       targetPort: 9090
       nodePort: 30003
   type: NodePort
+---
+# Server Go
+apiVersion: v1
+kind: Service
+metadata:
+  name: events-api-go-service
+spec:
+  selector:
+    app: events-api-go
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8181
+      nodePort: 30004
+  type: NodePort

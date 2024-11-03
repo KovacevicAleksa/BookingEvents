@@ -446,3 +446,27 @@ spec:
         - name: prometheus-storage
           persistentVolumeClaim:
             claimName: prometheus-storage
+---
+# Server Go Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: events-api-go
+  labels:
+    app: events-api-go
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: events-api-go
+  template:
+    metadata:
+      labels:
+        app: events-api-go
+    spec:
+      containers:
+      - name: events-api-go
+        image: kovacevicaleksa/events-api-go:latest
+        ports:
+        - containerPort: 8181
+        imagePullPolicy: Always
