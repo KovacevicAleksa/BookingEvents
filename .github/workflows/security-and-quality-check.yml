@@ -1,0 +1,39 @@
+name: Security and Code Quality
+
+on:
+  push:
+    branches: [ main ]  # Trigger the workflow on pushes to the main branch
+  pull_request:
+    branches: [ main ]  # Trigger the workflow on pull requests to the main branch
+  schedule:
+    - cron: '0 0 * * 0'  # Schedule the workflow to run weekly on Sunday at midnight
+
+jobs:
+  analyze:
+    name: Security & Quality Check
+    runs-on: ubuntu-latest  # Specify the OS for the job
+    
+    steps:
+    - uses: actions/checkout@v4  # Check out the repository code
+
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/init@v3
+      with:
+        languages: javascript  # Define the language for CodeQL analysis
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3  # Run the CodeQL analysis on the checked-out code
+
+    - name: Run Dependency Check
+      uses: snyk/actions/node@master  # Use Snyk to check for vulnerabilities in dependencies
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}  # Set the Snyk API token from GitHub secrets
+        
+    - name: Check File Size
+      run: |
+        find . -type f -size +1M | while read file; do
+          echo "Warning: $file is larger than 1MB"
+        done  # Search for files larger than 1MB and display a warning for each
+
+    - name: Check for Secrets
+      uses: zricethezav/gitleaks-action@master  # Use Gitleaks to scan the codebase for sensitive information
