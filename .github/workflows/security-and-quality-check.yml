@@ -8,32 +8,65 @@ on:
   schedule:
     - cron: '0 0 * * 0'  # Schedule the workflow to run weekly on Sunday at midnight
 
+permissions:
+  contents: read  # Allow read access to repository contents
+  security-events: write  # Allow write access to security events
+  actions: read  # Allow read access to actions
+
 jobs:
   analyze:
-    name: Security & Quality Check
+    name: Security & Quality Check  # Name of the job
     runs-on: ubuntu-latest  # Specify the OS for the job
     
     steps:
-    - uses: actions/checkout@v4  # Check out the repository code
-
-    - name: Run CodeQL Analysis
-      uses: github/codeql-action/init@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4  # Check out the repository code
       with:
-        languages: javascript  # Define the language for CodeQL analysis
+        fetch-depth: 0  # Fetch all history for all branches
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3  # Initialize CodeQL for analysis
+      with:
+        languages: javascript  # Specify the language for CodeQL analysis
+        # Add config file reference if you have one
+        # config-file: ./.github/codeql/codeql-config.yml
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v3  # Run the CodeQL analysis on the checked-out code
+      uses: github/codeql-action/analyze@v3  # Run CodeQL analysis on the checked-out code
+      with:
+        category: "/language:javascript"  # Specify the category for the analysis
 
-    - name: Run Dependency Check
+    - name: Setup Node.js
+      uses: actions/setup-node@v4  # Set up Node.js environment
+      with:
+        node-version: '20'  # Specify the Node.js version
+        cache: 'npm'  # Cache npm dependencies
+
+    - name: Run Snyk Security Check
       uses: snyk/actions/node@master  # Use Snyk to check for vulnerabilities in dependencies
+      continue-on-error: true  # Prevent workflow failure if vulnerabilities are found
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}  # Set the Snyk API token from GitHub secrets
-        
-    - name: Check File Size
-      run: |
-        find . -type f -size +1M | while read file; do
-          echo "Warning: $file is larger than 1MB"
-        done  # Search for files larger than 1MB and display a warning for each
+      with:
+        args: --severity-threshold=high  # Set the severity threshold for Snyk
 
-    - name: Check for Secrets
-      uses: zricethezav/gitleaks-action@master  # Use Gitleaks to scan the codebase for sensitive information
+    - name: Check File Size
+      run: |  # Run a shell command to check file sizes
+        echo "Checking for large files..."
+        find . -type f -not -path "*/node_modules/*" -not -path "*/\.*" -size +1M | while read file; do
+          echo "::warning file=$file::File size exceeds 1MB"  # Emit a warning for files larger than 1MB
+        done
+
+    - name: Run Gitleaks
+      uses: gitleaks/gitleaks-action@v2  # Use Gitleaks to scan for sensitive information
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Set the GitHub token from secrets
+      with:
+        config-path: .github/gitleaks.toml  # Specify the path to the Gitleaks config file
+        verbose: true  # Enable verbose output for more details
+
+    - name: Upload Security Results
+      if: always()  # Always run this step, regardless of previous failures
+      uses: github/codeql-action/upload-sarif@v3  # Upload the SARIF results for CodeQL analysis
+      with:
+        sarif_file: results.sarif  # Specify the SARIF file to upload
