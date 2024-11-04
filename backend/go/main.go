@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"events-api-go/config"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -28,6 +30,28 @@ type Event struct {
 	CreatedAt   time.Time          `json:"createdAt" bson:"createdAt"`
 	UpdatedAt   time.Time          `json:"updatedAt" bson:"updatedAt"`
 	Version     int                `json:"__v" bson:"__v"`
+}
+
+// saveToJSONFile saves events data to a JSON file
+func saveToJSONFile(events []Event) error {
+	// Create filename with current date
+	currentDate := time.Now().Format("2006-01-02")
+	filename := fmt.Sprintf("Account_Backup_%s.json", currentDate)
+
+	// Convert events to JSON with proper indentation
+	jsonData, err := json.MarshalIndent(events, "", "    ")
+	if err != nil {
+		return fmt.Errorf("error marshaling JSON: %v", err)
+	}
+
+	// Write to file
+	err = os.WriteFile(filename, jsonData, 0644)
+	if err != nil {
+		return fmt.Errorf("error writing to file: %v", err)
+	}
+
+	log.Printf("Successfully saved backup to %s", filename)
+	return nil
 }
 
 func main() {
@@ -73,6 +97,12 @@ func main() {
 		}
 
 		log.Printf("Found %d events", len(events))
+
+		// Save events to JSON file
+		if err := saveToJSONFile(events); err != nil {
+			log.Printf("Error saving backup: %v", err)
+			// Continue processing even if backup fails
+		}
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(events)
