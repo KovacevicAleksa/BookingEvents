@@ -32,14 +32,26 @@ type Event struct {
 	Version     int                `json:"__v" bson:"__v"`
 }
 
-// saveToJSONFile saves events data to a JSON file
-func saveToJSONFile(events []Event) error {
-	// Create filename with current date
-	currentDate := time.Now().Format("2006-01-02")
-	filename := fmt.Sprintf("Account_Backup_%s.json", currentDate)
+// Account represents the structure of an account document in MongoDB
+type Account struct {
+	ID        primitive.ObjectID   `json:"_id" bson:"_id,omitempty"`
+	Email     string               `json:"email" bson:"email"`
+	Password  string               `json:"password" bson:"password"`
+	Events    []primitive.ObjectID `json:"events" bson:"events"`
+	IsAdmin   bool                 `json:"isAdmin" bson:"isAdmin"`
+	CreatedAt time.Time            `json:"createdAt" bson:"createdAt"`
+	UpdatedAt time.Time            `json:"updatedAt" bson:"updatedAt"`
+	Version   int                  `json:"__v" bson:"__v"`
+}
 
-	// Convert events to JSON with proper indentation
-	jsonData, err := json.MarshalIndent(events, "", "    ")
+// saveToJSONFile saves data to a JSON file with the current date in the filename
+func saveToJSONFile(data interface{}, filenamePrefix string) error {
+	// Get the current date
+	currentDate := time.Now().Format("2006-01-02")
+	filename := fmt.Sprintf("%s_%s.json", filenamePrefix, currentDate)
+
+	// Convert data to JSON with proper indentation
+	jsonData, err := json.MarshalIndent(data, "", "    ")
 	if err != nil {
 		return fmt.Errorf("error marshaling JSON: %v", err)
 	}
@@ -72,8 +84,12 @@ func main() {
 	log.Println("Successfully connected to MongoDB")
 
 	// Get the events collection
-	collection := client.Database("Node").Collection("events")
+	eventsCollection := client.Database("Node").Collection("events")
 	log.Printf("Using database: Node, collection: events")
+
+	// Get the accounts collection
+	accountsCollection := client.Database("Node").Collection("accounts")
+	log.Printf("Using database: Node, collection: accounts")
 
 	http.HandleFunc("/view/events", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Received request to /view/events")
@@ -81,7 +97,7 @@ func main() {
 		var events []Event
 
 		// Retrieve all events from the database
-		cursor, err := collection.Find(context.Background(), bson.D{})
+		cursor, err := eventsCollection.Find(context.Background(), bson.D{})
 		if err != nil {
 			log.Printf("Error finding events: %v", err)
 			http.Error(w, "Failed to fetch events", http.StatusInternalServerError)
@@ -98,14 +114,46 @@ func main() {
 
 		log.Printf("Found %d events", len(events))
 
-		// Save events to JSON file
-		if err := saveToJSONFile(events); err != nil {
+		// Save events to JSON file with the current date in the filename
+		if err := saveToJSONFile(events, "Events_Backup"); err != nil {
 			log.Printf("Error saving backup: %v", err)
 			// Continue processing even if backup fails
 		}
 
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(events)
+	})
+
+	http.HandleFunc("/view/accounts", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Received request to /view/accounts")
+
+		// Retrieve all accounts from the database
+		cursor, err := accountsCollection.Find(context.Background(), bson.D{})
+		if err != nil {
+			log.Printf("Error finding accounts: %v", err)
+			http.Error(w, "Failed to fetch accounts", http.StatusInternalServerError)
+			return
+		}
+		defer cursor.Close(context.Background())
+
+		// Decode retrieved accounts into a slice
+		var accounts []Account
+		if err = cursor.All(context.Background(), &accounts); err != nil {
+			log.Printf("Error decoding accounts: %v", err)
+			http.Error(w, "Failed to decode accounts", http.StatusInternalServerError)
+			return
+		}
+
+		log.Printf("Found %d accounts", len(accounts))
+
+		// Save accounts to JSON file with the current date in the filename
+		if err := saveToJSONFile(accounts, "Accounts_Backup"); err != nil {
+			log.Printf("Error saving backup: %v", err)
+			// Continue processing even if backup fails
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(accounts)
 	})
 
 	log.Println("Server starting on port 8181...")
