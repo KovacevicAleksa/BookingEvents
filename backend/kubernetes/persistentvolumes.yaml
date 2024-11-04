@@ -53,3 +53,18 @@ spec:
   hostPath:
     path: /data/prometheus
     type: DirectoryOrCreate
+---
+# Go Backup PV
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: db-backup-data-pv
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/db-backup"  

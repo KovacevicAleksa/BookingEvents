@@ -451,22 +451,29 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: events-api-go
+  name: db-backup-go
   labels:
-    app: events-api-go
+    app: db-backup-go
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: events-api-go
+      app: db-backup-go
   template:
     metadata:
       labels:
-        app: events-api-go
+        app: db-backup-go
     spec:
       containers:
-      - name: events-api-go
-        image: kovacevicaleksa/events-api-go:latest
+      - name: db-backup-go
+        image: kovacevicaleksa/db-backup-go:latest
         ports:
-        - containerPort: 8181
+          - containerPort: 8181
         imagePullPolicy: Always
+        volumeMounts:
+          - mountPath: "/app/data"  # Directory inside the container for storage
+            name: db-backup-storage
+      volumes:
+        - name: db-backup-storage
+          persistentVolumeClaim:
+            claimName: db-backup-data-pvc

@@ -46,3 +46,15 @@ spec:
     requests:
       storage: 1Gi
   storageClassName: hostpath
+---
+# PersistentVolumeClaim for Go Backup
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-backup-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

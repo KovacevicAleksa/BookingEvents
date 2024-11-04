@@ -104,10 +104,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: events-api-go-service
+  name: db-backup-go-service
 spec:
   selector:
-    app: events-api-go
+    app: db-backup-go
   ports:
     - protocol: TCP
       port: 80
