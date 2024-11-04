@@ -427,6 +427,22 @@ spec:
             - "--storage.tsdb.path=/prometheus"
           ports:
             - containerPort: 9090
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9090
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9090
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
           volumeMounts:
             - name: prometheus-config
               mountPath: /etc/prometheus/
@@ -455,7 +471,7 @@ metadata:
   labels:
     app: db-backup-go
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: db-backup-go
@@ -464,14 +480,51 @@ spec:
       labels:
         app: db-backup-go
     spec:
+      initContainers:
+        - name: wait-for-postgres-2
+          image: busybox
+          command:
+            [
+              "sh",
+              "-c",
+              "until nc -z -w 2 postgres 5432; do echo waiting for postgres; sleep 2; done;",
+            ]
       containers:
       - name: db-backup-go
         image: kovacevicaleksa/db-backup-go:latest
         ports:
           - containerPort: 8181
+        resources:
+            requests:
+              memory: "64Mi"
+              cpu: "30m"
+            limits:
+              memory: "256Mi"
+              cpu: "100m"
+        livenessProbe:
+          httpGet:
+            path: /view/events
+            port: 8181
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - |
+              wget -q --spider http://localhost:8181/view/events && \
+              wget -q --spider http://localhost:8181/view/accounts && \
+              wget -q --spider http://localhost:8181/view/postgres-data
+          initialDelaySeconds: 10
+          periodSeconds: 15
+          timeoutSeconds: 10
+          failureThreshold: 3
         imagePullPolicy: Always
         volumeMounts:
-          - mountPath: "/app/data"  # Directory inside the container for storage
+          - mountPath: "/app/data"
             name: db-backup-storage
       volumes:
         - name: db-backup-storage
