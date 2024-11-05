@@ -1,6 +1,9 @@
 # Use the official Go image with version 1.21 on Alpine Linux for a lightweight environment
 FROM golang:1.21-alpine
 
+# Install curl for health checks
+RUN apk add --no-cache curl
+
 # Set the working directory inside the container
 WORKDIR /app
 

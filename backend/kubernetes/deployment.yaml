@@ -142,7 +142,7 @@ spec:
               path: /health
               port: 8080
             initialDelaySeconds: 30
-            periodSeconds: 15
+            periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
@@ -150,7 +150,7 @@ spec:
               path: /health
               port: 8080
             initialDelaySeconds: 15
-            periodSeconds: 10
+            periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
 
@@ -187,7 +187,7 @@ spec:
               path: /health # Adjust this based on the health check path for your Nginx server
               port: 8081
             initialDelaySeconds: 25
-            periodSeconds: 10
+            periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
@@ -195,7 +195,7 @@ spec:
               path: /health # Adjust this based on the readiness check path for your Nginx server
               port: 8081
             initialDelaySeconds: 15
-            periodSeconds: 10
+            periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
 
@@ -247,13 +247,13 @@ spec:
               path: /misc/ping
               port: 80
             failureThreshold: 30
-            periodSeconds: 10
+            periodSeconds: 60
           livenessProbe:
             httpGet:
               path: /misc/ping
               port: 80
             initialDelaySeconds: 60
-            periodSeconds: 30
+            periodSeconds: 60
             timeoutSeconds: 10
             failureThreshold: 3
           readinessProbe:
@@ -261,7 +261,7 @@ spec:
               path: /misc/ping
               port: 80
             initialDelaySeconds: 30
-            periodSeconds: 30
+            periodSeconds: 60
             timeoutSeconds: 10
           lifecycle:
             preStop:
@@ -307,7 +307,7 @@ spec:
               path: /
               port: 3000
             initialDelaySeconds: 30
-            periodSeconds: 10
+            periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
@@ -315,7 +315,7 @@ spec:
               path: /
               port: 3000
             initialDelaySeconds: 15
-            periodSeconds: 10
+            periodSeconds: 30
             timeoutSeconds: 5
             failureThreshold: 3
 ---
@@ -368,6 +368,7 @@ spec:
               port: 3001
             initialDelaySeconds: 60
             timeoutSeconds: 30
+            periodSeconds: 60
             failureThreshold: 10
           readinessProbe:
             httpGet:
@@ -375,6 +376,7 @@ spec:
               port: 3001
             initialDelaySeconds: 60
             timeoutSeconds: 30
+            periodSeconds: 60
             failureThreshold: 10
       volumes:
         - name: grafana-storage
@@ -433,7 +435,7 @@ spec:
               port: 9090
             initialDelaySeconds: 30
             timeoutSeconds: 30
-            periodSeconds: 10
+            periodSeconds: 300    # 1 min
             failureThreshold: 3
           readinessProbe:
             httpGet:
@@ -441,7 +443,7 @@ spec:
               port: 9090
             initialDelaySeconds: 30
             timeoutSeconds: 30
-            periodSeconds: 10
+            periodSeconds: 60    # 1 min
             failureThreshold: 3
           volumeMounts:
             - name: prometheus-config
@@ -502,25 +504,31 @@ spec:
               memory: "256Mi"
               cpu: "100m"
         livenessProbe:
-          httpGet:
-            path: /view/events
-            port: 8181
-          initialDelaySeconds: 15
-          periodSeconds: 10
-          timeoutSeconds: 5
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - |
+              curl -sf http://localhost:8181/view/events && \
+              curl -sf http://localhost:8181/view/accounts && \
+              curl -sf http://localhost:8181/view/postgres-data
+          initialDelaySeconds: 30 
+          periodSeconds: 86400     # 24 sata
+          timeoutSeconds: 30
           failureThreshold: 3
+
         readinessProbe:
           exec:
             command:
             - /bin/sh
             - -c
             - |
-              wget -q --spider http://localhost:8181/view/events && \
-              wget -q --spider http://localhost:8181/view/accounts && \
-              wget -q --spider http://localhost:8181/view/postgres-data
-          initialDelaySeconds: 10
-          periodSeconds: 15
-          timeoutSeconds: 10
+              curl -sf http://localhost:8181/view/events && \
+              curl -sf http://localhost:8181/view/accounts && \
+              curl -sf http://localhost:8181/view/postgres-data
+          initialDelaySeconds: 30
+          periodSeconds: 86400
+          timeoutSeconds: 30
           failureThreshold: 3
         imagePullPolicy: Always
         volumeMounts:
