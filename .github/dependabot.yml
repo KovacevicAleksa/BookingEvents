@@ -6,35 +6,17 @@ updates:
     directory: "/backend"
     schedule:
       interval: "weekly"
-    allowed-updates:
-      - match:
-          dependency-type: "production"
-          update-types: ["semver:minor", "semver:patch", "version-update:no-pin"]
-      - match:
-          dependency-type: "development"
-          update-types: ["semver:patch", "version-update:no-pin"]
 
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
       interval: "weekly"
-    allowed-updates:
-      - match:
-          dependency-type: "production"
-          update-types: ["semver:minor", "semver:patch", "version-update:no-pin"]
-      - match:
-          dependency-type: "development"
-          update-types: ["semver:patch", "version-update:no-pin"]
 
   # Go modules in the backend/go folder
   - package-ecosystem: "gomod"
     directory: "/backend/go"
     schedule:
       interval: "weekly"
-    allowed-updates:
-      - match:
-          dependency-type: "direct"
-          update-types: ["semver:minor", "semver:patch"]
 
   # Docker images in backend and frontend
   - package-ecosystem: "docker"
