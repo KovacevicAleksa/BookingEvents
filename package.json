@@ -19,7 +19,7 @@
     "update-all": "npm run docker-update && npm run k8s-update"
   },
   "dependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^9.1.0"
   },
   "devDependencies": {}
 }
