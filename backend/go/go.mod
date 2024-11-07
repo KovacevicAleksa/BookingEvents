@@ -1,6 +1,6 @@
 module events-api-go
 
-go 1.21
+go 1.21.0
 
 require (
 	github.com/golang/snappy v0.0.4 // indirect
