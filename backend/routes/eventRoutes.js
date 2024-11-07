@@ -31,6 +31,12 @@ router.patch("/edit/events/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
+    const allowedUpdates = ['name', 'date', 'location', 'description']; // List of allowed fields
+
+    // Ensure that the id is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid event ID" });
+    }
 
     const updatedEvent = await Event.findByIdAndUpdate(id, updateData, {
       new: true,
@@ -46,5 +52,6 @@ router.patch("/edit/events/:id", auth, async (req, res) => {
     res.status(500).json({ message: error.message }); // Return an error if something goes wrong
   }
 });
+
 
 export default router;
