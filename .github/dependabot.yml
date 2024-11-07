@@ -1,5 +1,6 @@
 version: 2
 updates:
+
   # npm dependencies for both backend and frontend
   - package-ecosystem: "npm"
     directory: "/backend"
@@ -47,19 +48,19 @@ updates:
       interval: "weekly"
 
   # Kubernetes manifests in backend/kubernetes
-  - package-ecosystem: "kubernetes"
+  - package-ecosystem: "gitsubmodule"
     directory: "/backend/kubernetes"
     schedule:
       interval: "weekly"
 
   # Grafana dashboards in backend/grafana
-  - package-ecosystem: "grafana"
+  - package-ecosystem: "gitsubmodule"
     directory: "/backend/grafana"
     schedule:
       interval: "weekly"
 
   # Prometheus configuration in backend/prometheus
-  - package-ecosystem: "prometheus"
+  - package-ecosystem: "gitsubmodule"
     directory: "/backend/prometheus"
     schedule:
       interval: "weekly"
