@@ -1,0 +1,48 @@
+version: 2
+updates:
+
+  # npm dependencies for both backend and frontend
+  - package-ecosystem: "npm"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+
+  # Go modules in the backend/go folder
+  - package-ecosystem: "gomod"
+    directory: "/backend/go"
+    schedule:
+      interval: "weekly"
+
+  # Docker images in backend and frontend
+  - package-ecosystem: "docker"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "docker"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+
+  # Kubernetes manifests in backend/kubernetes
+  - package-ecosystem: "gitsubmodule"
+    directory: "/backend/kubernetes"
+    schedule:
+      interval: "weekly"
+
+  # Grafana dashboards in backend/grafana
+  - package-ecosystem: "gitsubmodule"
+    directory: "/backend/grafana"
+    schedule:
+      interval: "weekly"
+
+  # Prometheus configuration in backend/prometheus
+  - package-ecosystem: "gitsubmodule"
+    directory: "/backend/prometheus"
+    schedule:
+      interval: "weekly"
