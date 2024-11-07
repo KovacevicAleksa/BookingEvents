@@ -31,8 +31,15 @@ router.patch("/edit/events/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
+    const allowedUpdates = ['name', 'date', 'location', 'description']; // List of allowed fields
+    const sanitizedData = {};
+    for (const key of Object.keys(updateData)) {
+      if (allowedUpdates.includes(key)) {
+        sanitizedData[key] = updateData[key];
+      }
+    }
 
-    const updatedEvent = await Event.findByIdAndUpdate(id, updateData, {
+    const updatedEvent = await Event.findByIdAndUpdate(id, { $set: sanitizedData }, {
       new: true,
       runValidators: true,
     }); // Update the event by ID with the provided data
