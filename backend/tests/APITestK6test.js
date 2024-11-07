@@ -21,7 +21,7 @@ export default function () {
     const url = 'http://localhost:8081/view/events'; // Endpoint to test
     const params = {
         headers: {
-            'Authorization': 'Bearer e....Gw' // Bearer token for authorization
+            'Authorization': '' // Bearer token for authorization
         },
     };
 
