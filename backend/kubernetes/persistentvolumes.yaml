@@ -58,13 +58,12 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: db-backup-data-pv
-  labels:
-    type: local
+  name: db-backup-pv
 spec:
   capacity:
     storage: 1Gi
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
   hostPath:
-    path: "/data/db-backup"  
+    path: /data/db-backup
+    type: DirectoryOrCreate

@@ -54,7 +54,7 @@ metadata:
   name: db-backup-data-pvc
 spec:
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
   resources:
     requests:
       storage: 1Gi

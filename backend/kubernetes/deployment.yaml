@@ -483,26 +483,24 @@ spec:
         app: db-backup-go
     spec:
       initContainers:
-        - name: wait-for-postgres-2
-          image: busybox
-          command:
-            [
-              "sh",
-              "-c",
-              "until nc -z -w 2 postgres 5432; do echo waiting for postgres; sleep 2; done;",
-            ]
+      - name: wait-for-postgres
+        image: busybox:1.35
+        command: ["sh", "-c", "until nc -z -w 2 postgres 5432; do echo waiting for postgres; sleep 2; done;"]
       containers:
       - name: db-backup-go
         image: kovacevicaleksa/db-backup-go:latest
         ports:
-          - containerPort: 8181
+        - containerPort: 8181
         resources:
-            requests:
-              memory: "64Mi"
-              cpu: "30m"
-            limits:
-              memory: "256Mi"
-              cpu: "100m"
+          requests:
+            memory: "64Mi"
+            cpu: "30m"
+          limits:
+            memory: "256Mi"
+            cpu: "100m"
+        volumeMounts:
+        - name: db-backup-data
+          mountPath: /data/db-backup
         livenessProbe:
           exec:
             command:
@@ -516,7 +514,6 @@ spec:
           periodSeconds: 86400     # 24 sata
           timeoutSeconds: 30
           failureThreshold: 3
-
         readinessProbe:
           exec:
             command:
@@ -531,10 +528,7 @@ spec:
           timeoutSeconds: 30
           failureThreshold: 3
         imagePullPolicy: Always
-        volumeMounts:
-          - mountPath: "/app/data"
-            name: db-backup-storage
       volumes:
-        - name: db-backup-storage
-          persistentVolumeClaim:
-            claimName: db-backup-data-pvc
+      - name: db-backup-data
+        persistentVolumeClaim:
+          claimName: db-backup-data-pvc

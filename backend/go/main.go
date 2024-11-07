@@ -82,11 +82,12 @@ type Message struct {
 
 // Helper Functions
 
-// saveToJSONFile saves data to a JSON file with the current date in the filename
+// saveToJSONFile saves data to a JSON file in the persistent volume
 func saveToJSONFile(data interface{}, filenamePrefix string) error {
 	// Get the current date
 	currentDate := time.Now().Format("2006-01-02")
 	filename := fmt.Sprintf("%s_%s.json", filenamePrefix, currentDate)
+	filepath := fmt.Sprintf("/data/db-backup/%s", filename)
 
 	// Convert data to JSON with proper indentation
 	jsonData, err := json.MarshalIndent(data, "", "    ")
@@ -94,13 +95,13 @@ func saveToJSONFile(data interface{}, filenamePrefix string) error {
 		return fmt.Errorf("error marshaling JSON: %v", err)
 	}
 
-	// Write to file
-	err = os.WriteFile(filename, jsonData, 0644)
+	// Write to file in the persistent volume
+	err = os.WriteFile(filepath, jsonData, 0644)
 	if err != nil {
 		return fmt.Errorf("error writing to file: %v", err)
 	}
 
-	log.Printf("Successfully saved backup to %s", filename)
+	log.Printf("Successfully saved backup to %s", filepath)
 	return nil
 }
 
