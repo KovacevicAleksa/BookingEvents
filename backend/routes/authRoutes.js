@@ -9,8 +9,7 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const existingAccount = await Account.findOne({ email });
-    if (existingAccount) {
+    const existingAccount = await Account.findOne({ email: { $eq: email } });    if (existingAccount) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
@@ -32,7 +31,7 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     console.log(`Login attempt for email: ${email}`);
 
-    const account = await Account.findOne({ email }); // Find the account by email
+    const account = await Account.findOne({ email: { $eq: email } }); // Find the account by email
     if (!account) {
       console.log(`No account found for email: ${email}`);
       return res.status(400).json({ message: "Invalid email or password" });

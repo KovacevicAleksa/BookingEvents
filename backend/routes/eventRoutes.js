@@ -32,7 +32,7 @@ router.patch("/edit/events/:id", auth, async (req, res) => {
     const { id } = req.params;
     const updateData = req.body;
 
-    const updatedEvent = await Event.findByIdAndUpdate(id, updateData, {
+    const updatedEvent = await Event.findByIdAndUpdate(id, { $set: sanitizedData }, {
       new: true,
       runValidators: true,
     }); // Update the event by ID with the provided data
@@ -46,5 +46,6 @@ router.patch("/edit/events/:id", auth, async (req, res) => {
     res.status(500).json({ message: error.message }); // Return an error if something goes wrong
   }
 });
+
 
 export default router;
