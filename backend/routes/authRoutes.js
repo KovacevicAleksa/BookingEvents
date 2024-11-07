@@ -9,8 +9,7 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const existingAccount = await Account.findOne({ email });
-    if (existingAccount) {
+    const existingAccount = await Account.findOne({ email: { $eq: email } });    if (existingAccount) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
