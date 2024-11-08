@@ -10,6 +10,7 @@ function ChangePassword() {
   const [id, setId] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState(""); // Added state for error handling
 
   // Hook for navigation to different routes
   const navigate = useNavigate();
@@ -24,9 +25,24 @@ function ChangePassword() {
   // Function to handle form submission for password change
   const handleSubmit = async (event) => {
     event.preventDefault(); // Prevent default form submission behavior
+    setError(""); // Reset any previous errors
 
+    // Validate password match before submission
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      setError("Passwords do not match");
+      return;
+    }
+
+    // Added password strength validation on frontend
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long");
+      return;
+    }
+
+    // Regular expression to check password complexity
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      setError("Password must contain at least one uppercase letter, one lowercase letter, one number and one special character");
       return;
     }
 
@@ -39,7 +55,7 @@ function ChangePassword() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ password }),
+          body: JSON.stringify({ password }), // Simplified to only send new password
         }
       );
 
@@ -48,9 +64,7 @@ function ChangePassword() {
 
       // Check if the response was successful
       if (!response.ok) {
-        throw new Error(
-          result.message || "An error occurred while updating your password"
-        );
+        throw new Error(result.message || "Failed to update password");
       }
 
       // If the password change was successful
@@ -58,7 +72,7 @@ function ChangePassword() {
       navigate("/login"); // Navigate to the login page
     } catch (error) {
       console.error("Change password error:", error); // Log the error to the console
-      alert(error.message || "An error occurred while updating your password"); // Display the error to the user
+      setError(error.message || "An error occurred while updating your password"); // Display the error to the user
     }
   };
 
@@ -71,6 +85,12 @@ function ChangePassword() {
               <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
                 Change Your Password
               </h1>
+              {/* Added error message display */}
+              {error && (
+                <div className="p-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-red-200 dark:text-red-800" role="alert">
+                  {error}
+                </div>
+              )}
               <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
                 <div>
                   <label
@@ -88,7 +108,7 @@ function ChangePassword() {
                     required
                     value={id}
                     onChange={(e) => setId(e.target.value)} // Update ID state on change
-                    readOnly={!!id}
+                    readOnly={!!urlId}
                   />
                 </div>
                 <div>

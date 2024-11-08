@@ -7,7 +7,7 @@ const AccountSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-      index: true, // Add index on the events field
+      index: true, // Indexed for faster email-based queries
     },
     password: {
       type: String,
@@ -15,7 +15,7 @@ const AccountSchema = new mongoose.Schema(
     },
     events: {
       type: [String],
-      index: true, // Add index on the events field
+      index: true, // Indexed for faster event-based queries
     },
     isAdmin: {
       type: Boolean,
@@ -23,12 +23,12 @@ const AccountSchema = new mongoose.Schema(
     },
   },
   {
-    timestamps: true, // Automatically add 'createdAt' and 'updatedAt' timestamps
-    collection: "accounts", // Specifies the collection name in MongoDB
+    timestamps: true, // Adds createdAt and updatedAt fields
+    collection: "accounts",
   }
 );
 
-// Middleware function to hash the password before saving the document
+// Hash password before saving
 AccountSchema.pre("save", async function (next) {
   try {
     if (!this.isModified("password")) {
@@ -43,7 +43,11 @@ AccountSchema.pre("save", async function (next) {
   }
 });
 
-// Create and export the 'Account' model based on the schema
+// Method to compare passwords
+AccountSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
 const Account = mongoose.model("Account", AccountSchema);
 
 export default Account;

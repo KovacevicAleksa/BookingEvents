@@ -5,6 +5,8 @@ import Account from "../models/account.js";
 import { auth } from "../middleware/auth.js";
 import { resetAccountLimiter } from "../middleware/resetAccountLimiter.js";
 import { sendEmail } from "../services/emailService.js";
+import mongoose from 'mongoose'; // Added for ObjectId validation
+import bcrypt from 'bcrypt'; // Added for password hashing
 
 const router = express.Router();
 
@@ -62,25 +64,67 @@ router.patch("/edit/password/:id", async (req, res) => {
     const { id } = req.params;
     const { password } = req.body;
 
-    const account = await Account.findById(id);
-    if (!account) {
-      return res.status(404).json({ message: "Account not found" });
+    // Enhanced input validation
+    if (!id || !password) {
+      return res.status(400).json({ 
+        message: "All fields are required" 
+      });
     }
 
-    account.password = password;
-    await account.save();
+    // Validate MongoDB ObjectId format to prevent injection
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid ID format"
+      });
+    }
 
-    await sendEmail(
-      account.email,
-      "Password was changed",
-      "Your password has been successfully changed."
+    // Password strength validation
+    if (password.length < 8) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters long"
+      });
+    }
+
+    // Regular expression to check password complexity
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message: "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character"
+      });
+    }
+
+    // Generate salt and hash the password manually
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Update the password directly using updateOne to bypass the pre-save middleware
+    const updatedAccount = await Account.updateOne(
+      { _id: id },
+      { $set: { password: hashedPassword } }
     );
 
-    console.log("Password change notification email sent.");
+    if (updatedAccount.matchedCount === 0) {
+      return res.status(404).json({ 
+        message: "Account not found" 
+      });
+    }
 
-    res.status(200).json({ message: "Password updated successfully" });
+    // Return success without exposing sensitive data
+    res.status(200).json({ 
+      message: "Password updated successfully",
+      timestamp: new Date()
+    });
+
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    // Log error safely without exposing sensitive details
+    console.error("Password update error:", {
+      error: error.message,
+      timestamp: new Date()
+    });
+
+    res.status(500).json({ 
+      message: "An error occurred while updating the password"
+    });
   }
 });
 
