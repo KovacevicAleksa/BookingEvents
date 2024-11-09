@@ -9,6 +9,8 @@ volumes:
     driver: local # Uses local Docker storage for saving data
   pgadmin-data: # Volume for persisting pgAdmin data
     driver: local # Uses local Docker storage for pgAdmin configuration
+  redis-data: # Add the missing volume definition for Redis data
+    driver: local # Uses local Docker storage for Redis data
 
 services:
   frontend:
@@ -52,8 +54,11 @@ services:
       - PGADMIN_EMAIL=${PGADMIN_EMAIL}
       - PGADMIN_PASS=${PGADMIN_PASS}
       - DATABASE_URL=${DATABASE_URL}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
     depends_on:
       - postgres
+      - redis-cache
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"] # Health check using curl to check if API is up
       interval: 30s
@@ -138,3 +143,20 @@ services:
       retries: 5
     networks:
       - backend # Connects to the backend network
+
+  redis-cache:
+    image: redis:alpine
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - redis-data:/data
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
