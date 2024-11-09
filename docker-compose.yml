@@ -63,6 +63,28 @@ services:
       - frontend # Connects to the frontend network
       - backend # Connects to the backend network
 
+  go-service:
+    build:
+      context: ./backend/go # Points to the go directory inside backend
+      dockerfile: Dockerfile.go.backend # Uses your renamed Dockerfile
+    container_name: go-backend
+    ports:
+      - "8181:8181" # Maps port 8181 on host to container
+    environment:
+      - PG_USER=${PG_USER} # Sets PostgreSQL user from an environment variable
+      - PG_PASS=${PG_PASS} # Sets PostgreSQL password from an environment variable
+      - PG_DB=${PG_DB} # Sets PostgreSQL database name from an environment variable
+      - PG_HOST=${PG_HOST}
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8181/health || exit 1"] # Health check using curl to check if Go service is up
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - backend # Connects to the backend network
+
   nginx:
     build:
       context: ./backend # Builds from the backend directory

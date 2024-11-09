@@ -83,11 +83,18 @@ type Message struct {
 // Helper Functions
 
 // saveToJSONFile saves data to a JSON file in the persistent volume
+// saveToJSONFile saves data to a JSON file in the persistent volume
 func saveToJSONFile(data interface{}, filenamePrefix string) error {
 	// Get the current date
 	currentDate := time.Now().Format("2006-01-02")
 	filename := fmt.Sprintf("%s_%s.json", filenamePrefix, currentDate)
-	filepath := fmt.Sprintf("/data/db-backup/%s", filename)
+	backupDir := "/data/db-backup"
+	filepath := fmt.Sprintf("%s/%s", backupDir, filename)
+
+	// Create backup directory if it doesn't exist
+	if err := os.MkdirAll(backupDir, 0755); err != nil {
+		return fmt.Errorf("error creating backup directory: %v", err)
+	}
 
 	// Convert data to JSON with proper indentation
 	jsonData, err := json.MarshalIndent(data, "", "    ")
