@@ -88,12 +88,31 @@ metadata:
   name: redis-config
 data:
   redis.conf: |
-    # redis.conf
-
-    # Redis bind i port
+    # Main Redis configuration
     bind 0.0.0.0
     port 6379
-
-    # Trajanje keša u sekundama (TTL za podatke keša)
-    maxmemory-policy allkeys-lru
+    
+    # Security settings
+    protected-mode yes
+    # Use placeholder that will be replaced with actual password
+    requirepass ${REDIS_PASSWORD}
+    
+    # ACL configuration
+    user default on >${REDIS_PASSWORD} ~* &* +@all
+    
+    # Memory management
     maxmemory 256mb
+    maxmemory-policy allkeys-lru
+    
+    # Performance tuning
+    appendonly yes
+    appendfsync everysec
+    
+    # Connection settings
+    timeout 0
+    tcp-keepalive 300
+    
+    # Snapshotting
+    save 900 1
+    save 300 10
+    save 60 10000

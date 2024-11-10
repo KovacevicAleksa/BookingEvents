@@ -538,6 +538,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis
+  labels:
+    app: redis
 spec:
   replicas: 1
   selector:
@@ -551,32 +553,51 @@ spec:
       containers:
       - name: redis
         image: redis:alpine
+        env:
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: secrets
+              key: REDIS_PASSWORD
+        command:
+        - sh
+        - -c
+        - |
+          export REDIS_PASSWORD=$(echo $REDIS_PASSWORD)
+          envsubst < /usr/local/etc/redis/redis.conf > /tmp/redis.conf
+          redis-server /tmp/redis.conf
+        resources:
+          requests:
+            memory: "300Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
         ports:
         - containerPort: 6379
+          name: redis
         volumeMounts:
         - name: redis-config
           mountPath: /usr/local/etc/redis/redis.conf
           subPath: redis.conf
         - name: redis-data
           mountPath: /data
-        command: ["redis-server"]
-        args: ["/usr/local/etc/redis/redis.conf"]
         livenessProbe:
           exec:
             command:
-            - redis-cli
-            - ping
+            - /bin/sh
+            - -c
+            - redis-cli -a "$REDIS_PASSWORD" ping
           initialDelaySeconds: 30
           periodSeconds: 10
-          timeoutSeconds: 5
         readinessProbe:
           exec:
             command:
-            - redis-cli
-            - ping
+            - /bin/sh
+            - -c
+            - redis-cli -a "$REDIS_PASSWORD" ping
           initialDelaySeconds: 5
           periodSeconds: 10
-          timeoutSeconds: 5
       volumes:
       - name: redis-config
         configMap:
