@@ -67,3 +67,19 @@ spec:
   hostPath:
     path: /data/db-backup
     type: DirectoryOrCreate
+---
+# Redis PV
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-pv
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
+  hostPath:
+    path: /data/redis
+    type: DirectoryOrCreate

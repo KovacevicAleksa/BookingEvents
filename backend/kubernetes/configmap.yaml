@@ -80,3 +80,20 @@ data:
             regex: ([^:]+)(?::\d+)?;(\d+)
             replacement: $1:$2
             target_label: __address__
+---
+# Redis configMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-config
+data:
+  redis.conf: |
+    # redis.conf
+
+    # Redis bind i port
+    bind 0.0.0.0
+    port 6379
+
+    # Trajanje keša u sekundama (TTL za podatke keša)
+    maxmemory-policy allkeys-lru
+    maxmemory 256mb

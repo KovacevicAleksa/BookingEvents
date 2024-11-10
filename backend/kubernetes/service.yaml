@@ -100,7 +100,7 @@ spec:
       nodePort: 30003
   type: NodePort
 ---
-# Server Go
+# Service Go
 apiVersion: v1
 kind: Service
 metadata:
@@ -113,3 +113,18 @@ spec:
       port: 80
       targetPort: 8181
   type: NodePort
+---
+# Service Redis
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-cache
+  labels:
+    app: redis
+spec:
+  selector:
+    app: redis
+  ports:
+    - port: 6379
+      targetPort: 6379
+  type: ClusterIP
