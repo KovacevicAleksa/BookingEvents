@@ -73,3 +73,15 @@ spec:
     requests:
       storage: 5Gi
   storageClassName: standard
+---
+#Jenkins persistent Volume Claim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jenkins-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi

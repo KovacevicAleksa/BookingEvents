@@ -1,0 +1,37 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: example-pipeline
+spec:
+  tasks:
+  - name: build-and-push-image
+    taskRef:
+      name: kaniko
+    params:
+    - name: IMAGE
+      value: myregistry.azurecr.io/example-app:$(uid)
+  - name: deploy-to-k8s
+    taskRef: 
+      name: kubectl-apply
+    params:
+    - name: YAML_MANIFEST
+      value: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: example-app
+        spec:
+          replicas: 3
+          selector:
+            matchLabels:
+              app: example-app
+          template:
+            metadata:
+              labels:
+                app: example-app
+            spec:
+              containers:
+              - name: example-app
+                image: myregistry.azurecr.io/example-app:$(tasks.build-and-push-image.outputs.image-digest)
+                ports:
+                - containerPort: 80

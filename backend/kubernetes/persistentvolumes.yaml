@@ -86,3 +86,16 @@ spec:
   hostPath:
     path: /data/redis
     type: DirectoryOrCreate
+---
+# Jenkins Persistent Volume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jenkins-pv
+spec:
+  capacity:
+    storage: 3Gi
+  accessModes:
+  - ReadWriteOnce
+  hostPath:
+    path: /data/jenkins
