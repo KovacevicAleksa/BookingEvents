@@ -48,7 +48,7 @@
     "@babel/preset-react": "^7.24.7",
     "@chromatic-com/storybook": "^3.2.2",
     "@testing-library/jest-dom": "^6.4.8",
-    "@testing-library/react": "^16.0.0",
+    "@testing-library/react": "^16.0.1",
     "babel-jest": "^29.7.0",
     "eslint-plugin-storybook": "^0.11.0",
     "jest": "^27.5.1",
