@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-function HealthCheck() {
+function HealthCheckDashboard() {
   const { user } = useAuth();
   const MAX_HISTORY_POINTS = 20;
 
@@ -35,6 +35,12 @@ function HealthCheck() {
       lastChecked: null,
       error: null,
     },
+    redis: {
+      status: "pending",
+      responseTime: null,
+      lastChecked: null,
+      error: null,
+    },
   });
 
   const [performanceHistory, setPerformanceHistory] = useState([]);
@@ -43,6 +49,7 @@ function HealthCheck() {
     accounts: "#8884d8",
     events: "#82ca9d",
     postgresql: "#ffc658",
+    redis: "#ff6384",
   };
 
   const checkEndpoint = useCallback(
@@ -62,7 +69,7 @@ function HealthCheck() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        await response.json();
+        const data = await response.json();
 
         setHealthStatus((prev) => ({
           ...prev,
@@ -74,7 +81,7 @@ function HealthCheck() {
           },
         }));
 
-        return { responseTime, status: "healthy" };
+        return { responseTime, status: "healthy", data };
       } catch (error) {
         const endTime = performance.now();
         const responseTime = Math.round(endTime - startTime);
@@ -97,10 +104,11 @@ function HealthCheck() {
 
   const checkHealth = useCallback(async () => {
     const timestamp = new Date().toLocaleTimeString();
-    const [accounts, events, postgresql] = await Promise.all([
+    const [accounts, events, postgresql, redis] = await Promise.all([
       checkEndpoint("/admin/accounts", "accounts"),
       checkEndpoint("/view/events", "events"),
       checkEndpoint("/healthcheck/pg", "postgresql"),
+      checkEndpoint("/healthcheck/redis", "redis"),
     ]);
 
     setPerformanceHistory((prev) => {
@@ -114,6 +122,8 @@ function HealthCheck() {
           eventsStatus: events.status,
           postgresql: postgresql.responseTime,
           postgresqlStatus: postgresql.status,
+          redis: redis.responseTime,
+          redisStatus: redis.status,
         },
       ];
 
@@ -217,6 +227,13 @@ function HealthCheck() {
               color={serviceColors.postgresql}
             />
 
+            <ServiceCard
+              title="Redis"
+              endpoint="/healthcheck/redis"
+              status={healthStatus.redis}
+              color={serviceColors.redis}
+            />
+
             <div className="flex justify-center mt-4">
               <button
                 onClick={checkHealth}
@@ -279,7 +296,7 @@ function HealthCheck() {
             </div>
 
             {/* Performance Stats */}
-            <div className="grid grid-cols-3 gap-4 mt-6">
+            <div className="grid grid-cols-4 gap-4 mt-6">
               {Object.entries(serviceColors).map(([service, color]) => {
                 const times = performanceHistory
                   .map((h) => h[service])
@@ -314,4 +331,4 @@ function HealthCheck() {
   );
 }
 
-export default HealthCheck;
+export default HealthCheckDashboard;

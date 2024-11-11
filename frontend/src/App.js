@@ -4,7 +4,7 @@ import Login from "./routes/Login";
 import Registration from "./routes/Registration";
 import PrivateRoute from "./Components/PrivateRoute";
 import AdminAddEvent from "./routes/AdminAddEvent";
-import HealthCheck from "./routes/HealthCheck";
+import HealthCheckDashboard from "./routes/HealthCheck";
 import Unauthorized from "./routes/Unauthorized";
 import ForgotPassword from "./routes/ForgotPassword";
 import ChangePassword from "./routes/ChangePassword";
@@ -120,7 +120,7 @@ function App() {
         path="/admin/healthCheck"
         element={
           <PrivateRoute adminOnly={true}>
-            <HealthCheck />
+            <HealthCheckDashboard />
           </PrivateRoute>
         }
       />
