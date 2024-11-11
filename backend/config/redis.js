@@ -10,11 +10,6 @@ const __dirname = dirname(__filename);
 // Configure dotenv to load .env file from the correct location
 dotenv.config({ path: resolve(__dirname, '/.env') });
 
-// Validate Redis credentials
-// Added validation check to ensure Redis password is provided
-
-console.log(process.env.REDIS_PASSWORD);
-
 // Initialize a new Redis instance with custom configuration
 const redis = new Redis({
   host: 'redis-cache', // Specify the host where Redis is running
