@@ -632,10 +632,24 @@ spec:
         resources:
           requests:
             memory: "1Gi"
-            cpu: "1"
+            cpu: "500m"
           limits:
             memory: "2Gi"
             cpu: "2"
+        env:
+        - name: JAVA_OPTS
+          value: >-
+            -XX:+UseParallelGC
+            -XX:MinRAMPercentage=50.0
+            -XX:MaxRAMPercentage=75.0
+            -Dhudson.model.LoadStatistics.decay=0.5
+            -Dhudson.model.LoadStatistics.clock=2000
+            -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.HEARTBEAT_CHECK_INTERVAL=86400
+            -Djenkins.model.Jenkins.slaveAgentPort=50000
+        - name: JENKINS_OPTS
+          value: >-
+            --sessionTimeout=60
+            --sessionEviction=60
       volumes:
       - name: jenkins-home
         persistentVolumeClaim:
