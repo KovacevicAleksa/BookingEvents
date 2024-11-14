@@ -1,6 +1,8 @@
 import prometheus from "prom-client";
 import express from "express";
 import os from "os";
+import pkg from '@kubernetes/client-node';
+const { Kubernetes, KubeConfig } = pkg;
 
 const register = new prometheus.Registry();
 
