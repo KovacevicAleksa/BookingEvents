@@ -1,8 +1,6 @@
 import prometheus from "prom-client";
 import express from "express";
 import os from "os";
-import pkg from '@kubernetes/client-node';
-const { Kubernetes, KubeConfig } = pkg;
 
 const register = new prometheus.Registry();
 
@@ -190,6 +188,60 @@ metricsRouter.get("/metrics", async (req, res) => {
   }
 });
 
+// Kubernetes Pod CPU Usage Metric
+const kubernetesPodCpuUsage = new prometheus.Gauge({
+  name: "kubernetes_pod_cpu_usage_percent",
+  help: "Percentage of CPU usage per Kubernetes pod",
+  labelNames: ["namespace", "pod_name"],
+  collect() {
+    // Use the Kubernetes API to get CPU usage per pod
+    const podMetrics = fetchPodMetrics();
+    
+    // Iterate through the pod metrics and set the metric values
+    podMetrics.forEach((metric) => {
+      this.set(
+        { namespace: metric.namespace, pod_name: metric.podName },
+        metric.cpuUsagePercent
+      );
+    });
+  }
+});
+
+// Helper function to fetch pod metrics from Kubernetes API
+async function fetchPodMetrics() {
+  // Create a Kubernetes client using the default configuration
+  const kc = new KubeConfig();
+  kc.loadFromDefault();
+  const k8sApi = kc.makeApiClient(Kubernetes.CoreV1Api);
+
+  // Fetch pod metrics from all namespaces
+  const podList = await k8sApi.listPodForAllNamespaces();
+
+  const podMetrics = [];
+
+  // Iterate through the pods and collect CPU usage metrics
+  for (const pod of podList.body.items) {
+    const podName = pod.metadata.name;
+    const namespace = pod.metadata.namespace;
+
+    // Calculate CPU usage for the pod
+    const usageCpuMilli = pod.containers.reduce((total, container) => {
+      return total + (container.resources?.usage?.['cpu'] || 0);
+    }, 0);
+
+    const cpuUsagePercent = (usageCpuMilli / (1000 * pod.spec.containers.length)) * 100;
+
+    // Add the pod metrics to the array
+    podMetrics.push({
+      namespace,
+      podName,
+      cpuUsagePercent,
+    });
+  }
+
+  return podMetrics;
+}
+
 export {
   metrics,
   register,
@@ -198,4 +250,6 @@ export {
   monitorSocketIO,
   errorHandler,
   metricsRouter,
+  kubernetesPodCpuUsage,
+  fetchPodMetrics,
 };
