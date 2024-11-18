@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react"; // Import necessary hooks from React
+import React, { useState, useEffect, useCallback, useRef } from "react"; // Import necessary hooks from React
 import io from "socket.io-client"; // Import Socket.IO client
 import { useParams } from "react-router-dom"; // Import useParams to get URL parameters
 
@@ -14,7 +14,9 @@ const Chat = () => {
   // State to manage the number of active users in the chat
   const [activeUsers, setActiveUsers] = useState(0);
 
-  // Initialize the socket connection and set up event listeners
+  // Reference for the message list to enable auto-scrolling
+  const messagesEndRef = useRef(null);
+
   const initializeSocket = useCallback(() => {
     // Create a new socket connection
     const newSocket = io(`http://localhost:8081`, {
@@ -71,7 +73,14 @@ const Chat = () => {
     return cleanup; // Return cleanup function
   }, [initializeSocket]);
 
-  // Function to handle sending a message
+  // Auto-scroll to the latest message when messages change
+  useEffect(() => {
+    // Scroll to the bottom of the chat when new messages arrive
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
   const sendMessage = (e) => {
     e.preventDefault(); // Prevent default form submission
     // Emit the message if socket and message are valid
@@ -144,6 +153,8 @@ const Chat = () => {
       {/* Message List */}
       <ul className="flex-grow overflow-y-auto p-4 bg-gray-200">
         {renderMessages()}
+        {/* Add a reference to the bottom of the messages list */}
+        <div ref={messagesEndRef}></div>
       </ul>
 
       {/* Message Input */}
@@ -153,9 +164,9 @@ const Chat = () => {
             <input
               type="text"
               value={message}
-              onChange={(e) => setMessage(e.target.value)} // Update message state on input change
+              onChange={(e) => setMessage(e.target.value)}
               className="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Type a message..." // Placeholder for the input field
+              placeholder="Type a message..."
             />
             <button
               type="submit"
