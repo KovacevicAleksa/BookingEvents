@@ -3,9 +3,7 @@
 
 This is an Event Management System that allows users to register and log in securely. Each user can register for one event only once. The system features dynamic loading of events from the database.<br>
 
-## Technologies and Tools
 
-# Tehnologije u projektu
 
 ## **Backend:**
 
