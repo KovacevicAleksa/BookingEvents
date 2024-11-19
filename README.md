@@ -9,21 +9,19 @@ This is an Event Management System that allows users to register and log in secu
 
 1. **Node.js**: JavaScript runtime for server-side programming.
 2. **Express**: Web application framework for Node.js.
-3. **MongoDB**: NoSQL database for storing user accounts and events.
-4. **PostgreSQL**: Relational database for structured data storage.
-5. **pgAdmin**: Web-based management tool for PostgreSQL.
-6. **Go**: Programming language for building high-performance backend services.
-7. **Mongoose**: ODM library for MongoDB.
-8. **Socket.IO**: Library for real-time and live chat functionality.
-9. **JWT (jsonwebtoken)**: Library for handling authentication with JSON Web Tokens.
-10. **Bcrypt**: Library for hashing passwords.
-11. **Nodemailer**: Library for sending emails in Node.js applications.
-12. **Cors**: Middleware for enabling Cross-Origin Resource Sharing.
-13. **Helmet**: Security middleware for setting HTTP headers.
-14. **Rate Limit**: Middleware for rate limiting requests.
-15. **Body-Parser**: Middleware for parsing incoming request bodies.
-16. **dotenv**: Module for loading environment variables from a `.env` file.
-17. **Node Limits**: Module for managing file uploads and request limits.
+3. **Go**: Programming language for building high-performance backend services.
+4. **Socket.IO**: Library for real-time and live chat functionality.
+5. **JWT (jsonwebtoken)**: Library for handling authentication with JSON Web Tokens.
+6. **Bcrypt**: Library for hashing passwords.
+7. **Nodemailer**: Library for sending emails in Node.js applications.
+8. **Cors**: Middleware for enabling Cross-Origin Resource Sharing.
+9. **Helmet**: Security middleware for setting HTTP headers.
+10. **Rate Limit**: Middleware for rate limiting requests.
+11. **Body-Parser**: Middleware for parsing incoming request bodies.
+12. **dotenv**: Module for loading environment variables from a .env file.
+13. **Node Limits**: Module for managing file uploads and request limits.
+14. **pgAdmin**: Web-based management tool for PostgreSQL.
+15. **Mongoose**: ODM library for MongoDB.
 
 ## **Frontend:**
 
@@ -44,6 +42,12 @@ This is an Event Management System that allows users to register and log in secu
 2. **@testing-library/react**: A library for testing React components, which allows rendering components.
 3. **@testing-library/jest-dom**: An extension for Jest that adds useful matchers for testing DOM elements.
 4. **supertest**: A library that allows making HTTP requests in tests and verifying responses.
+
+## **Databases:**
+
+1. **MongoDB**: NoSQL database for storing user accounts and events.
+2. **PostgreSQL**: Relational database for structured data storage.
+3. **Redis**: In-memory data structure store used as a database, cache, and message broker.
 
 
 ## Start the application
