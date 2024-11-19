@@ -1,5 +1,5 @@
 # Build stage
-FROM node:23-alpine AS build
+FROM node:18-alpine AS build  
 
 # Set working directory
 WORKDIR /app
@@ -7,13 +7,17 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci
+# Clear npm cache and install dependencies with more verbosity
+RUN npm cache clean --force && \
+    npm install --verbose
 
 # Copy frontend source code
 COPY . .
 
-# Build the application
+# Add environment variable to increase Node's memory limit
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+# Build the application with more verbose output
 RUN npm run build
 
 # Production stage

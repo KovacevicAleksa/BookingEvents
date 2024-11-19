@@ -64,7 +64,7 @@ kind: Service
 metadata:
   name: frontend
 spec:
-  type: LoadBalancer # Exposing frontend externally
+  type: ClusterIP # Exposing frontend externally
   selector:
     app: frontend
   ports:
