@@ -1,7 +1,12 @@
 
 # Event Management System
 
-This is an Event Management System that allows users to register and log in securely. Each user can register for one event only once. The system features dynamic loading of events from the database.<br>
+BookingEvents is a comprehensive event management system developed with the goal of providing a secure process for
+user registration and participation in events. The system allows for easy and secure registration, ensuring the protection
+of user data. MongoDB is used for backend data management, while PostgreSQL is used for storing messages from live
+chat. Database backups are implemented using Go language. Modern technologies such as Nginx, Docker, and
+Kubernetes enable efficient and scalable infrastructure handling. CI/CD processes are implemented using GitHub Actions
+and Jenkins
 
 
 

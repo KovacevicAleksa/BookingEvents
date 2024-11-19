@@ -16,9 +16,9 @@ function Card(props) {
   // Check if the event has already expired
   const isExpired = eventDate < today;
 
-  // Format the date to display either "Isteklo" if expired or the event date
+  // Format the date to display either "Expired" if expired or the event date
   const formattedDate = isExpired
-    ? "Isteklo"
+    ? "Expired"
     : eventDate.toLocaleDateString("sr-Latn-RS", {
         weekday: "long",
         year: "numeric",
@@ -95,7 +95,7 @@ function Card(props) {
 
       // Fetch the current user's events to check if they are already registered
       const data = await fetchAccountData(accountId);
-      console.log("Sadrzaj korisnikovih eventa:", data.events);
+      console.log("User's event list:", data.events);
 
       // If the user is not already registered for the event
       console.log(data.events.includes(eventId));
@@ -120,11 +120,11 @@ function Card(props) {
         // If we also want to update the user's account with this event
         if (!onlyUpdateTotalPeople) {
           await updateAccountEvent(accountId, eventId);
-          alert("Uspesna prijava");
+          alert("Successfully registered");
         }
         setTotalPeople(newTotalPeople);
       } else {
-        alert("Vec ste se prijavili na event");
+        alert("You are already registered for this event");
       }
     } catch (error) {
       console.error("Error updating event:", error);
@@ -135,7 +135,7 @@ function Card(props) {
   async function fetchAccountEvents(accountId, eventId) {
     try {
       const data = await fetchAccountData(accountId);
-      console.log("Sadrzaj korisnikovih eventa:", data.events);
+      console.log("User's event list:", data.events);
       return data.events.includes(eventId);
     } catch (error) {
       console.error("Failed to fetch account events:", error);
@@ -165,19 +165,19 @@ function Card(props) {
 
       const result = await response.json();
       console.log("Success:", result);
-      alert("Uspesna odjava");
+      alert("Successfully deregistered");
     } catch (error) {
       console.error("Error:", error);
     }
   }
 
-  // Handle the click event for the "PRIJAVI SE" button
+  // Handle the click event for the "REGISTER" button
   const handleClick = () => {
     isExpired || updateTotalPeople(props.eventId, totalPeople + 1, false);
-    isExpired && alert("Event je istekao");
+    isExpired && alert("The event has expired");
   };
 
-  // Handle the click event for the "ODJAVI SE" button
+  // Handle the click event for the "UNREGISTER" button
   const handleDeleteEvent = async () => {
     try {
       const accountId = localStorage.getItem("accountid");
@@ -192,12 +192,12 @@ function Card(props) {
         await deleteEvent(accountId, eventId);
         await updateTotalPeople(eventId, totalPeople - 1, true);
       } else if (!isExpired) {
-        alert("Niste prijavljeni na event");
+        alert("You are not registered for this event");
         console.log("Event ID not found in user's events.");
       } else if (isExpired) {
-        alert("Event je istekao");
+        alert("The event has expired");
       } else if (totalPeople >= props.maxPeople) {
-        alert("Event is fully booked");
+        alert("The event is fully booked");
       }
     } catch (error) {
       console.error("Error handling delete event:", error);
@@ -238,20 +238,20 @@ function Card(props) {
         </a>
         <br></br>
         <span>
-          {props.description}{" "}
-          <div className="flex justify-between items-center">
-            <p
+          {props.description}
+          <div className="mt-4 flex justify-between items-center">
+            <button
               onClick={handleDeleteEvent}
-              className="font-ms text-lg text-left text-red-600 transition duration-500 ease-in-out mb-2 cursor-pointer"
+              className="font-ms text-lg text-red-600 border border-red-600 rounded-md px-4 py-2 transition duration-300 ease-in-out hover:bg-red-600 hover:text-white hover:scale-105"
             >
-              ODJAVI SE
-            </p>
-            <p
+              Leave
+            </button>
+            <button
               onClick={handleClick}
-              className="font-ms text-lg text-right text-indigo-600 transition duration-500 ease-in-out mb-2 cursor-pointer"
+              className="font-ms text-lg text-indigo-600 border border-indigo-600 rounded-md px-4 py-2 transition duration-300 ease-in-out hover:bg-indigo-600 hover:text-white hover:scale-105"
             >
-              PRIJAVI SE
-            </p>
+              Join
+            </button>
           </div>
         </span>
       </div>
