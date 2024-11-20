@@ -154,9 +154,9 @@ router.get("/edit/password/:email", resetAccountLimiter, async (req, res) => {
               <p>We received a request to reset the password for your account associated with this email address.</p>
               <p>If you requested this password reset, please click the link below to reset your password:</p>
               <p>ID: ${account.id}</p>
-              <p>http://localhost:3000/change-password/${account.id}</p>
+              <p>http://localhost/change-password/${account.id}</p>
               <div style="text-align: center; margin: 20px 0;">
-                <a href="http://localhost:3000/change-password/${account.id}"
+                <a href="http://localhost/change-password/${account.id}"
                   style="background-color: #28a745; color: #fff; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
                   Reset Password
                 </a>

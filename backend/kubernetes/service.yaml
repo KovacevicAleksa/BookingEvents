@@ -25,7 +25,7 @@ spec:
   ports:
     - protocol: TCP
       port: 8081 # Exposes port 8081 on the Service
-      targetPort: 8081 # Forwards traffic to port 8081 on the container
+      targetPort: 8081 # Forwards traffic to po rt 8081 on the container
 
 ---
 # PostgreSQL Service
@@ -63,14 +63,16 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend
+  labels:
+    app: frontend
 spec:
-  type: ClusterIP # Exposing frontend externally
   selector:
     app: frontend
   ports:
-    - protocol: TCP
-      port: 3000
+    - port: 80
       targetPort: 3000
+      protocol: TCP
+  type: ClusterIP
 ---
 # Grafana service
 apiVersion: v1

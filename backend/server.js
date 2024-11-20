@@ -81,7 +81,7 @@ app.use((req, res, next) => {
 
 // CORS configuration
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://localhost:3000", // Allow only requests from your frontend
+  origin: process.env.FRONTEND_URL || "http://localhost", // Allow only requests from your frontend
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // Allowed methods
   allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
   credentials: true, // Allow cookies to be sent with requests
@@ -91,7 +91,7 @@ const corsOptions = {
 // Initialize Socket.IO
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000", // Replace with your React app's URL
+    origin: process.env.FRONTEND_URL || "http://localhost", // Replace with your React app's URL
     methods: ["GET", "POST"],
     credentials: true, // Allow credentials to be included in Socket.IO requests
   },

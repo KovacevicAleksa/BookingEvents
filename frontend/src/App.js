@@ -68,8 +68,8 @@ function Data() {
             title={event.title}
             description={event.description}
             location={event.location}
-            photo={konferencija}
-            hoverPhoto={hoverPhoto}
+            photo={konferencija || "https://github.com/user-attachments/assets/f59f4fde-c4c6-4118-bf26-755064981064"} // fallback ako konferencija nije dostupna
+            hoverPhoto={hoverPhoto || "https://github.com/user-attachments/assets/a181e3fa-f86f-418e-8286-6f533e93c6c5"} // fallback ako hoverPhoto nije dostupno
             attendees={`/${event.maxPeople}`}
             date={event.date}
             eventId={event._id}

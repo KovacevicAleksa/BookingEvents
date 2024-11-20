@@ -208,7 +208,7 @@ function Card(props) {
     <div className="rounded overflow-hidden shadow-lg flex flex-col">
       <div className="relative">
         <a
-          href={`http://localhost:3000/chat/${props.title}`}
+          href={`http://localhost/chat/${props.title}`}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
