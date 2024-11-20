@@ -7,7 +7,7 @@
     "testEsLint": "npx eslint .",
     "dev": "nodemon server.js",
     "docker": "docker-compose up",
-    "k8s": "kubectl apply -f kubernetes/secret.yaml && kubectl apply -f kubernetes/deployment.yaml && kubectl apply -f kubernetes/service.yaml && kubectl apply -f kubernetes/configmap.yaml && kubectl apply -f kubernetes/persistentvolumeclaim.yaml && kubectl apply -f kubernetes/persistentvolumes.yaml && kubectl apply -f kubernetes/prometheus-rbac.yaml && kubectl apply -f kubernetes/network-policy.yaml && kubectl apply -f kubernetes/ingress.yaml",
+    "k8s": "kubectl apply -f kubernetes/secret.yaml && kubectl apply -f kubernetes/deployment.yaml && kubectl apply -f kubernetes/service.yaml && kubectl apply -f kubernetes/configmap.yaml && kubectl apply -f kubernetes/persistentvolumeclaim.yaml && kubectl apply -f kubernetes/persistentvolumes.yaml && kubectl apply -f kubernetes/prometheus-rbac.yaml && kubectl apply -f kubernetes/network-policy.yaml && kubectl apply -f kubernetes/ingress.yaml && kubectl apply -f kubernetes/ingress-nginx-deployment.yaml",
     "k8s-delete": "kubectl delete networkpolicies --all && kubectl delete deployments --all && kubectl delete services --all",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles --forceExit",
     "test:watch": "jest --watch"
