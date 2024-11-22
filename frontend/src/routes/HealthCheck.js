@@ -11,6 +11,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import config from "../config/config";
+
 
 function HealthCheckDashboard() {
   const { user } = useAuth();
@@ -56,7 +58,7 @@ function HealthCheckDashboard() {
     async (endpoint, type) => {
       const startTime = performance.now();
       try {
-        const response = await fetch(`http://localhost:8081${endpoint}`, {
+        const response = await fetch(`${config.api.baseURL}${endpoint}`, {
           headers: {
             Authorization: `Bearer ${user.token}`,
           },

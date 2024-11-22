@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
+import config from "../config/config"
+
 
 function AdminAddEvent() {
   const { user } = useAuth();
@@ -20,7 +22,7 @@ function AdminAddEvent() {
 
   const fetchAccounts = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:8081/admin/accounts", {
+      const response = await fetch(`${config.api.baseURL}${config.api.endpoints.adminaccounts}`, {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
@@ -36,7 +38,7 @@ function AdminAddEvent() {
 
   const fetchEvents = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:8081/view/events", {
+      const response = await fetch(`${config.api.baseURL}${config.api.endpoints.viewevents}`, {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
@@ -62,7 +64,7 @@ function AdminAddEvent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:8081/admin/add/events", {
+      const response = await fetch(`${config.api.baseURL}${config.api.endpoints.adminaddevents}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -93,7 +95,7 @@ function AdminAddEvent() {
 
     try {
       const response = await fetch(
-        `http://localhost:8081/delete/events/${deleteEventId.trim()}`,
+        `${config.api.baseURL}${config.api.endpoints.deleteevents}${deleteEventId.trim()}`,
         {
           method: "DELETE",
           headers: {
@@ -128,7 +130,7 @@ function AdminAddEvent() {
 
     try {
       const response = await fetch(
-        `http://localhost:8081/delete/users/${deleteAccountId.trim()}`,
+        `${config.api.baseURL}${config.api.endpoints.deleteusers}${deleteAccountId.trim()}`,
         {
           method: "DELETE",
           headers: {

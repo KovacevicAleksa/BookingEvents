@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import config from "../config/config";
 
 function Login() {
   // State variables for storing email and password input values
@@ -20,7 +21,7 @@ function Login() {
 
     try {
       // Make a POST request to the login endpoint with email and password
-      const response = await fetch("http://localhost:8081/login", {
+      const response = await fetch(`${config.api.baseURL}${config.api.endpoints.login}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

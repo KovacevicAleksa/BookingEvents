@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import config from "../config/config";
 
 function ForgotPassword() {
   // State variable for storing email input value
@@ -16,7 +17,7 @@ function ForgotPassword() {
     try {
       // Make a GET request to the forgot-password endpoint with the email
       const response = await fetch(
-        `http://localhost:8081/edit/password/${email}`,
+        `${config.api.baseURL}${config.api.endpoints.editpassword}${email}`,
         {
           method: "GET",
           headers: {

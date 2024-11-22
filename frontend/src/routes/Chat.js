@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react"; // Import necessary hooks from React
 import io from "socket.io-client"; // Import Socket.IO client
 import { useParams } from "react-router-dom"; // Import useParams to get URL parameters
+import config from "../config/config";
 
 const Chat = () => {
   // Get roomName from URL parameters
@@ -19,7 +20,7 @@ const Chat = () => {
 
   const initializeSocket = useCallback(() => {
     // Create a new socket connection
-    const newSocket = io(`http://localhost:8081`, {
+    const newSocket = io(`${config.api.baseURL}`, {
       withCredentials: true,
     });
     setSocket(newSocket); // Store the socket connection in state

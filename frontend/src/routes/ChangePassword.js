@@ -1,6 +1,8 @@
 /* eslint-disable jsx-a11y/anchor-has-content */
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import config from "../config/config";
+
 
 function ChangePassword() {
   // Get the user ID from the URL params
@@ -49,7 +51,7 @@ function ChangePassword() {
     try {
       // Make a PATCH request to the change-password endpoint with the new password
       const response = await fetch(
-        `http://localhost:8081/edit/password/${id}`,
+        `${config.api.baseURL}${config.api.endpoints.editpassword}${id}`,
         {
           method: "PATCH",
           headers: {

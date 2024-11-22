@@ -13,8 +13,10 @@ import Header from "./Components/Header";
 import Card from "./Components/Card";
 import konferencija from "./Components/assets/Konferencija.jpg";
 import hoverPhoto from "./Components/assets/hoverPhoto.gif";
+import config from "./config/config";
 
 import { useAuth } from "./context/AuthContext";
+
 
 // Data component to display events
 function Data() {
@@ -29,7 +31,7 @@ function Data() {
       }
 
       try {
-        const response = await fetch("http://localhost:8081/view/events", {
+        const response = await fetch(`${config.api.baseURL}${config.api.endpoints.viewevents}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import config from "../config/config";
+
 
 function Registration() {
   // State variables for storing email, password, and error messages
@@ -56,7 +58,7 @@ function Registration() {
 
     // Register the user via a POST request with form data
     try {
-      const response = await fetch("http://localhost:8081/register", {
+      const response = await fetch(`${config.api.baseURL}${config.api.endpoints.registration}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
