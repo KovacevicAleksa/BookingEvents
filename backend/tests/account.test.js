@@ -1,66 +1,24 @@
 import { jest, describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import dotenv from "dotenv";
 import request from "supertest";
-import mongoose from "mongoose";
 import app from "../server.js";
-import Account from "../models/account.js";
-import jwt from "jsonwebtoken";
+import { setupTestServer, setupTestDatabase, cleanupTest } from './setup/testSetup.js';
 
-dotenv.config();
-
-describe("API Tests", () => {
-  let authToken; // Authentication token
-  let server; // Server instance
-  let testUserId; // ID of the test user
+describe("Account API Tests", () => {
+  let server;
+  let authToken;
+  let testUser;
 
   beforeAll(async () => {
-    try {
-      // Close any existing connections
-      await mongoose.connection.close();
-
-      // Connect to the MongoDB database
-      await mongoose.connect(process.env.MONGODB_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
-
-      // Create a test user
-      const testUser = new Account({
-        email: "testuser@example.com",
-        password: "testpassword", // Consider hashing if your schema uses hooks
-      });
-      const savedUser = await testUser.save();
-      testUserId = savedUser._id;
-
-      // Generate an authentication token for the test user
-      authToken = jwt.sign(
-        { id: testUserId, email: testUser.email },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
-      );
-
-      // Start the server on a dynamic port
-      server = app.listen(0);
-    } catch (error) {
-      console.error("Setup failed:", error);
-      throw error;
-    }
+    const serverSetup = await setupTestServer(app);
+    server = serverSetup.server;
+    
+    const dbSetup = await setupTestDatabase();
+    authToken = dbSetup.authToken;
+    testUser = dbSetup.testUser;
   });
 
   afterAll(async () => {
-    try {
-      // Remove the test user
-      await Account.deleteOne({ _id: testUserId });
-
-      // Close the database connection
-      await mongoose.connection.close();
-
-      // Stop the server
-      await server.close();
-    } catch (error) {
-      console.error("Cleanup failed:", error);
-      throw error;
-    }
+    await cleanupTest(server, testUser);
   });
 
   describe("GET /accounts", () => {
@@ -69,12 +27,12 @@ describe("API Tests", () => {
         .get("/accounts")
         .set("Authorization", `Bearer ${authToken}`);
 
-      expect(response.statusCode).toBe(200); // Expect a successful response
-      expect(Array.isArray(response.body)).toBe(true); // Ensure the response is an array
+      expect(response.statusCode).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
       response.body.forEach((account) => {
-        expect(account).not.toHaveProperty("password"); // Ensure passwords are excluded
-        expect(account).not.toHaveProperty("_id"); // Ensure _id is excluded
-        expect(account).not.toHaveProperty("events"); // Ensure events are excluded
+        expect(account).not.toHaveProperty("password");
+        expect(account).not.toHaveProperty("_id");
+        expect(account).not.toHaveProperty("events");
       });
     }, 30000);
   });
@@ -85,8 +43,8 @@ describe("API Tests", () => {
         .get("/view/events")
         .set("Authorization", `Bearer ${authToken}`);
 
-      expect(response.statusCode).toBe(200); // Expect a successful response
-      expect(Array.isArray(response.body)).toBe(true); // Ensure the response is an array
+      expect(response.statusCode).toBe(200);
+      expect(Array.isArray(response.body)).toBe(true);
     }, 30000);
   });
 });

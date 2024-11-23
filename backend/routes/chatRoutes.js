@@ -8,23 +8,38 @@ dotenv.config(); // Load environment variables from .env file
 
 const router = express.Router(); // Creating a new Express router
 
-// PostgreSQL connection pool configuration
-const pool = new Pool({
-  host: process.env.PG_HOST || "postgres",
-  user: process.env.PG_USER,
-  password: process.env.PG_PASS,
-  database: process.env.PG_DB,
-  port: 5432,
-});
+// Initialize pool variable outside if/else blocks
+let pool;
 
+// Configure pool based on environment
+if (process.env.NODE_ENV === 'test') {
+  pool = new Pool({
+    host: 'localhost',  // Fixed: Added quotes around localhost
+    user: process.env.PG_USER,
+    password: process.env.PG_PASS,
+    database: process.env.PG_TEST_DB || 'test_db', // Added default test database
+    port: 5432,
+  });
+} else {
+  pool = new Pool({
+    host: process.env.PG_HOST || "postgres",
+    user: process.env.PG_USER,
+    password: process.env.PG_PASS,
+    database: process.env.PG_DB,
+    port: 5432,
+  });
+}
+
+if(process.env.NODE_ENV!=="test"){
 // Test connection to the database
 pool.query("SELECT NOW()", (err, res) => {
   if (err) {
+    console.log(process.env.NODE_ENV);
     console.error("Error connecting to the database", err); // Log error if connection fails
   } else {
     console.log("Successfully connected to the PostgreSQL"); // Log success message
   }
-});
+});}
 
 export default function (io) {
   const rooms = new Map(); // Map to keep track of rooms and connected users

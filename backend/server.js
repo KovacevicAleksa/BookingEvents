@@ -154,6 +154,7 @@ app.use("/api/chat", chatRoutes(io));
 app.use(errorHandler);
 
 // Connect to MongoDB and start the server
+process.env.NODE_ENV !== 'test' && 
 mongoose
   .connect(dbURI)
   .then(() => {
