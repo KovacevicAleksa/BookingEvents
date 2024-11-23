@@ -157,35 +157,47 @@ app.use(errorHandler);
 mongoose
   .connect(dbURI)
   .then(() => {
+    // Monitor MongoDB status (e.g., health, queries)
     monitorMongoDB(mongoose);
+
+    // Start the HTTP server once the database connection is successful
     httpServer.listen(port, () => {
+      // Monitor Socket.IO connections
       monitorSocketIO(io);
+
+      // Log information about server and database connection
       console.log(`Server is running on port ${port}`); // Log the server port
       console.log("Successfully connected to the MongoDB"); // Log successful database connection
       console.log(`Server start time: ${new Date().toLocaleString()}`); // Log the server start time
     });
   })
-  .catch((err) => console.log(`Database connection error: ${err}`)); // Log any database connection errors
+  .catch((err) => {
+    // Log any database connection errors
+    console.error(`Database connection error: ${err}`);
+  });
 
 // Handle graceful shutdown
 process.on("SIGTERM", () => {
   console.log("SIGTERM signal received: closing HTTP server");
 
+  // Close the HTTP server first
   httpServer.close(() => {
     console.log("HTTP server closed");
 
+    // Close the MongoDB connection
     mongoose.connection
       .close()
       .then(() => {
-        console.log("Mongoose connection closed.");
-        process.exit(0);
+        console.log("Mongoose connection closed."); // Log successful closure of MongoDB connection
+        process.exit(0); // Exit the process with a success code
       })
       .catch((err) => {
-        console.error("Error closing the Mongoose connection:", err);
-        process.exit(1);
+        console.error("Error closing the Mongoose connection:", err); // Log any errors during closure
+        process.exit(1); // Exit the process with a failure code
       });
   });
 });
+
 
 // Export the Express app for use in other files
 export default app;

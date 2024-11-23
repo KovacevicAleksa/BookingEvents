@@ -1,4 +1,5 @@
 import Redis from 'ioredis';
+import RedisMock from 'ioredis-mock'; // Import the mock Redis client
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
 import dotenv from 'dotenv';
@@ -11,36 +12,31 @@ const __dirname = dirname(__filename);
 dotenv.config({ path: resolve(__dirname, '/.env') });
 
 // Initialize a new Redis instance with custom configuration
-const redis = new Redis({
-  host: 'redis-cache', // Specify the host where Redis is running
-  port: 6379, // Default Redis port
-  password: process.env.REDIS_PASSWORD, // Load Redis password from .env file
-  username: process.env.REDIS_USERNAME || 'default', // Added Redis username with default fallback
-  tls: process.env.REDIS_TLS === 'true', // Added TLS support if enabled in env
-  retryStrategy: (times) => {
-    // Set a delay strategy for reconnection attempts, up to a maximum of 2 seconds
-    const delay = Math.min(times * 50, 2000);
-    return delay;
-  },
-  maxRetriesPerRequest: 5, // Limit the number of retries per request
-  enableReadyCheck: true, // Enable ready check for better connection validation
-  reconnectOnError: (err) => {
-    // Reconnect if Redis enters READONLY mode (e.g., during failover)
-    const targetError = 'READONLY';
-    if (err.message.includes(targetError)) {
-      return true;
-    }
-    return false;
-  },
-  // Added retry mechanism for authentication failures
-  retryOnAuthFailure: true,
-  // Added connection timeout
-  connectTimeout: 10000,
-  // Added keep-alive configuration
-  keepAlive: 10000,
-  // Added debug mode for better error tracking
-  showFriendlyErrorStack: process.env.NODE_ENV !== 'production'
-});
+const redis = process.env.NODE_ENV === 'test'
+  ? new RedisMock() // Use mock Redis for tests
+  : new Redis({
+      host: process.env.REDIS_HOST || 'redis-cache', // Specify the host where Redis is running
+      port: process.env.REDIS_PORT || 6379, // Default Redis port
+      password: process.env.REDIS_PASSWORD, // Load Redis password from .env file
+      username: process.env.REDIS_USERNAME || 'default', // Added Redis username with default fallback
+      tls: process.env.REDIS_TLS === 'true', // Added TLS support if enabled in env
+      retryStrategy: (times) => {
+        const delay = Math.min(times * 50, 2000); // Set a delay strategy for reconnection attempts
+        return delay;
+      },
+      maxRetriesPerRequest: 5, // Limit the number of retries per request
+      enableReadyCheck: true, // Enable ready check for better connection validation
+      reconnectOnError: (err) => {
+        if (err.message.includes('READONLY')) {
+          return true;
+        }
+        return false;
+      },
+      retryOnAuthFailure: true, // Retry mechanism for authentication failures
+      connectTimeout: 10000, // Connection timeout
+      keepAlive: 10000, // Keep-alive configuration
+      showFriendlyErrorStack: process.env.NODE_ENV !== 'production' // Debug mode for better error tracking
+    });
 
 const DEFAULT_EXPIRATION = 1800; // Cache expiration time in seconds (30 minutes)
 
@@ -52,10 +48,8 @@ const getOrSetCache = async (key, cb) => {
       return JSON.parse(data); // Return cached data if it exists
     }
     
-    // If no cached data, execute callback to fetch fresh data
-    const freshData = await cb();
-    // Store fresh data in cache with expiration
-    await redis.setex(key, DEFAULT_EXPIRATION, JSON.stringify(freshData));
+    const freshData = await cb(); // Execute callback to fetch fresh data if no cached data
+    await redis.setex(key, DEFAULT_EXPIRATION, JSON.stringify(freshData)); // Store fresh data in cache
     return freshData;
   } catch (error) {
     // Handle Redis errors and fallback to fresh data

@@ -9,7 +9,7 @@
     "docker": "docker-compose up",
     "k8s": "kubectl apply -f kubernetes/secret.yaml && kubectl apply -f kubernetes/deployment.yaml && kubectl apply -f kubernetes/service.yaml && kubectl apply -f kubernetes/configmap.yaml && kubectl apply -f kubernetes/persistentvolumeclaim.yaml && kubectl apply -f kubernetes/persistentvolumes.yaml && kubectl apply -f kubernetes/prometheus-rbac.yaml && kubectl apply -f kubernetes/network-policy.yaml && kubectl apply -f kubernetes/ingress.yaml && kubectl apply -f kubernetes/ingress-nginx-deployment.yaml",
     "k8s-delete": "kubectl delete networkpolicies --all && kubectl delete deployments --all && kubectl delete services --all",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --detectOpenHandles --forceExit",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.cjs --detectOpenHandles --forceExit",
     "test:watch": "jest --watch"
   },
   "keywords": [],
@@ -38,8 +38,12 @@
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "babel-jest": "^29.7.0",
     "eslint": "^9.5.0",
     "eslint-plugin-security": "^3.0.1",
+    "ioredis-mock": "^8.9.0",
     "jest": "^29.7.0",
     "nodemon": "^3.1.2",
     "supertest": "^7.0.0"
