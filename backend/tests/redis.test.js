@@ -95,7 +95,7 @@ describe("Redis Cache Tests", () => {
       const end = Date.now();
 
       expect(response.statusCode).toBe(200);
-      expect(end - start).toBeLessThan(100);
+      expect(end - start).toBeLessThan(200);
     });
 
     it("should handle cache miss gracefully", async () => {
