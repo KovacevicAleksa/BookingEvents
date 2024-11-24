@@ -36,7 +36,8 @@ describe("Account API Tests", () => {
 
   // Cleanup after all tests
   afterAll(async () => {
-    await Account.deleteMany({});
+    await Account.deleteMany({ email: `updated@example.com`});
+    await Account.deleteMany({ email: `test@example.com`});
     await cleanupTest(server, testUser);
   });
 

@@ -24,7 +24,7 @@ describe("Event API Tests", () => {
     
     // Create a sample event for testing
     const testEvent = await Event.create({
-      title: "Test Event",
+      title: "Auto Test Event",
       description: "This is a test event description",
       location: "Test Location",
       date: new Date(),
@@ -37,7 +37,8 @@ describe("Event API Tests", () => {
 
   // Clean up test data after all tests complete
   afterAll(async () => {
-    await Event.deleteMany({});
+    await Event.deleteMany({ title: `Auto Test Event`});
+    await Event.deleteMany({ title: `Updated Event Title`});
     await cleanupTest(server, testUser);
   });
 
@@ -69,7 +70,7 @@ describe("Event API Tests", () => {
         .set("Authorization", `Bearer ${authToken}`);
 
       expect(response.statusCode).toBe(200);
-      expect(response.body).toHaveProperty("title", "Test Event");
+      expect(response.body).toHaveProperty("title", "Auto Test Event");
     });
 
     // Test handling of non-existent event

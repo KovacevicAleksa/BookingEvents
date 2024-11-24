@@ -27,7 +27,7 @@ describe("Redis Cache Tests", () => {
     testUser = dbSetup.testUser;
     
     const testEvent = await Event.create({
-      title: "Test Event",
+      title: "Auto Test Event",
       description: "This is a test event description",
       location: "Test Location",
       date: new Date(),
@@ -47,11 +47,15 @@ describe("Redis Cache Tests", () => {
   });
 
   afterAll(async () => {
-    // Restore console functions
     jest.restoreAllMocks();
     
-    await Event.deleteMany({});
-    await redis.flushall();
+    await Event.deleteMany({ title: `Auto Test Event`});
+    
+    const testKeys = await redis.keys('event:test:*');
+    if (testKeys.length > 0) {
+      await redis.del(testKeys);
+    }
+    
     await redis.quit();
     await cleanupTest(server, testUser);
   });
