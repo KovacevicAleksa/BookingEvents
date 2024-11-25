@@ -83,7 +83,6 @@ type Message struct {
 // Helper Functions
 
 // saveToJSONFile saves data to a JSON file in the persistent volume
-// saveToJSONFile saves data to a JSON file in the persistent volume
 func saveToJSONFile(data interface{}, filenamePrefix string) error {
 	// Get the current date
 	currentDate := time.Now().Format("2006-01-02")

@@ -1,80 +1,135 @@
 import jwt from "jsonwebtoken";
 import Account from "../models/account.js";
 
-// Middleware for general user authentication
-const auth = async (req, res, next) => {
+/**
+ * Extracts and validates the JWT token from the Authorization header
+ * @param {Object} req - Express request object
+ * @returns {Object} Object containing the validation result and token
+ */
+const validateAuthHeader = (req) => {
+  const authHeader = req.header("Authorization");
+  if (!authHeader) {
+    throw new Error("No Authorization header provided");
+  }
+
+  const token = authHeader.replace("Bearer ", "").trim();
+  if (!token) {
+    throw new Error("No token provided");
+  }
+
+  return token;
+};
+
+/**
+ * Verifies JWT token and finds associated account
+ * @param {string} token - JWT token to verify
+ * @returns {Object} Verified account object
+ */
+const verifyTokenAndGetAccount = async (token) => {
   try {
-    const authHeader = req.header("Authorization"); // Get the Authorization header
-    if (!authHeader) {
-      return res
-        .status(401)
-        .send({ error: "No Authorization header provided." });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const account = await Account.findById(decoded.id);
+    
+    if (!account) {
+      throw new Error("Account not found");
     }
-
-    const token = authHeader.replace("Bearer ", ""); // Extract the token from the header
-    if (!token) {
-      return res.status(401).send({ error: "No token provided." });
+    
+    return account;
+  } catch (err) {
+    if (err.name === 'JsonWebTokenError') {
+      throw new Error("Invalid token");
     }
-
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify the token
-      const account = await Account.findById(decoded.id); // Find the account associated with the token
-
-      if (!account) {
-        return res.status(404).send({ error: "Account not found." });
-      }
-
-      req.account = account; // Attach the account to the request object
-      req.token = token; // Attach the token to the request object
-      next(); // Move to the next middleware or route handler
-    } catch (err) {
-      console.error("Error verifying token:", err);
-      return res.status(401).send({ error: "Invalid token." });
-    }
-  } catch (error) {
-    console.error("Auth error:", error);
-    res.status(500).send({ error: "Server error during authentication." });
+    throw err;
   }
 };
 
-// Middleware for admin authentication
+/**
+ * Middleware for general user authentication
+ * Validates JWT token and attaches account to request object
+ */
+const auth = async (req, res, next) => {
+  try {
+    // Extract and validate token
+    const token = validateAuthHeader(req);
+    
+    // Verify token and get account
+    const account = await verifyTokenAndGetAccount(token);
+    
+    // Attach account and token to request
+    req.account = account;
+    req.token = token;
+    
+    next();
+  } catch (error) {
+    // Handle specific error types
+    switch (error.message) {
+      case "No Authorization header provided":
+      case "No token provided":
+      case "Invalid token":
+        return res.status(401).json({ error: error.message });
+      case "Account not found":
+        return res.status(404).json({ error: error.message });
+      default:
+        console.error("Authentication error:", error);
+        return res.status(500).json({ error: "Server error during authentication" });
+    }
+  }
+};
+
+/**
+ * Middleware for admin authentication
+ * Extends user authentication to verify admin privileges
+ */
 const adminAuth = async (req, res, next) => {
   try {
-    const authHeader = req.header("Authorization"); // Get the Authorization header
-    if (!authHeader) {
-      return res
-        .status(401)
-        .send({ error: "No Authorization header provided." });
+    // First perform regular authentication
+    const token = validateAuthHeader(req);
+    const account = await verifyTokenAndGetAccount(token);
+    
+    // Check admin privileges
+    if (!account.isAdmin) {
+      return res.status(403).json({ error: "Access denied. Admin privileges required" });
     }
-
-    const token = authHeader.replace("Bearer ", ""); // Extract the token from the header
-    if (!token) {
-      return res.status(401).send({ error: "No token provided." });
-    }
-
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET); // Verify the token
-      const account = await Account.findById(decoded.id); // Find the account associated with the token
-
-      if (!account) {
-        return res.status(404).send({ error: "Account not found." });
-      }
-
-      if (!account.isAdmin) {
-        return res.status(403).send({ error: "User is not an admin." });
-      }
-
-      req.account = account; // Attach the account to the request object
-      req.token = token; // Attach the token to the request object
-      next(); // Move to the next middleware or route handler
-    } catch (err) {
-      console.error("Error verifying token:", err);
-      return res.status(401).send({ error: "Invalid token." });
-    }
+    
+    // Attach account and token to request
+    req.account = account;
+    req.token = token;
+    
+    next();
   } catch (error) {
-    console.error("adminAuth error:", error);
-    res.status(500).send({ error: "Server error during authentication." });
+    // Handle specific error types
+    switch (error.message) {
+      case "No Authorization header provided":
+      case "No token provided":
+      case "Invalid token":
+        return res.status(401).json({ error: error.message });
+      case "Account not found":
+        return res.status(404).json({ error: error.message });
+      default:
+        console.error("Admin authentication error:", error);
+        return res.status(500).json({ error: "Server error during authentication" });
+    }
   }
+};
+
+// Add rate limiting for failed authentication attempts
+const failedAuthAttempts = new Map();
+
+/**
+ * Helper to check for too many failed attempts
+ * @param {string} clientIp - IP address of the client
+ * @returns {boolean} Whether the client is rate limited
+ */
+const isRateLimited = (clientIp) => {
+  const attempts = failedAuthAttempts.get(clientIp) || { count: 0, timestamp: Date.now() };
+  
+  // Reset counter after 15 minutes
+  if (Date.now() - attempts.timestamp > 15 * 60 * 1000) {
+    failedAuthAttempts.delete(clientIp);
+    return false;
+  }
+  
+  return attempts.count >= 5;
 };
 
 export { auth, adminAuth };

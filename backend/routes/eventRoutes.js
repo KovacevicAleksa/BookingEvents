@@ -1,14 +1,14 @@
 import express from "express";
 import Event from "../models/event.js";
 import { auth } from "../middleware/auth.js";
-import { getOrSetCache, redis } from '../config/redis.js';  // Dodaj ovaj import
+import { getOrSetCache, redis } from '../config/redis.js';
 
 const router = express.Router();
 
 // Route to view all events with Redis caching
 router.get("/view/events", auth, async (req, res) => {
   try {
-    console.time('events-fetch'); // Meri vreme izvršavanja
+    console.time('events-fetch'); // Measure execution time
     
     const events = await getOrSetCache('events', async () => {
       console.log('Cache MISS - Fetching from Database');
@@ -16,7 +16,7 @@ router.get("/view/events", auth, async (req, res) => {
       return events;
     });
     
-    console.timeEnd('events-fetch'); // Prikazuje ukupno vreme
+    console.timeEnd('events-fetch'); // Display total time
     console.log(`Total events fetched: ${events.length}`);
 
     res.status(200).json(events);
