@@ -29,6 +29,14 @@ router.post("/admin/add/events", adminAuth, async (req, res) => {
       date,
     } = req.body;
 
+    // Check if an event with the same title already exists
+    const existingEvent = await Event.findOne({ title });
+    if (existingEvent) {
+      return res.status(400).json({
+        message: `Event with the title "${title}" already exists.`,
+      });
+    }
+
     const newEvent = new Event({
       price,
       title,

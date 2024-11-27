@@ -74,7 +74,8 @@ function AdminAddEvent() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to add event");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to add event");
       }
 
       const result = await response.json();
@@ -83,7 +84,7 @@ function AdminAddEvent() {
       fetchEvents(); // Refresh events after adding a new one
     } catch (error) {
       console.error("Error adding event:", error);
-      alert("Failed to add event. Please try again.");
+      alert(error.message);
     }
   };
 
