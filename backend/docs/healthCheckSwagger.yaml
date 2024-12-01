@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: Booking Event API - Health Check Routes
+  version: 1.0.0
+  description: Service health check routes for system monitoring
+
+paths:
+  /health:
+    get:
+      summary: Comprehensive system health check
+      tags:
+        - Health
+      responses:
+        '200':
+          description: All services are healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  services:
+                    type: object
+                    properties:
+                      postgresql:
+                        type: string
+                      mongodb:
+                        type: string
+                      redis:
+                        type: object
+                        properties:
+                          status:
+                            type: string
+                          latency:
+                            type: string
+        '500':
+          description: One or more services are unhealthy
+
+  /healthcheck/redis:
+    get:
+      summary: Redis service health check
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Redis is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  latency:
+                    type: string
+        '500':
+          description: Redis connection failed
+
+  /healthcheck/pg:
+    get:
+      summary: PostgreSQL database health check
+      tags:
+        - Health
+      responses:
+        '200':
+          description: PostgreSQL is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+        '500':
+          description: PostgreSQL connection failed

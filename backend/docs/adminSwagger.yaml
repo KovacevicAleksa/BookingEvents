@@ -1,0 +1,136 @@
+openapi: 3.0.0
+info:
+  title: Booking Event API - Admin Routes
+  version: 1.0.0
+  description: Administrative routes for managing users and events
+
+paths:
+  /admin/accounts:
+    get:
+      summary: Retrieve all user accounts (admin access)
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved all accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+        '500':
+          description: Server error
+
+  /admin/add/events:
+    post:
+      summary: Add a new event (admin only)
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventInput'
+      responses:
+        '201':
+          description: Event successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Event already exists
+        '500':
+          description: Server error
+
+  /delete/users/{id}:
+    delete:
+      summary: Delete a user account (admin only)
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User account successfully deleted
+        '404':
+          description: Account not found
+        '500':
+          description: Server error
+
+  /delete/events/{id}:
+    delete:
+      summary: Delete an event (admin only)
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event successfully deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  accountsUpdated:
+                    type: number
+        '404':
+          description: Event not found
+        '500':
+          description: Server error
+
+components:
+  schemas:
+    EventInput:
+      type: object
+      required:
+        - title
+        - price
+        - description
+        - location
+        - maxPeople
+        - date
+      properties:
+        price:
+          type: number
+        title:
+          type: string
+        description:
+          type: string
+        location:
+          type: string
+        maxPeople:
+          type: number
+        totalPeople:
+          type: number
+        date:
+          type: string
+          format: date-time
+
+    Event:
+      allOf:
+        - $ref: '#/components/schemas/EventInput'
+        - type: object
+          properties:
+            _id:
+              type: string

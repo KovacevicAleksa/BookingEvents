@@ -40,8 +40,16 @@ import eventRoutes from "./routes/eventRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import healthCheckRoutes from "./routes/healthCheckRoutes.js";
 
+// Import Swagger
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./swaggerConfig.js";
+
+
 // Initializing the Express application
 const app = express();
+
+// Swagger route
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Create HTTP server using the Express app
 const httpServer = http.createServer(app);

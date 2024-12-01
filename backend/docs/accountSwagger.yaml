@@ -1,0 +1,159 @@
+openapi: 3.0.0
+info:
+  title: Booking Event API - Account Routes
+  version: 1.0.0
+  description: API routes for account management and interactions
+
+paths:
+  /accounts:
+    get:
+      summary: Retrieve all accounts
+      tags:
+        - Accounts
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountSummary'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /accounts/{id}:
+    get:
+      summary: Retrieve a specific account by ID
+      tags:
+        - Accounts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieved account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /edit/account/{id}:
+    patch:
+      summary: Update an account
+      tags:
+        - Accounts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                events:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Account successfully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        '404':
+          description: Account not found
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /edit/password/{id}:
+    patch:
+      summary: Update account password
+      tags:
+        - Accounts
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+              properties:
+                password:
+                  type: string
+                  minLength: 8
+      responses:
+        '200':
+          description: Password successfully updated
+        '400':
+          description: Invalid password requirements
+        '500':
+          description: Server error
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Account:
+      type: object
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+        events:
+          type: array
+          items:
+            type: string
+
+    AccountSummary:
+      type: object
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
