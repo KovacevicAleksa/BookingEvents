@@ -117,14 +117,19 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// General rate limiter for all incoming requests
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15-minute window
-  max: 100, // Limit each IP to 100 requests per window
-  message: "Too many requests from this IP, please try again after 15 minutes",
-  standardHeaders: true, // Include rate limit info in `RateLimit-*` headers
-  legacyHeaders: false, // Disable `X-RateLimit-*` headers
-});
+// Check if rate limiting is enabled via the environment variable
+if (process.env.rateLimit === 'true') {
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15-minute window
+    max: 100, // Limit each IP to 100 requests per window
+    message: "Too many requests from this IP, please try again after 15 minutes",
+    standardHeaders: true, // Include rate limit info in `RateLimit-*` headers
+    legacyHeaders: false, // Disable `X-RateLimit-*` headers
+  });
+
+  // Apply the rate limiting middleware to all requests
+  app.use(limiter);
+}
 
 // Set limits on file uploads and request sizes
 app.use(
@@ -137,9 +142,6 @@ app.use(
 
 // Limit JSON request body size to 1MB
 app.use(bodyParser.json({ limit: "1mb" }));
-
-// Apply rate limiting middleware
-app.use(limiter);
 
 // Apply routes
 app.use("/", authRoutes); //POST /registration, /login

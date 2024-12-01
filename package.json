@@ -26,6 +26,7 @@
     "k8s-build:nginx": "docker build --network=host -t express-nginx:latest -f ./backend/Dockerfile.nginx ./backend",
     "k8s-build:frontend": "docker build --network=host -t react-frontend:latest -f ./frontend/Dockerfile.frontend ./frontend",
     "k8s-build:go": "docker build --network=host -t db-backup-go:latest -f ./backend/go/Dockerfile.go.backend ./backend/go",
+    "k6-stress-test":"k6 run backend/tests/manuallyTests/APITestK6test.js",
     "k8s-DUS": "npm run delete-k8s && npm run update-all && npm run all-k8s"
   },
   "dependencies": {

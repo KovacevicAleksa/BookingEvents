@@ -14,10 +14,10 @@ let pool;
 // Configure pool based on environment
 if (process.env.NODE_ENV === 'test') {
   pool = new Pool({
-    host: 'localhost',  // Fixed: Added quotes around localhost
+    host: 'localhost',
     user: process.env.PG_USER,
     password: process.env.PG_PASS,
-    database: process.env.PG_TEST_DB || 'test_db', // Added default test database
+    database: process.env.PG_TEST_DB || 'test_db',
     port: 5432,
   });
 } else {
