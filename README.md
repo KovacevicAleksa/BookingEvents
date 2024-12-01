@@ -27,6 +27,7 @@ and Jenkins
 13. **Node Limits**: Module for managing file uploads and request limits.
 14. **pgAdmin**: Web-based management tool for PostgreSQL.
 15. **Mongoose**: ODM library for MongoDB.
+16. **Swagger**: Tool for API documentation.
 
 ## **Frontend:**
 
@@ -84,6 +85,7 @@ npm run all-node
 ```
 npm run docker
 npm run k8s
+npm run k8s-DUS //Delete,Update,Start
 ```
 
 **Tests**
@@ -109,6 +111,8 @@ all-test
 | ![Screenshot 2024-09-29 183159](https://github.com/user-attachments/assets/f8dc8b35-fec2-4a67-84f3-ebdd225e7ab9) | ![Screenshot 2024-09-29 180505](https://github.com/user-attachments/assets/57d14279-7e87-411f-b8c5-210aacbff010) | ![Screenshot 2024-09-10 194413](https://github.com/user-attachments/assets/a3658412-25e8-4540-bd11-88c6c88bd12e) |
 | ![Screenshot 2024-10-24 151549](https://github.com/user-attachments/assets/450adb52-9ed2-4a33-8c10-eeccb8a4334a) | ![Screenshot 2024-09-10 201740](https://github.com/user-attachments/assets/2e0dd792-b3b7-474f-b977-d26239f4f6a4) | ![Screenshot 2024-10-26 002030](https://github.com/user-attachments/assets/b8421102-8a11-43f2-adef-c7073e246a34) |
 | !![Screenshot From 2024-11-18 16-11-03](https://github.com/user-attachments/assets/0a30ea63-a896-42ed-9caf-ec3435e3ddab) | ![Screenshot 2024-10-27 175923](https://github.com/user-attachments/assets/51e94f42-8f51-401e-86d1-c40fbcfffba4) | ![Screenshot 2024-10-27 174600](https://github.com/user-attachments/assets/e8f0c30a-4420-40b3-a7dd-f0eed573a463) |
+|![Screenshot From 2024-12-01 19-41-05](https://github.com/user-attachments/assets/11a7dc6e-0146-483b-b61c-07ebf4ff16b3)
+|||
 
 
 ## Folder structure
@@ -121,6 +125,12 @@ all-test
     └── 📁config
         └── .env
         └── redis.js
+        └── test.config.js
+    └── 📁docs
+        └── accountSwagger.yaml
+        └── adminSwagger.yaml
+        └── eventSwagger.yaml
+        └── healthCheckSwagger.yaml
     └── 📁go
         └── 📁config
             └── config.go
@@ -138,6 +148,9 @@ all-test
     └── 📁kubernetes
         └── configmap.yaml
         └── deployment.yaml
+        └── HPA.yml
+        └── ingress-nginx-deployment.yaml
+        └── ingress.yaml
         └── network-policy.yaml
         └── persistentvolumeclaim.yaml
         └── persistentvolumes.yaml
@@ -163,9 +176,16 @@ all-test
     └── 📁sql
         └── messages.sql
     └── 📁tests
-        └── APITestK6test.js
+        └── 📁manuallyTests
+            └── APITestK6LongTest.js
+            └── APITestK6test.js
+            └── metric_example.js
+        └── 📁setup
+            └── testSetup.js
+        └── account.test.js
         └── event.test.js
-        └── metric_example.js
+        └── redis.test.js
+        └── socketio.test.js
     └── .babelrc
     └── .dockerignore
     └── .env
@@ -177,57 +197,35 @@ all-test
     └── Dockerfile
     └── Dockerfile.nginx
     └── eslint.config.mjs
-    └── jest.config.js
+    └── jest.config.cjs
+    └── jest.setup.mjs
     └── nginx.conf
     └── package-lock.json
     └── package.json
     └── server.js
+    └── swaggerConfig.js
     └── ZAPToFix.md
-```
-```
-└── 📁frontend
-	└── 📁__mocks__
-		└── styleMock.js
-	└── 📁public
-		└── index.html
-		└── manifest.json
-		└── robots.txt
-	└── 📁src
-		└── 📁Components
-			└── 📁assets
-				└── hoverPhoto.gif
-				└── Konferencija.jpg
-			└── Card.js
-			└── Header.js
-			└── PrivateRoute.js
-		└── 📁context
-			└── AuthContext.js
-		└── 📁routes
-			└── AdminAddEvent.js
-			└── ChangePassword.js
-			└── Chat.js
-			└── ForgotPassword.js
-			└── Login.js
-			└── Registration.js
-			└── Unauthorized.js
-		└── App.js
-		└── index.css
-		└── index.js
-	└── 📁tests
-		└── Card.test.js
-	└── .babelrc
-	└── .gitignore
-	└── Dockerfile.frontend
-	└── nginx.conf
-	└── package-lock.json
-	└── package.json
-	└── README.md
-	└── tailwind.config.js
 ```
 ```
 └── 📁frontend
     └── 📁__mocks__
         └── styleMock.js
+    └── 📁build
+        └── 📁static
+            └── 📁css
+                └── main.ae835bc1.css
+                └── main.ae835bc1.css.map
+            └── 📁js
+                └── main.359c69a9.js
+                └── main.359c69a9.js.LICENSE.txt
+                └── main.359c69a9.js.map
+            └── 📁media
+                └── hoverPhoto.b2e2ccbe84873d9b24be.gif
+                └── Konferencija.7511b640952133852b1b.jpg
+        └── asset-manifest.json
+        └── index.html
+        └── manifest.json
+        └── robots.txt
     └── 📁public
         └── index.html
         └── manifest.json
@@ -240,6 +238,8 @@ all-test
             └── Card.js
             └── Header.js
             └── PrivateRoute.js
+        └── 📁config
+            └── config.js
         └── 📁context
             └── AuthContext.js
         └── 📁routes
@@ -257,6 +257,7 @@ all-test
     └── 📁tests
         └── Card.test.js
     └── .babelrc
+    └── .env
     └── .gitignore
     └── Dockerfile.frontend
     └── nginx.conf
@@ -264,6 +265,7 @@ all-test
     └── package.json
     └── README.md
     └── tailwind.config.js
+    └── webpack.config.js
 ```
 ```
 └── 📁.github
