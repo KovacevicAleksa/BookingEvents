@@ -4,11 +4,11 @@ import { check, sleep } from 'k6';
 
 export const options = {
     scenarios: {
-        test_scenario: { //300 req in 10 sec
+        test_scenario: { //1800 req in 60 sec
             executor: 'constant-arrival-rate', // Maintain a constant request rate
             rate: 30,                         // Target 30 iterations per second
             timeUnit: '1s',                   // Rate defined per second
-            duration: '10s',                  // Total test duration
+            duration: '60s',                  // Total test duration
             preAllocatedVUs: 50,              // Preallocate 50 virtual users
             maxVUs: 50,                       // Set a maximum of 50 virtual users
         },
