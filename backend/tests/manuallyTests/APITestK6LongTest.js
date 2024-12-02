@@ -19,7 +19,7 @@ export default function () {
     const url = 'http://localhost:8081/accounts'; // Endpoint to test
     const params = {
         headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YjkzMmVmNDVkNTExYWEzN2MwMjg4OSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaXNBZG1pbiI6dHJ1ZSwiaWF0IjoxNzMzMDU1ODcyLCJleHAiOjE3MzMwNTk0NzJ9.urZ7BNWEg0zTNAa2EGALcdgSQjfjdovitzciBciUbGI' // Bearer token for authorization
+            'Authorization': 'Bearer ...' // Bearer token for authorization
         },
     };
 
