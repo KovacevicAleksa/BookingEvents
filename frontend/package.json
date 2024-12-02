@@ -6,7 +6,7 @@
     "@testing-library/user-event": "^14.5.2",
     "dotenv-webpack": "^8.1.0",
     "jwt-decode": "^4.0.0",
-    "lucide-react": "^0.460.0",
+    "lucide-react": "^0.462.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
