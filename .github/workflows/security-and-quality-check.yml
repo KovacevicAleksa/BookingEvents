@@ -58,12 +58,11 @@ jobs:
         done
 
     - name: Run Gitleaks
-      uses: gitleaks/gitleaks-action@v2  # Use Gitleaks to scan for sensitive information
+      run: |  # Use Gitleaks CLI directly for scanning sensitive data
+        echo "Running Gitleaks..."
+        gitleaks detect --source . --config-path .github/gitleaks.toml --verbose
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Set the GitHub token from secrets
-      with:
-        config-path: .github/gitleaks.toml  # Specify the path to the Gitleaks config file
-        verbose: true  # Enable verbose output for more details
 
     - name: Upload Security Results
       if: always()  # Always run this step, regardless of previous failures
