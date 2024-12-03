@@ -205,7 +205,7 @@ function Card(props) {
   };
 
   return (
-    <div className="rounded overflow-hidden shadow-lg flex flex-col">
+    <div className="rounded-lg overflow-hidden shadow-xl flex flex-col bg-gray-800 text-white">
       <div className="relative">
         <a
           href={`http://localhost/chat/${props.title}`}
@@ -215,28 +215,27 @@ function Card(props) {
           <img
             className="w-full"
             src={isHovered ? props.hoverPhoto : props.photo}
-            alt="Conference"
+            alt="Event"
           />
-          <div className="hover:bg-transparent transition duration-300 absolute bottom-0 top-0 right-0 left-0 bg-gray-900 opacity-25"></div>
+          <div className="hover:bg-transparent transition duration-300 absolute bottom-0 top-0 right-0 left-0 bg-gray-900 opacity-30"></div>
         </a>
         <a href="#!">
-          <div className="text-l absolute top-0 right-0 bg-indigo-600 px-4 py-2 text-white mt-3 mr-3 hover:bg-white hover:text-indigo-600 transition duration-500 ease-in-out">
+          <div className="text-l absolute top-0 right-0 bg-green-600 px-4 py-2 text-white mt-3 mr-3 hover:bg-white hover:text-green-600 transition duration-500 ease-in-out">
             {props.price}
           </div>
-          <div className="text-l absolute top-0 left-0 bg-indigo-600 px-4 py-2 text-white mt-3 hover:bg-white hover:text-indigo-600 transition duration-500 ease-in-out">
-            {totalPeople}
-            {props.attendees}
+          <div className="text-l absolute top-0 left-0 bg-green-600 px-4 py-2 text-white mt-3 hover:bg-white hover:text-green-600 transition duration-500 ease-in-out">
+            {totalPeople} {props.attendees}
           </div>
         </a>
       </div>
       <div className="px-6 py-4 mb-auto">
         <a
           href="/events"
-          className="font-medium text-lg inline-block hover:text-indigo-600 transition duration-500 ease-in-out mb-2"
+          className="font-medium text-xl inline-block hover:text-green-600 transition duration-500 ease-in-out mb-2"
         >
           {props.title}
         </a>
-        <br></br>
+        <br />
         <span>
           {props.description}
           <div className="mt-4 flex justify-between items-center">
@@ -248,18 +247,15 @@ function Card(props) {
             </button>
             <button
               onClick={handleClick}
-              className="font-ms text-lg text-indigo-600 border border-indigo-600 rounded-md px-4 py-2 transition duration-300 ease-in-out hover:bg-indigo-600 hover:text-white hover:scale-105"
+              className="font-ms text-lg text-green-600 border border-green-600 rounded-md px-4 py-2 transition duration-300 ease-in-out hover:bg-green-600 hover:text-white hover:scale-105"
             >
               Join
             </button>
           </div>
         </span>
       </div>
-      <div className="px-6 py-3 flex flex-row items-center justify-between bg-gray-100">
-        <span
-          href="#"
-          className="py-1 text-xs font-regular text-gray-900 mr-1 flex flex-row items-center"
-        >
+      <div className="px-6 py-3 flex flex-row items-center justify-between bg-gray-700">
+        <span className="py-1 text-xs font-regular text-gray-300 mr-1 flex flex-row items-center">
           <span className="ml-1">{props.location}</span>
         </span>
         <span className="mr-1">{formattedDate}</span>

@@ -8,7 +8,8 @@ import HealthCheckDashboard from "./routes/HealthCheck";
 import Unauthorized from "./routes/Unauthorized";
 import ForgotPassword from "./routes/ForgotPassword";
 import ChangePassword from "./routes/ChangePassword";
-import QrCode from "./routes/QrCode"
+import QrCode from "./routes/QrCode";
+import Profile from "./routes/Profile";
 import Chat from "./routes/Chat";
 import Header from "./Components/Header";
 import Card from "./Components/Card";
@@ -62,7 +63,7 @@ function Data() {
   }, [user, checkTokenExpiration, logout]);
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-900">
       {Array.isArray(eventData) &&
         eventData.map((event) => (
           <Card
@@ -71,8 +72,8 @@ function Data() {
             title={event.title}
             description={event.description}
             location={event.location}
-            photo={konferencija || "https://github.com/user-attachments/assets/f59f4fde-c4c6-4118-bf26-755064981064"} // fallback ako konferencija nije dostupna
-            hoverPhoto={hoverPhoto || "https://github.com/user-attachments/assets/a181e3fa-f86f-418e-8286-6f533e93c6c5"} // fallback ako hoverPhoto nije dostupno
+            photo={konferencija || "https://github.com/user-attachments/assets/f59f4fde-c4c6-4118-bf26-755064981064"}
+            hoverPhoto={hoverPhoto || "https://github.com/user-attachments/assets/a181e3fa-f86f-418e-8286-6f533e93c6c5"}
             attendees={`/${event.maxPeople}`}
             date={event.date}
             eventId={event._id}
@@ -80,7 +81,7 @@ function Data() {
           />
         ))}
     </div>
-  );
+  );  
 }
 
 export function Events() {
@@ -88,7 +89,7 @@ export function Events() {
 
   return (
     <div>
-      <Header userEmail={user?.email} onLogout={logout} />
+      <Header userEmail={user?.email} onLogout={logout}/>
       <Data />
     </div>
   );
@@ -104,6 +105,7 @@ function App() {
       <Route path="/change-password/:id" element={<ChangePassword />} />
       <Route path="/chat/:roomName" element={<Chat />} />
       <Route path="/qrcode" element={<QrCode />} />
+      <Route path="/profile" element={<Profile />} />
       <Route
         path="/events"
         element={
