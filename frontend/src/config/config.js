@@ -10,7 +10,7 @@ const config = {
         adminaccounts: '/admin/accounts',
         deleteevents: '/delete/events/',
         deleteusers: '/delete/users/',
-
+        qrcodeGenerator: '/generate-qrcode',
       }
     }
   };

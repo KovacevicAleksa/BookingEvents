@@ -8,6 +8,7 @@ import HealthCheckDashboard from "./routes/HealthCheck";
 import Unauthorized from "./routes/Unauthorized";
 import ForgotPassword from "./routes/ForgotPassword";
 import ChangePassword from "./routes/ChangePassword";
+import QrCode from "./routes/QrCode"
 import Chat from "./routes/Chat";
 import Header from "./Components/Header";
 import Card from "./Components/Card";
@@ -102,6 +103,7 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/change-password/:id" element={<ChangePassword />} />
       <Route path="/chat/:roomName" element={<Chat />} />
+      <Route path="/qrcode" element={<QrCode />} />
       <Route
         path="/events"
         element={
