@@ -1,4 +1,7 @@
 const config = {
+    url:{
+      baseURL: 'http://localhost',
+    },
     api: {
       baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8081',
       endpoints: {

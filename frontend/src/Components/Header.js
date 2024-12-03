@@ -1,4 +1,5 @@
 import React from "react";
+import config from "../config/config.js";
 
 function Header({ userEmail, onLogout}) {
   return (
@@ -54,13 +55,13 @@ function Header({ userEmail, onLogout}) {
             {userEmail}
           </span>
           <button
-            onClick={() => { window.location.href = 'http://localhost:3000/profile'; }}
+            onClick={() => { window.location.href = `${config.url.baseURL}/profile`; }}
             className="px-4 py-2 bg-green-600 text-white rounded-full shadow hover:bg-green-700 hover:shadow-lg transition duration-300"
           >
             Profile
           </button>
           <button
-            onClick={() => { window.location.href = 'http://localhost:3000/profile'; }}
+            onClick={onLogout}
             className="px-4 py-2 bg-red-600 text-white rounded-full shadow hover:bg-red-700 hover:shadow-lg transition duration-300"
           >
             Logout

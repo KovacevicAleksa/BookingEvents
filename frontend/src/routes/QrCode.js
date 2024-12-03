@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import config from "../config/config";
 
+
 function QrCodeGenerator() {
   const [inputText, setInputText] = useState("");
   const [qrCode, setQrCode] = useState(null);
