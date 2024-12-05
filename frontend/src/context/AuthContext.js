@@ -36,7 +36,8 @@ export const AuthProvider = ({ children }) => {
           // Token has expired, log out the user
           logout();
         } else {
-          setUser({ token, ...decoded });
+          // Add isAdmin and isOrganizer to user state if they exist in token
+          setUser({ token, ...decoded, isAdmin: decoded.isAdmin, isOrganizer: decoded.isOrganizer });
         }
       } catch (error) {
         // If there's an error decoding, remove the invalid token
@@ -47,10 +48,10 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(false);
   }, [logout]); // Add logout to the dependency array
 
-  const login = (token, isAdmin) => {
+  const login = (token, isAdmin, isOrganizer) => {
     localStorage.setItem("token", token);
     const decoded = jwtDecode(token);
-    setUser({ token, ...decoded, isAdmin });
+    setUser({ token, ...decoded, isAdmin, isOrganizer }); // Add isAdmin and isOrganizer from token
   };
 
   // New function to check token expiration

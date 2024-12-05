@@ -21,6 +21,10 @@ const AccountSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isOrganizer: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields

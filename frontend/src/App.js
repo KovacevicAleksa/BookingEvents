@@ -104,7 +104,6 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/change-password/:id" element={<ChangePassword />} />
       <Route path="/chat/:roomName" element={<Chat />} />
-      <Route path="/qrcode" element={<QrCode />} />
       <Route path="/profile" element={<Profile />} />
       <Route
         path="/events"
@@ -127,6 +126,14 @@ function App() {
         element={
           <PrivateRoute adminOnly={true}>
             <HealthCheckDashboard />
+          </PrivateRoute>
+        }
+      />
+            <Route
+        path="/qrcode"
+        element={
+          <PrivateRoute organizerOnly={true}>
+            <QrCode />
           </PrivateRoute>
         }
       />

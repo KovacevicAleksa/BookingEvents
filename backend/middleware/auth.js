@@ -48,6 +48,13 @@ const verifyTokenAndGetAccount = async (token) => {
  * Validates JWT token and attaches account to request object
  */
 const auth = async (req, res, next) => {
+  const clientIp = req.ip;  // Get the client's IP address
+
+  // Check if the client is rate-limited
+  if (isRateLimited(clientIp)) {
+    return res.status(429).json({ error: "Too many failed attempts. Please try again later." });
+  }
+
   try {
     // Extract and validate token
     const token = validateAuthHeader(req);
@@ -61,6 +68,11 @@ const auth = async (req, res, next) => {
     
     next();
   } catch (error) {
+    // Log failed authentication attempt
+    const attempts = failedAuthAttempts.get(clientIp) || { count: 0, timestamp: Date.now() };
+    attempts.count += 1;
+    failedAuthAttempts.set(clientIp, attempts);
+
     // Handle specific error types
     switch (error.message) {
       case "No Authorization header provided":
@@ -78,11 +90,18 @@ const auth = async (req, res, next) => {
 
 /**
  * Middleware for admin authentication
- * Extends user authentication to verify admin privileges
+ * Extends user authentication to verify admin privileges with rate limiting
  */
 const adminAuth = async (req, res, next) => {
+  const clientIp = req.ip;  // Get the client's IP address
+
+  // Check if the client is rate-limited
+  if (isRateLimited(clientIp)) {
+    return res.status(429).json({ error: "Too many failed attempts. Please try again later." });
+  }
+
   try {
-    // First perform regular authentication
+    // Extract and validate token
     const token = validateAuthHeader(req);
     const account = await verifyTokenAndGetAccount(token);
     
@@ -97,6 +116,11 @@ const adminAuth = async (req, res, next) => {
     
     next();
   } catch (error) {
+    // Log failed authentication attempt
+    const attempts = failedAuthAttempts.get(clientIp) || { count: 0, timestamp: Date.now() };
+    attempts.count += 1;
+    failedAuthAttempts.set(clientIp, attempts);
+
     // Handle specific error types
     switch (error.message) {
       case "No Authorization header provided":
@@ -107,6 +131,54 @@ const adminAuth = async (req, res, next) => {
         return res.status(404).json({ error: error.message });
       default:
         console.error("Admin authentication error:", error);
+        return res.status(500).json({ error: "Server error during authentication" });
+    }
+  }
+};
+
+/**
+ * Middleware for organizer authentication
+ * Extends user authentication to verify organizer privileges with rate limiting
+ */
+const organizerAuth = async (req, res, next) => {
+  const clientIp = req.ip;  // Get the client's IP address
+
+  // Check if the client is rate-limited
+  if (isRateLimited(clientIp)) {
+    return res.status(429).json({ error: "Too many failed attempts. Please try again later." });
+  }
+
+  try {
+    // Extract and validate token
+    const token = validateAuthHeader(req);
+    const account = await verifyTokenAndGetAccount(token);
+    
+    // Check organizer privileges
+    if (!account.isOrganizer) {
+      return res.status(403).json({ error: "Access denied. Organizer privileges required" });
+    }
+    
+    // Attach account and token to request
+    req.account = account;
+    req.token = token;
+    
+    next();
+  } catch (error) {
+    // Log failed authentication attempt
+    const attempts = failedAuthAttempts.get(clientIp) || { count: 0, timestamp: Date.now() };
+    attempts.count += 1;
+    failedAuthAttempts.set(clientIp, attempts);
+
+    // Handle specific error types
+    switch (error.message) {
+      case "No Authorization header provided":
+      case "No token provided":
+      case "Invalid token":
+        return res.status(401).json({ error: error.message });
+      case "Account not found":
+        return res.status(404).json({ error: error.message });
+      default:
+        console.error("Organizer authentication error:", error);
         return res.status(500).json({ error: "Server error during authentication" });
     }
   }
@@ -132,4 +204,4 @@ const isRateLimited = (clientIp) => {
   return attempts.count >= 5;
 };
 
-export { auth, adminAuth };
+export { auth, adminAuth, organizerAuth };

@@ -9,7 +9,8 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const existingAccount = await Account.findOne({ email: { $eq: email } });    if (existingAccount) {
+    const existingAccount = await Account.findOne({ email: { $eq: email } });
+    if (existingAccount) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
@@ -17,6 +18,7 @@ router.post("/register", async (req, res) => {
       email,
       password,
       isAdmin: false,
+      isOrganizer: false,
     });
     await account.save(); // Save the new account to the database
     res.status(201).json(account); // Return the newly created account
@@ -49,7 +51,7 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: account._id, email: account.email, isAdmin: account.isAdmin },
+      { id: account._id, email: account.email, isAdmin: account.isAdmin, isOrganizer: account.isOrganizer }, // Add isOrganizer to token
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -62,6 +64,7 @@ router.post("/login", async (req, res) => {
         id: account._id,
         email: account.email,
         isAdmin: account.isAdmin,
+        isOrganizer: account.isOrganizer,
         events: account.events,
       },
     });

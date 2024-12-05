@@ -5,9 +5,16 @@ import config from "../config/config";
 
 
 function QrCodeGenerator() {
-  const [inputText, setInputText] = useState("");
+  const { user } = useAuth();
+    const [inputText, setInputText] = useState("");
   const [qrCode, setQrCode] = useState(null);
   const [error, setError] = useState("");
+
+    // Redirect if the user is not an organizer
+    const navigate = useNavigate();
+    if (user && !user.isOrganizer) {
+      navigate("/unauthorized"); // Redirect to an unauthorized page or a route of your choice
+    }
 
   const handleGenerateQrCode = async () => {
     try {
@@ -31,6 +38,9 @@ function QrCodeGenerator() {
       setQrCode(null);
     }
   };
+  if (!user || !user.isOrganizer) {
+    return <p>You do not have permission to access this page. Please contact support.</p>;
+  }
 
   return (
     <div style={{ textAlign: "center", marginTop: "20px" }}>
