@@ -40,6 +40,7 @@ import eventRoutes from "./routes/eventRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import healthCheckRoutes from "./routes/healthCheckRoutes.js";
 import barcodeRoutes from "./routes/barcodeRoutes.js"
+import ticketRoutes from "./routes/ticketRoutes.js"
 
 // Import Swagger
 import swaggerUi from "swagger-ui-express";
@@ -159,6 +160,7 @@ app.use("/", eventRoutes); //GET /events, POST /create/event, PATCH /edit/event/
 app.use("/", adminRoutes); //Admin routes (protected by adminAuth middleware)
 app.use("/", healthCheckRoutes); //Health check routes
 app.use("/", barcodeRoutes); //Barcode  routes
+app.use("/", ticketRoutes);//Ticket routes
 
 
 // New chat route using the initialized Socket.IO instance
