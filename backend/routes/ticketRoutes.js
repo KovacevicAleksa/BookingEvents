@@ -33,14 +33,14 @@ router.get("/tickets/:id", auth, async (req, res) => {
 // Route to create a new ticket
 router.post("/tickets", auth, async (req, res) => {
   try {
-    const { eventName, assignedTo } = req.body;
+    const { eventID, assignedTo } = req.body;
 
     // Check for required fields
-    if (!eventName || !assignedTo) {
-      return res.status(400).json({ message: "Event Name and Assigned To are required" });
+    if (!eventID || !assignedTo) {
+      return res.status(400).json({ message: "Event ID and Assigned To are required" });
     }
 
-    const newTicket = new Ticket({ eventName, assignedTo });
+    const newTicket = new Ticket({ eventID, assignedTo });
     await newTicket.save(); // Save the ticket to the database
 
     res.status(201).json(newTicket); // Return the newly created ticket

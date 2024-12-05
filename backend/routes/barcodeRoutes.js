@@ -1,12 +1,11 @@
 import express from "express";
 import QRCode from "qrcode"; // Use qrcode library for Node.js
-import Account from "../models/account.js";
 import { auth } from "../middleware/auth.js";
 
 const router = express.Router();
 
 // Endpoint for generating a 2D QR Code
-router.post("/generate-qrcode", async (req, res) => {
+router.post("/generate-qrcode", auth, async (req, res) => {
   try {
     const { text } = req.body; // Text or data to encode in the QR Code
 

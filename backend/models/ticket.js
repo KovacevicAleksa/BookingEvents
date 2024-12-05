@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 // Define the schema for the 'Ticket' collection
 const TicketSchema = new mongoose.Schema(
   {
-    eventName: {
+    eventID: {
       type: String,
       required: true,
     },

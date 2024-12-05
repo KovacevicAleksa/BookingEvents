@@ -82,54 +82,64 @@ function Card(props) {
     }
   }
 
-  // Function to update the total number of people for the event
-  const updateTotalPeople = async (
-    eventId,
-    newTotalPeople,
-    onlyUpdateTotalPeople
-  ) => {
-    try {
-      const accountId = localStorage.getItem("accountid");
-      console.log(localStorage.getItem("accountid"));
-      console.log(accountId);
+// Function to update the total number of people for the event
+const updateTotalPeople = async (
+  eventId,
+  newTotalPeople,
+  onlyUpdateTotalPeople,
+  makeTickets = false
+) => {
+  try {
+    const accountId = localStorage.getItem("accountid");
+    console.log(localStorage.getItem("accountid"));
+    console.log(accountId);
 
-      // Fetch the current user's events to check if they are already registered
-      const data = await fetchAccountData(accountId);
-      console.log("User's event list:", data.events);
+    // Fetch the current user's events to check if they are already registered
+    const data = await fetchAccountData(accountId);
+    console.log("User's event list:", data.events);
 
-      // If the user is not already registered for the event
-      console.log(data.events.includes(eventId));
-      if (!data.events.includes(eventId)) {
-        // Update the total number of people registered for the event
-        const eventUpdateTotalPeople = await fetch(
-          `http://localhost:8081/edit/events/${eventId}`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
-            },
-            body: JSON.stringify({ totalPeople: newTotalPeople }),
-          }
-        );
-
-        if (!eventUpdateTotalPeople.ok) {
-          throw new Error("Network response was not ok");
+    // If the user is not already registered for the event
+    console.log(data.events.includes(eventId));
+    if (!data.events.includes(eventId)) {
+      // Update the total number of people registered for the event
+      const eventUpdateTotalPeople = await fetch(
+        `http://localhost:8081/edit/events/${eventId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          body: JSON.stringify({ totalPeople: newTotalPeople }),
         }
+      );
 
-        // If we also want to update the user's account with this event
-        if (!onlyUpdateTotalPeople) {
-          await updateAccountEvent(accountId, eventId);
-          alert("Successfully registered");
-        }
-        setTotalPeople(newTotalPeople);
-      } else {
-        alert("You are already registered for this event");
+      if (!eventUpdateTotalPeople.ok) {
+        throw new Error("Network response was not ok");
       }
-    } catch (error) {
-      console.error("Error updating event:", error);
+
+      // If we also want to update the user's account with this event
+      if (!onlyUpdateTotalPeople) {
+        await updateAccountEvent(accountId, eventId);
+        alert("Successfully registered");
+
+        // Create tickets if required
+        console.log("makeTickets value:", makeTickets); // Proveri šta je ovo
+        if (typeof makeTickets === "function") {
+          await makeTickets(eventId, accountId);
+        } else {
+          console.error("makeTickets is not a function or is undefined.");
+        }
+      }
+      setTotalPeople(newTotalPeople);
+    } else {
+      alert("You are already registered for this event");
     }
-  };
+  } catch (error) {
+    console.error("Error updating event:", error);
+  }
+};
+
 
   // Function to fetch the events of a specific user account
   async function fetchAccountEvents(accountId, eventId) {
@@ -171,11 +181,50 @@ function Card(props) {
     }
   }
 
+// Function to create a new ticket
+async function makeTickets(eventID, assignedTo) {
+  const url = "http://localhost:8081/tickets"; // The backend route to create a ticket
+  const data = {
+    eventID,      // Dynamically passed event ID
+    assignedTo,   // Dynamically passed user ID
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: "POST", // Use POST to create a new ticket
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.token}`, // Make sure to pass the user's token for authentication
+      },
+      body: JSON.stringify(data), // Send the event data as JSON
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log("Success:", result); // Log the response data from the backend
+    alert("Ticket created successfully");
+  } catch (error) {
+    console.error("Error:", error); // Log any errors that occur
+    alert("Failed to create ticket");
+  }
+}
+
+  
   // Handle the click event for the "REGISTER" button
   const handleClick = () => {
-    isExpired || updateTotalPeople(props.eventId, totalPeople + 1, false);
+    isExpired ||
+      updateTotalPeople(
+        props.eventId,
+        totalPeople + 1,
+        false,
+        makeTickets
+      );
     isExpired && alert("The event has expired");
   };
+  
 
   // Handle the click event for the "UNREGISTER" button
   const handleDeleteEvent = async () => {

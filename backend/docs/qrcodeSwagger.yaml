@@ -1,0 +1,63 @@
+openapi: 3.0.0
+info:
+  title: Booking Event API - QR Code Routes
+  version: 1.0.0
+  description: API routes for generating QR codes for event data
+
+paths:
+  /generate-qrcode:
+    post:
+      summary: Generate a QR code from the provided text
+      tags:
+        - QRCode
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
+                  type: string
+                  description: The text or data to be encoded into a QR code
+      responses:
+        '200':
+          description: Successfully generated QR code
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  qrCode:
+                    type: string
+                    description: The generated QR code in Base64-encoded PNG format
+        '400':
+          description: Text to encode is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string

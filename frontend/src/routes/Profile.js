@@ -22,7 +22,7 @@ function Profile() {
       fetch(`${config.api.baseURL}/accounts/${userId}`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem("token")}`, // Assuming token is saved
+          'Authorization': `Bearer ${localStorage.getItem("token")}`,
           'Content-Type': 'application/json',
         },
       })
@@ -81,6 +81,7 @@ function Profile() {
       const response = await fetch(`${config.api.baseURL}${config.api.endpoints.qrcodeGenerator}`, {
         method: "POST",
         headers: {
+          'Authorization': `Bearer ${localStorage.getItem("token")}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ text: email }), // Using userEmail for QR Code generation
