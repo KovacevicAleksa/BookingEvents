@@ -108,11 +108,10 @@ all-test
 ## Pictures
 | ![Screenshot 2024-09-10 201917](https://github.com/user-attachments/assets/314b13f8-ada2-4b23-bf9f-0db4f29fd5dd) | ![Screenshot 2024-08-25 223617](https://github.com/user-attachments/assets/662b8167-b060-460a-9efd-6fa7d0f8c23a) | ![Screenshot 2024-08-25 223612](https://github.com/user-attachments/assets/c3f23d55-30d9-4aae-874b-9ca7875c0741) |
 |-------------------------------------------------|-------------------------------------------------|-------------------------------------------------|
-| ![Screenshot 2024-09-29 183159](https://github.com/user-attachments/assets/f8dc8b35-fec2-4a67-84f3-ebdd225e7ab9) | ![Screenshot 2024-09-29 180505](https://github.com/user-attachments/assets/57d14279-7e87-411f-b8c5-210aacbff010) | ![Screenshot 2024-09-10 194413](https://github.com/user-attachments/assets/a3658412-25e8-4540-bd11-88c6c88bd12e) |
-| ![Screenshot 2024-10-24 151549](https://github.com/user-attachments/assets/450adb52-9ed2-4a33-8c10-eeccb8a4334a) | ![Screenshot 2024-09-10 201740](https://github.com/user-attachments/assets/2e0dd792-b3b7-474f-b977-d26239f4f6a4) | ![Screenshot 2024-10-26 002030](https://github.com/user-attachments/assets/b8421102-8a11-43f2-adef-c7073e246a34) |
-| !![Screenshot From 2024-11-18 16-11-03](https://github.com/user-attachments/assets/0a30ea63-a896-42ed-9caf-ec3435e3ddab) | ![Screenshot 2024-10-27 175923](https://github.com/user-attachments/assets/51e94f42-8f51-401e-86d1-c40fbcfffba4) | ![Screenshot 2024-10-27 174600](https://github.com/user-attachments/assets/e8f0c30a-4420-40b3-a7dd-f0eed573a463) |
-|![Screenshot From 2024-12-01 19-41-05](https://github.com/user-attachments/assets/11a7dc6e-0146-483b-b61c-07ebf4ff16b3)
-|||
+| ![Screenshot 2024-09-29 183159](https://github.com/user-attachments/assets/f8dc8b35-fec2-4a67-84f3-ebdd225e7ab9) | ![Screenshot 2024-09-29 180505](https://github.com/user-attachments/assets/57d14279-7e87-411f-b8c5-210aacbff010) | ![Screenshot From 2024-12-03 19-45-44](https://github.com/user-attachments/assets/aa176859-6e71-45d7-9945-a5c8ccd84799) |
+| ![Screenshot 2024-10-24 151549](https://github.com/user-attachments/assets/450adb52-9ed2-4a33-8c10-eeccb8a4334a) | ![Screenshot 2024-09-10 201740](https://github.com/user-attachments/assets/2e0dd792-b3b7-474f-b977-d26239f4f6a4) | ![Screenshot From 2024-12-01 19-41-05](https://github.com/user-attachments/assets/11a7dc6e-0146-483b-b61c-07ebf4ff16b3) |
+| ![Screenshot From 2024-11-18 16-11-03](https://github.com/user-attachments/assets/0a30ea63-a896-42ed-9caf-ec3435e3ddab) | ![Screenshot 2024-10-27 175923](https://github.com/user-attachments/assets/51e94f42-8f51-401e-86d1-c40fbcfffba4) | ![Screenshot 2024-10-27 174600](https://github.com/user-attachments/assets/e8f0c30a-4420-40b3-a7dd-f0eed573a463) |
+| ![Screenshot 2024-10-26 002030](https://github.com/user-attachments/assets/b8421102-8a11-43f2-adef-c7073e246a34) | ![Screenshot From 2024-12-03 19-45-14](https://github.com/user-attachments/assets/a7d5f5b5-b0d6-40d1-87d4-3cfaee3b7b90) | ![](placeholder.jpg) |
 
 
 ## Folder structure
