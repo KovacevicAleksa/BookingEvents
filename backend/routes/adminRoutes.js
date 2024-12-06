@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Account from "../models/account.js";
 import Event from "../models/event.js";
 import { adminAuth } from "../middleware/auth.js";
+import { body, validationResult } from 'express-validator';
 
 const router = express.Router();
 
@@ -16,45 +17,68 @@ router.get("/admin/accounts", adminAuth, async (req, res) => {
   }
 });
 
-// Route to add a new event (admin only)
-router.post("/admin/add/events", adminAuth, async (req, res) => {
-  try {
-    const {
-      price,
-      title,
-      description,
-      location,
-      maxPeople,
-      totalPeople,
-      date,
-    } = req.body;
+router.post(
+  "/admin/add/events",
+  adminAuth,
+  [
+    // Validate and sanitize the "title" field
+    body("title").trim().escape().notEmpty().withMessage("Title is required."),
+    
+    // Custom validation for the "price" field
+    body("price")
+      .custom((value) => {
+        // Allow "free" or numeric values only
+        if (value === "FREE" || !isNaN(Number(value))) {
+          return true;
+        }
+        throw new Error("Price must be a number or 'FREE'.");
+      }),
 
-    // Check if an event with the same title already exists
-    const existingEvent = await Event.findOne({ title });
-    if (existingEvent) {
-      return res.status(400).json({
-        message: `Event with the title "${title}" already exists.`,
-      });
+    // Validate the "date" field to ensure it is a valid ISO8601 date
+    body("date").isISO8601().withMessage("Date must be valid."),
+  ],
+  async (req, res) => {
+    // Check if there are validation errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() }); // Return validation errors
     }
 
-    const newEvent = new Event({
-      price,
-      title,
-      description,
-      location,
-      maxPeople,
-      totalPeople,
-      date: new Date(date),
-    });
+    try {
+      const { price, title, description, location, maxPeople, totalPeople, date } = req.body;
 
-    const savedEvent = await newEvent.save(); // Save the new event to the database
-    console.log("Event saved:", savedEvent);
+      // Check if an event with the same title already exists
+      const existingEvent = await Event.findOne({ title: title.trim() });
+      if (existingEvent) {
+        return res.status(400).json({
+          message: `Event with the title "${title}" already exists.`,
+        });
+      }
 
-    res.status(201).json({ event: savedEvent }); // Return the newly created event
-  } catch (error) {
-    res.status(500).json({ message: error.message }); // Return an error if something goes wrong
+      // Create a new event
+      const newEvent = new Event({
+        price: price === "FREE" ? "FREE" : Number(price), // Save price as "free" or convert it to a number
+        title: title.trim(),
+        description,
+        location,
+        maxPeople,
+        totalPeople,
+        date: new Date(date),
+      });
+
+      // Save the new event to the database
+      const savedEvent = await newEvent.save();
+      console.log("Event saved:", savedEvent);
+
+      // Return the newly created event
+      res.status(201).json({ event: savedEvent });
+    } catch (error) {
+      // Handle server errors
+      console.error("Error saving event:", error.message);
+      res.status(500).json({ message: "An error occurred while creating the event." });
+    }
   }
-});
+);
 
 // Route to delete a user account by ID
 router.delete("/delete/users/:id", adminAuth, async (req, res) => {
