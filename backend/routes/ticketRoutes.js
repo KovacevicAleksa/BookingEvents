@@ -14,6 +14,35 @@ router.get("/tickets", auth, async (req, res) => {
   }
 });
 
+// Route to search tickets by eventID and/or assignedTo using request body
+router.post("/tickets/filter", auth, async (req, res) => {
+  try {
+    const { eventID, assignedTo } = req.body; // Extract values from request body
+
+    const filter = {}; // Initialize an empty filter object
+
+    if (eventID) {
+      filter.eventID = eventID; // Add eventID to the filter if provided
+    }
+
+    if (assignedTo) {
+      filter.assignedTo = assignedTo; // Add assignedTo to the filter if provided
+    }
+
+    // Find tickets based on the filter
+    const tickets = await Ticket.find(filter);
+
+    if (tickets.length === 0) {
+      return res.status(404).json({ message: "No tickets found with the given criteria" });
+    }
+
+    res.status(200).json(tickets); // Return matching tickets
+  } catch (error) {
+    res.status(500).json({ message: error.message }); // Handle errors
+  }
+});
+
+
 // Route to get a single ticket by ID
 router.get("/tickets/:id", auth, async (req, res) => {
   try {
@@ -100,5 +129,7 @@ router.delete("/tickets/:id", auth, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+
 
 export default router;
