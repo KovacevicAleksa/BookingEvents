@@ -1,0 +1,104 @@
+openapi: 3.0.0
+info:
+  title: Account API
+  version: 1.0.0
+  description: API routes for account management including login and registration
+
+paths:
+  /login:
+    post:
+      summary: User login
+      description: Authenticates a user and generates a JWT token.
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: The user's email address.
+                password:
+                  type: string
+                  description: The user's password.
+              example:
+                email: "user@example.com"
+                password: "securepassword123"
+      responses:
+        '200':
+          description: Successfully authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                    description: JWT token to access protected resources.
+                  account:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: User ID.
+                      email:
+                        type: string
+                        description: User's email address.
+                      isAdmin:
+                        type: boolean
+                        description: Whether the user has admin privileges.
+                      isOrganizer:
+                        type: boolean
+                        description: Whether the user is an event organizer.
+                      events:
+                        type: array
+                        items:
+                          type: string
+                          description: Event IDs associated with the user.
+                example:
+                  message: "Login successful"
+                  token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  account:
+                    id: "64123abcd5678"
+                    email: "user@example.com"
+                    isAdmin: false
+                    isOrganizer: true
+                    events: ["event123", "event456"]
+        '400':
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: "Invalid email or password"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: "Internal server error"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
