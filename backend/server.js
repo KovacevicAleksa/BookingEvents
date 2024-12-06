@@ -131,7 +131,7 @@ app.use(express.urlencoded({ extended: false }));
 if (process.env.rateLimit === 'true') {
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15-minute window
-    max: 300, // Limit each IP to 100 requests per window
+    max: 500, // Limit each IP to 500 requests per window
     message: "Too many requests from this IP, please try again after 15 minutes",
     standardHeaders: true, // Include rate limit info in `RateLimit-*` headers
     legacyHeaders: false, // Disable `X-RateLimit-*` headers

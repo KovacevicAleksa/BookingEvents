@@ -124,7 +124,6 @@ const updateTotalPeople = async (
         alert("Successfully registered");
 
         // Create tickets if required
-        console.log("makeTickets value:", makeTickets); // Proveri šta je ovo
         if (typeof makeTickets === "function") {
           await makeTickets(eventId, accountId);
         } else {

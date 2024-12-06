@@ -28,6 +28,45 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+    post:
+      summary: Create a new ticket
+      tags:
+        - Tickets
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - eventID
+                - assignedTo
+              properties:
+                eventID:
+                  type: string
+                assignedTo:
+                  type: string
+              example:
+                eventID: "12345"
+                assignedTo: "user@example.com"
+      responses:
+        '201':
+          description: Ticket successfully created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '400':
+          description: Missing required fields
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /tickets/{id}:
     get:
       summary: Retrieve a specific ticket by ID
@@ -57,44 +96,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /tickets:
-    post:
-      summary: Create a new ticket
-      tags:
-        - Tickets
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - eventName
-                - assignedTo
-              properties:
-                eventName:
-                  type: string
-                assignedTo:
-                  type: string
-      responses:
-        '201':
-          description: Ticket successfully created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Ticket'
-        '400':
-          description: Missing required fields
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /tickets/{id}:
     patch:
       summary: Update an existing ticket by ID
       tags:
@@ -114,10 +115,13 @@ paths:
             schema:
               type: object
               properties:
-                eventName:
+                eventID:
                   type: string
                 assignedTo:
                   type: string
+              example:
+                eventID: "54321"
+                assignedTo: "new_user@example.com"
       responses:
         '200':
           description: Ticket successfully updated
@@ -134,7 +138,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /tickets/{id}:
     delete:
       summary: Delete a ticket by ID
       tags:
@@ -172,7 +175,7 @@ components:
       properties:
         _id:
           type: string
-        eventName:
+        eventID:
           type: string
         assignedTo:
           type: string
@@ -182,9 +185,17 @@ components:
         updatedAt:
           type: string
           format: date-time
+      example:
+        _id: "64123abcd5678"
+        eventID: "12345"
+        assignedTo: "user@example.com"
+        createdAt: "2023-12-05T12:00:00Z"
+        updatedAt: "2023-12-05T12:00:00Z"
 
     ErrorResponse:
       type: object
       properties:
         message:
           type: string
+      example:
+        message: "An error occurred"

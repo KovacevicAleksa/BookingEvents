@@ -40,7 +40,12 @@ router.post("/tickets", auth, async (req, res) => {
       return res.status(400).json({ message: "Event ID and Assigned To are required" });
     }
 
-    const newTicket = new Ticket({ eventID, assignedTo });
+    // Create a new ticket without specifying _id (MongoDB will generate it)
+    const newTicket = new Ticket({
+      eventID,
+      assignedTo,
+    });
+
     await newTicket.save(); // Save the ticket to the database
 
     res.status(201).json(newTicket); // Return the newly created ticket
@@ -48,6 +53,7 @@ router.post("/tickets", auth, async (req, res) => {
     res.status(500).json({ message: error.message }); // Handle errors
   }
 });
+
 
 // Route to update a ticket by ID
 router.patch("/tickets/:id", auth, async (req, res) => {
@@ -71,9 +77,17 @@ router.patch("/tickets/:id", auth, async (req, res) => {
 });
 
 // Route to delete a ticket by ID
+import mongoose from "mongoose";
+
 router.delete("/tickets/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      console.log(id);
+      return res.status(400).json({ message: "Invalid Ticket ID" });
+    }
 
     const deletedTicket = await Ticket.findOneAndDelete({ _id: id });
 
@@ -83,7 +97,7 @@ router.delete("/tickets/:id", auth, async (req, res) => {
 
     res.status(200).json({ message: "Ticket deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message }); // Handle errors
+    res.status(500).json({ message: error.message });
   }
 });
 
