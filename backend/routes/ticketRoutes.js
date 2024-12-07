@@ -47,7 +47,13 @@ router.post("/tickets/filter", auth, async (req, res) => {
 router.get("/tickets/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
-    const ticket = await Ticket.findOne({ _id: id }); // Find ticket by _id, not id
+
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Ticket ID" });
+    }
+
+    const ticket = await Ticket.findOne({ _id: id });
 
     if (!ticket) {
       return res.status(404).json({ message: "Ticket not found" });
