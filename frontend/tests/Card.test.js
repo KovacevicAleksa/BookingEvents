@@ -35,5 +35,5 @@ test("renders Card component with given props", () => {
   expect(screen.getByText("500 RSD")).toBeInTheDocument(); // Check price
   expect(screen.getByText("Belgrade")).toBeInTheDocument(); // Check location
   expect(screen.getByText("5 / 30")).toBeInTheDocument(); // Check totalPeople
-  expect(screen.getByAltText("Conference")).toBeInTheDocument(); // Check alt text for image
+  expect(screen.getByAltText("Event")).toBeInTheDocument(); // Check alt text for image
 });
