@@ -22,6 +22,10 @@ describe('Ticket Routes', () => {
   });
 
   afterAll(async () => {
+    await Ticket.deleteMany({ eventID: `event123`});
+    await Ticket.deleteMany({ eventID: `event456`});
+    await Ticket.deleteMany({ eventID: `event789`});
+    await Ticket.deleteMany({ eventID: `updatedEvent`});
     await cleanupTest(server, testUser);
   });
 

@@ -19,7 +19,9 @@ router.post("/generate-qrcode", auth, async (req, res) => {
     // Respond with the QR code image
     res.status(200).json({ qrCode: qrCodeDataUrl });
   } catch (error) {
-    console.error(error);
+    if (process.env.NODE_ENV !== 'test') {
+      console.error(error); // Log errors only if not in test environment
+    }
     res.status(500).json({ error: "Failed to generate QR Code" });
   }
 });

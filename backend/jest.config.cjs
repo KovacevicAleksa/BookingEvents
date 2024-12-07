@@ -1,7 +1,9 @@
 module.exports = {
   testEnvironment: 'node',
   testTimeout: 30000,
-  transform: {},
+  transform: {
+    '^.+\\.js$': 'babel-jest',
+  },
   moduleFileExtensions: ['js', 'mjs', 'cjs', 'jsx', 'json', 'node'],
   setupFilesAfterEnv: ['./jest.setup.mjs'],
   testPathIgnorePatterns: ['/node_modules/'],

@@ -2,6 +2,8 @@ import { jest, describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import app from '../server.js';
 import { setupTestServer, setupTestDatabase, cleanupTest } from './setup/testSetup.js';
+import Account from '../models/account.js';
+
 
 describe('Authentication Routes', () => {
   let server;
@@ -12,7 +14,7 @@ describe('Authentication Routes', () => {
   const testEmail = "testuser@example.com";
   const testPassword = "testpassword";
 
-  // Pre testova, pokreni server i postavi bazu
+  // Before all tests, start the server and set up the test database
   beforeAll(async () => {
     const { server: createdServer, port: assignedPort } = await setupTestServer(app);
     server = createdServer;
@@ -23,11 +25,16 @@ describe('Authentication Routes', () => {
     authToken = token;
   });
 
-  // Nakon testova, očisti bazu i zaustavi server
+  // After all tests, clean up the test database and stop the server
   afterAll(async () => {
+    // Delete the test user after tests are finished
+    await Account.deleteMany({ email: `newuser@example.com`});
+    
+    // Clean up the test database and stop the server
     await cleanupTest(server, testUser);
   });
 
+  // Test for successful registration of a new account
   it('should register a new account successfully', async () => {
     const response = await request(app)
       .post('/register')
@@ -37,6 +44,7 @@ describe('Authentication Routes', () => {
     expect(response.body).toHaveProperty('email', 'newuser@example.com');
   });
 
+  // Test for failed registration with an existing email
   it('should fail registration with an existing email', async () => {
     const response = await request(app)
       .post('/register')
@@ -46,6 +54,7 @@ describe('Authentication Routes', () => {
     expect(response.body.message).toMatch(/Email already exists/);
   });
 
+  // Test for successful login and token return
   it('should log in successfully and return a token', async () => {
     const response = await request(app)
       .post('/login')
@@ -56,6 +65,7 @@ describe('Authentication Routes', () => {
     expect(response.body.account).toHaveProperty('email', testEmail);
   });
 
+  // Test for failed login due to incorrect password
   it('should fail login with incorrect password', async () => {
     const response = await request(app)
       .post('/login')
@@ -65,6 +75,7 @@ describe('Authentication Routes', () => {
     expect(response.body.message).toMatch(/Invalid email or password/);
   });
 
+  // Test for failed login due to non-existent email
   it('should fail login with non-existent email', async () => {
     const response = await request(app)
       .post('/login')
