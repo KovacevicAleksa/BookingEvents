@@ -10,39 +10,21 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  BarChart,
+  Bar,
 } from "recharts";
 import config from "../config/config";
-
 
 function HealthCheckDashboard() {
   const { user } = useAuth();
   const MAX_HISTORY_POINTS = 20;
 
   const [healthStatus, setHealthStatus] = useState({
-    accounts: {
-      status: "pending",
-      responseTime: null,
-      lastChecked: null,
-      error: null,
-    },
-    events: {
-      status: "pending",
-      responseTime: null,
-      lastChecked: null,
-      error: null,
-    },
-    postgresql: {
-      status: "pending",
-      responseTime: null,
-      lastChecked: null,
-      error: null,
-    },
-    redis: {
-      status: "pending",
-      responseTime: null,
-      lastChecked: null,
-      error: null,
-    },
+    accounts: { status: "pending", responseTime: null, lastChecked: null, error: null },
+    events: { status: "pending", responseTime: null, lastChecked: null, error: null },
+    tickets: { status: "pending", responseTime: null, lastChecked: null, error: null },
+    postgresql: { status: "pending", responseTime: null, lastChecked: null, error: null },
+    redis: { status: "pending", responseTime: null, lastChecked: null, error: null },
   });
 
   const [performanceHistory, setPerformanceHistory] = useState([]);
@@ -50,6 +32,7 @@ function HealthCheckDashboard() {
   const serviceColors = {
     accounts: "#8884d8",
     events: "#82ca9d",
+    tickets: "#36a2eb",
     postgresql: "#ffc658",
     redis: "#ff6384",
   };
@@ -59,9 +42,7 @@ function HealthCheckDashboard() {
       const startTime = performance.now();
       try {
         const response = await fetch(`${config.api.baseURL}${endpoint}`, {
-          headers: {
-            Authorization: `Bearer ${user.token}`,
-          },
+          headers: { Authorization: `Bearer ${user.token}` },
         });
 
         const endTime = performance.now();
@@ -70,8 +51,6 @@ function HealthCheckDashboard() {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-
-        const data = await response.json();
 
         setHealthStatus((prev) => ({
           ...prev,
@@ -83,7 +62,7 @@ function HealthCheckDashboard() {
           },
         }));
 
-        return { responseTime, status: "healthy", data };
+        return { responseTime, status: "healthy" };
       } catch (error) {
         const endTime = performance.now();
         const responseTime = Math.round(endTime - startTime);
@@ -106,9 +85,10 @@ function HealthCheckDashboard() {
 
   const checkHealth = useCallback(async () => {
     const timestamp = new Date().toLocaleTimeString();
-    const [accounts, events, postgresql, redis] = await Promise.all([
+    const [accounts, events, tickets, postgresql, redis] = await Promise.all([
       checkEndpoint("/admin/accounts", "accounts"),
       checkEndpoint("/view/events", "events"),
+      checkEndpoint("/tickets", "tickets"),
       checkEndpoint("/healthcheck/pg", "postgresql"),
       checkEndpoint("/healthcheck/redis", "redis"),
     ]);
@@ -122,6 +102,8 @@ function HealthCheckDashboard() {
           accountsStatus: accounts.status,
           events: events.responseTime,
           eventsStatus: events.status,
+          tickets: tickets.responseTime,
+          ticketsStatus: tickets.status,
           postgresql: postgresql.responseTime,
           postgresqlStatus: postgresql.status,
           redis: redis.responseTime,
@@ -153,8 +135,7 @@ function HealthCheckDashboard() {
           size={16}
         />
         <span className={`font-medium ${statusColors[serviceStatus.status]}`}>
-          {serviceStatus.status.charAt(0).toUpperCase() +
-            serviceStatus.status.slice(1)}
+          {serviceStatus.status.charAt(0).toUpperCase() + serviceStatus.status.slice(1)}
         </span>
       </div>
     );
@@ -168,7 +149,7 @@ function HealthCheckDashboard() {
       return <circle cx={cx} cy={cy} r={4} fill="red" />;
     }
 
-    return null; // Return null for healthy status to keep the default line appearance
+    return null;
   };
 
   const ServiceCard = ({ title, endpoint, status, color }) => (
@@ -214,36 +195,30 @@ function HealthCheckDashboard() {
               status={healthStatus.accounts}
               color={serviceColors.accounts}
             />
-
             <ServiceCard
               title="Events API"
               endpoint="/view/events"
               status={healthStatus.events}
               color={serviceColors.events}
             />
-
+            <ServiceCard
+              title="Tickets API"
+              endpoint="/tickets"
+              status={healthStatus.tickets}
+              color={serviceColors.tickets}
+            />
             <ServiceCard
               title="PostgreSQL"
               endpoint="/healthcheck/pg"
               status={healthStatus.postgresql}
               color={serviceColors.postgresql}
             />
-
             <ServiceCard
               title="Redis"
               endpoint="/healthcheck/redis"
               status={healthStatus.redis}
               color={serviceColors.redis}
             />
-
-            <div className="flex justify-center mt-4">
-              <button
-                onClick={checkHealth}
-                className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-300"
-              >
-                Refresh Status
-              </button>
-            </div>
           </div>
 
           {/* Performance Charts Section */}
@@ -255,12 +230,7 @@ function HealthCheckDashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={performanceHistory}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
@@ -288,43 +258,38 @@ function HealthCheckDashboard() {
                         service.charAt(0).toUpperCase() + service.slice(1)
                       } API`}
                       dot={<CustomizedDot />}
-                      strokeDasharray={(datum) =>
-                        datum[`${service}Status`] === "unhealthy" ? "5 5" : "0"
-                      }
                     />
                   ))}
                 </LineChart>
               </ResponsiveContainer>
             </div>
 
-            {/* Performance Stats */}
-            <div className="grid grid-cols-4 gap-4 mt-6">
-              {Object.entries(serviceColors).map(([service, color]) => {
-                const times = performanceHistory
-                  .map((h) => h[service])
-                  .filter(Boolean);
-                const avg = times.length
-                  ? Math.round(times.reduce((a, b) => a + b, 0) / times.length)
-                  : 0;
-                const max = times.length ? Math.max(...times) : 0;
-
-                return (
-                  <div
-                    key={service}
-                    className="p-4 rounded-lg"
-                    style={{
-                      backgroundColor: `${color}15`,
-                      borderLeft: `3px solid ${color}`,
-                    }}
-                  >
-                    <h3 className="font-semibold capitalize mb-2">{service}</h3>
-                    <div className="text-sm">
-                      <p>Avg: {avg}ms</p>
-                      <p>Max: {max}ms</p>
-                    </div>
-                  </div>
-                );
-              })}
+            {/* New Bar Chart Section */}
+            <div className="h-96 mt-8">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={[
+                    ...Object.entries(serviceColors).map(([service]) => {
+                      const times = performanceHistory.map((h) => h[service]).filter(Boolean);
+                      return {
+                        service: service.charAt(0).toUpperCase() + service.slice(1),
+                        avg: times.length
+                          ? Math.round(
+                              times.reduce((sum, val) => sum + val, 0) / times.length
+                            )
+                          : 0,
+                      };
+                    }),
+                  ]}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="service" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="avg" fill="#8884d8" name="Avg Response Time" />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
         </div>
