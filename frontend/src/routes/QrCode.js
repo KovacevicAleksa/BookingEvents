@@ -1,80 +1,31 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import config from "../config/config";
+import React from "react";
+import { Scanner } from "@yudiel/react-qr-scanner";
 
-
-function QrCodeGenerator() {
-  const { user } = useAuth();
-    const [inputText, setInputText] = useState("");
-  const [qrCode, setQrCode] = useState(null);
-  const [error, setError] = useState("");
-
-    // Redirect if the user is not an organizer
-    const navigate = useNavigate();
-    if (user && !user.isOrganizer) {
-      navigate("/unauthorized"); // Redirect to an unauthorized page or a route of your choice
-    }
-
-  const handleGenerateQrCode = async () => {
-    try {
-      setError("");
-      const response = await fetch(`${config.api.baseURL}${config.api.endpoints.qrcodeGenerator}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: inputText }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to generate QR Code");
-      }
-
-      const data = await response.json();
-      setQrCode(data.qrCode);
-    } catch (err) {
-      setError(err.message || "An unexpected error occurred");
-      setQrCode(null);
+function QrCodeScanner() {
+  const handleScan = (detectedCodes) => {
+    if (detectedCodes && detectedCodes.length > 0) {
+      const qrCodeData = detectedCodes[0].rawValue; // Prva vrednost QR koda
+      alert(`Scanned Data: ${qrCodeData}`);
     }
   };
-  if (!user || !user.isOrganizer) {
-    return <p>You do not have permission to access this page. Please contact support.</p>;
-  }
+
+  const handleError = (error) => {
+    console.error("QR Scanner Error:", error);
+  };
 
   return (
     <div style={{ textAlign: "center", marginTop: "20px" }}>
-      <h1>QR Code Generator</h1>
-      <input
-        type="text"
-        placeholder="Enter text for QR Code"
-        value={inputText}
-        onChange={(e) => setInputText(e.target.value)}
-        style={{ padding: "10px", width: "60%", marginBottom: "10px" }}
-      />
-      <br />
-      <button
-        onClick={handleGenerateQrCode}
-        style={{
-          padding: "10px 20px",
-          backgroundColor: "#007BFF",
-          color: "#fff",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-        }}
-      >
-        Generate QR Code
-      </button>
-      <div style={{ marginTop: "20px" }}>
-        {qrCode ? (
-          <img src={qrCode} alt="Generated QR Code" style={{ marginTop: "10px" }} />
-        ) : error ? (
-          <p style={{ color: "red" }}>{error}</p>
-        ) : null}
+      <h1>QR Code Scanner</h1>
+      <div style={{ maxWidth: "500px", margin: "0 auto" }}>
+        <Scanner
+          onScan={handleScan} // Funkcija koja obrađuje rezultate
+          onError={handleError} // Funkcija za greške
+          constraints={{ facingMode: "environment" }} // Zadnja kamera
+          style={{ width: "100%" }}
+        />
       </div>
     </div>
   );
 }
 
-export default QrCodeGenerator;
+export default QrCodeScanner;
