@@ -230,7 +230,7 @@ function HealthCheckDashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart
                   data={performanceHistory}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  margin={{ top: 5, right: 30, left: 50, bottom: 20 }} // Adjusted left margin
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
@@ -243,7 +243,8 @@ function HealthCheckDashboard() {
                     label={{
                       value: "Response Time (ms)",
                       angle: -90,
-                      position: "insideLeft",
+                      position: "left",
+                      fontSize: 13,
                     }}
                   />
                   <Tooltip />
@@ -264,8 +265,7 @@ function HealthCheckDashboard() {
               </ResponsiveContainer>
             </div>
 
-            {/* New Bar Chart Section */}
-            <div className="h-96 mt-8">
+            <div className="h-96 mt-12"> {/* Increased margin between charts */}
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
                   data={[
@@ -281,11 +281,18 @@ function HealthCheckDashboard() {
                       };
                     }),
                   ]}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  margin={{ top: 5, right: 30, left: 50, bottom: 20 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="service" />
-                  <YAxis />
+                  <YAxis 
+                                      label={{
+                                        value: "Avg Response Time (ms)",
+                                        angle: -90,
+                                        position: "left",
+                                        fontSize: 13,
+                                      }}
+                  />
                   <Tooltip />
                   <Bar dataKey="avg" fill="#8884d8" name="Avg Response Time" />
                 </BarChart>
