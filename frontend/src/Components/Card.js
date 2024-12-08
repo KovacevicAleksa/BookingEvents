@@ -223,34 +223,89 @@ async function makeTickets(eventID, assignedTo) {
       );
     isExpired && alert("The event has expired");
   };
-  
+
+// Function to delete a ticket by eventID and assignedTo
+async function deleteTicket(eventID, assignedTo) {
+  const url = "http://localhost:8081/tickets/filter";
+  const filter = { eventID, assignedTo };
+
+  try {
+    // Fetch the tickets matching eventID and assignedTo
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${user.token}`,
+      },
+      body: JSON.stringify(filter),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch tickets for deletion");
+    }
+
+    const tickets = await response.json();
+
+    if (tickets.length > 0) {
+      // Delete each matching ticket
+      for (const ticket of tickets) {
+        const deleteResponse = await fetch(
+          `http://localhost:8081/tickets/${ticket._id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        );
+
+        if (!deleteResponse.ok) {
+          throw new Error("Failed to delete ticket");
+        }
+      }
+
+      alert("Ticket deleted successfully");
+    } else {
+      alert("No tickets found to delete");
+    }
+  } catch (error) {
+    console.error("Error deleting ticket:", error);
+    alert("Failed to delete ticket");
+  }
+}
+
 
   // Handle the click event for the "UNREGISTER" button
-  const handleDeleteEvent = async () => {
-    try {
-      const accountId = localStorage.getItem("accountid");
-      const eventId = props.eventId;
+// Handle the click event for the "UNREGISTER" button
+const handleDeleteEvent = async () => {
+  try {
+    const accountId = localStorage.getItem("accountid");
+    const eventId = props.eventId;
 
-      // Check if the user is registered for the event
-      const eventExists = await fetchAccountEvents(accountId, eventId);
+    // Check if the user is registered for the event
+    const eventExists = await fetchAccountEvents(accountId, eventId);
 
-      if (eventExists) {
-        console.log(eventId);
-        // Delete the event from the user's account and update the total number of people
-        await deleteEvent(accountId, eventId);
-        await updateTotalPeople(eventId, totalPeople - 1, true);
-      } else if (!isExpired) {
-        alert("You are not registered for this event");
-        console.log("Event ID not found in user's events.");
-      } else if (isExpired) {
-        alert("The event has expired");
-      } else if (totalPeople >= props.maxPeople) {
-        alert("The event is fully booked");
-      }
-    } catch (error) {
-      console.error("Error handling delete event:", error);
+    if (eventExists) {
+      console.log(eventId);
+
+      // Delete the event from the user's account and update the total number of people
+      await deleteEvent(accountId, eventId);
+      await updateTotalPeople(eventId, totalPeople - 1, true);
+
+      // Delete the ticket for this event and user
+      await deleteTicket(eventId, accountId);
+    } else if (!isExpired) {
+      alert("You are not registered for this event");
+      console.log("Event ID not found in user's events.");
+    } else if (isExpired) {
+      alert("The event has expired");
+    } else if (totalPeople >= props.maxPeople) {
+      alert("The event is fully booked");
     }
-  };
+  } catch (error) {
+    console.error("Error handling delete event:", error);
+  }
+};
 
   return (
     <div className="rounded-lg overflow-hidden shadow-xl flex flex-col bg-gray-800 text-white">
