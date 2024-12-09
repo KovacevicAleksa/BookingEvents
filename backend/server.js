@@ -39,8 +39,8 @@ import accountRoutes from "./routes/accountRoutes.js";
 import eventRoutes from "./routes/eventRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import healthCheckRoutes from "./routes/healthCheckRoutes.js";
-import barcodeRoutes from "./routes/QRCodeRoutes.js"
-import ticketRoutes from "./routes/ticketRoutes.js"
+import barcodeRoutes from "./routes/QRCodeRoutes.js";
+import ticketRoutes from "./routes/ticketRoutes.js";
 
 // Import Swagger
 import swaggerUi from "swagger-ui-express";
