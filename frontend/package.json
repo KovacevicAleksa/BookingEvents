@@ -47,7 +47,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@babel/preset-env": "^7.25.3",
-    "@babel/preset-react": "^7.25.9",
+    "@babel/preset-react": "^7.26.3",
     "@chromatic-com/storybook": "^3.2.2",
     "@testing-library/jest-dom": "^6.4.8",
     "@testing-library/react": "^16.0.1",
