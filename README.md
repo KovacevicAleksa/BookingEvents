@@ -27,11 +27,15 @@ and Jenkins
 14. **pgAdmin**: Web-based management tool for PostgreSQL.
 15. **Mongoose**: ODM library for MongoDB.
 16. **Swagger**: Tool for API documentation.
+17. **QRCode**: Library for generating QR codes in Node.js.
+
+
 
 ## **Frontend:**
 
 1. **React**: JavaScript library for building user interfaces.
 2. **Tailwind CSS**: Utility-first CSS framework for styling components.
+3.  **@yudiel/react-qr-scanner**: React component for scanning QR codes.
 
 ## **DevOps:**
 
