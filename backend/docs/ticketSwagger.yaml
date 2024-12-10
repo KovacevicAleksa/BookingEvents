@@ -211,7 +211,11 @@ paths:
                 assignedTo: "13231241123"
       responses:
         '200':
-          description: Ticket successfully deleted or updated
+          description: Ticket successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Ticket not found
         '500':

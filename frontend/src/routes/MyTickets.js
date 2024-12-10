@@ -132,7 +132,7 @@ function MyTickets() {
     >
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {tickets.length === 0 ? (
+      {tickets.length < 1 ? (
         <p>No tickets available</p>
       ) : (
         <>

@@ -33,7 +33,7 @@ describe("Ticket API Tests", () => {
 
   // Cleanup after all tests
   afterAll(async () => {
-    await Ticket.deleteMany({});
+    await Ticket.deleteOne({ "assignedTo": "user456"});
     await cleanupTest(server);
   });
 

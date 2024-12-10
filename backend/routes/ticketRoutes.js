@@ -117,30 +117,14 @@ router.patch("/tickets/:id", adminAuth, async (req, res) => {
 router.delete("/tickets/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { assignedTo } = req.body; // Get the assignedTo from the request body
 
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       console.log(id);
       return res.status(400).json({ message: "Invalid Ticket ID" });
     }
-    
-    // If assignedTo is provided, check that both id and assignedTo match
-    if (assignedTo) {
-      const updatedTicket = await Ticket.findOneAndUpdate(
-        { _id: id, assignedTo: assignedTo }, // Match both id and assignedTo
-        { assignedTo }, // Update the assignedTo field
-        { new: true } // Return the updated ticket
-      );
 
-      if (!updatedTicket) {
-        return res.status(404).json({ message: "Ticket not found or assignedTo does not match" });
-      }
-
-      return res.status(200).json({ message: "Ticket updated successfully", ticket: updatedTicket });
-    }
-
-    // If no assignedTo is provided, delete the ticket
+    // Delete the ticket by ID
     const deletedTicket = await Ticket.findOneAndDelete({ _id: id });
 
     if (!deletedTicket) {
