@@ -48,9 +48,10 @@ paths:
                   type: string
                 assignedTo:
                   type: string
+                  description: A string identifier for the user to whom the ticket is assigned (can be any string, not necessarily an email)
               example:
                 eventID: "12345"
-                assignedTo: "user@example.com"
+                assignedTo: "13231241123"
       responses:
         '201':
           description: Ticket successfully created
@@ -86,10 +87,10 @@ paths:
                   description: ID of the event to filter tickets
                 assignedTo:
                   type: string
-                  description: Email of the user to whom the ticket is assigned
+                  description: String identifier for the user to whom the ticket is assigned
               example:
                 eventID: "12345"
-                assignedTo: "user@example.com"
+                assignedTo: "13231241123"
       responses:
         '200':
           description: Tickets matching the filter criteria
@@ -164,9 +165,10 @@ paths:
                   type: string
                 assignedTo:
                   type: string
+                  description: String identifier for the user to whom the ticket is assigned
               example:
                 eventID: "54321"
-                assignedTo: "new_user@example.com"
+                assignedTo: "13231241123312"
       responses:
         '200':
           description: Ticket successfully updated
@@ -204,9 +206,9 @@ paths:
               properties:
                 assignedTo:
                   type: string
-                  description: Email of the user to whom the ticket is assigned
+                  description: String identifier for the user to whom the ticket is assigned
               example:
-                assignedTo: "user@example.com"
+                assignedTo: "13231241123"
       responses:
         '200':
           description: Ticket successfully deleted or updated
@@ -245,7 +247,7 @@ components:
       example:
         _id: "64123abcd5678"
         eventID: "12345"
-        assignedTo: "user@example.com"
+        assignedTo: "13231241123"
         createdAt: "2023-12-05T12:00:00Z"
         updatedAt: "2023-12-05T12:00:00Z"
 

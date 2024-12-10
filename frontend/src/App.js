@@ -10,9 +10,11 @@ import ForgotPassword from "./routes/ForgotPassword";
 import ChangePassword from "./routes/ChangePassword";
 import QrCode from "./routes/QrCode";
 import Profile from "./routes/Profile";
+import MyTickets from "./routes/MyTickets";
 import Chat from "./routes/Chat";
 import Header from "./Components/Header";
 import Card from "./Components/Card";
+import AboutUs from "./routes/AboutUs";
 import konferencija from "./Components/assets/Konferencija.jpg";
 import hoverPhoto from "./Components/assets/hoverPhoto.gif";
 import config from "./config/config";
@@ -105,6 +107,9 @@ function App() {
       <Route path="/change-password/:id" element={<ChangePassword />} />
       <Route path="/chat/:roomName" element={<Chat />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/my-tickets" element={<MyTickets />} />
+      <Route path="/about-us" element={<AboutUs />} />
+
       <Route
         path="/events"
         element={

@@ -28,22 +28,22 @@ function Header({ userEmail, onLogout}) {
         {/* Navigation Links */}
         <div className="hidden md:flex space-x-6 text-gray-300">
           <a
-            href="/event"
+            href="/my-tickets"
             className="hover:text-white transition duration-300 text-lg"
           >
-            Home
+            My Tickets
           </a>
           <a
-            href="/event"
+            href="/events"
             className="hover:text-white transition duration-300 text-lg"
           >
             Events
           </a>
           <a
-            href="/event"
+            href="/about-us"
             className="hover:text-white transition duration-300 text-lg"
           >
-            Contact
+            About Us
           </a>
         </div>
 
