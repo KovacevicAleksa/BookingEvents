@@ -1,6 +1,8 @@
 import express from "express";
 import Ticket from "../models/ticket.js";
-import { auth } from "../middleware/auth.js";
+import { adminAuth, auth } from "../middleware/auth.js";
+import mongoose from 'mongoose';
+
 
 const router = express.Router();
 
@@ -91,7 +93,7 @@ router.post("/tickets", auth, async (req, res) => {
 
 
 // Route to update a ticket by ID
-router.patch("/tickets/:id", auth, async (req, res) => {
+router.patch("/tickets/:id", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const updates = req.body;
@@ -112,18 +114,33 @@ router.patch("/tickets/:id", auth, async (req, res) => {
 });
 
 // Route to delete a ticket by ID
-import mongoose from "mongoose";
-
 router.delete("/tickets/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
+    const { assignedTo } = req.body; // Get the assignedTo from the request body
 
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
       console.log(id);
       return res.status(400).json({ message: "Invalid Ticket ID" });
     }
+    
+    // If assignedTo is provided, check that both id and assignedTo match
+    if (assignedTo) {
+      const updatedTicket = await Ticket.findOneAndUpdate(
+        { _id: id, assignedTo: assignedTo }, // Match both id and assignedTo
+        { assignedTo }, // Update the assignedTo field
+        { new: true } // Return the updated ticket
+      );
 
+      if (!updatedTicket) {
+        return res.status(404).json({ message: "Ticket not found or assignedTo does not match" });
+      }
+
+      return res.status(200).json({ message: "Ticket updated successfully", ticket: updatedTicket });
+    }
+
+    // If no assignedTo is provided, delete the ticket
     const deletedTicket = await Ticket.findOneAndDelete({ _id: id });
 
     if (!deletedTicket) {

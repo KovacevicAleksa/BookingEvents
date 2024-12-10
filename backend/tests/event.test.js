@@ -5,6 +5,7 @@ import { setupTestServer, setupTestDatabase, cleanupTest } from './setup/testSet
 import mongoose from 'mongoose';
 import Event from '../models/event.js';
 
+
 describe("Event API Tests", () => {
   let server;
   let authToken;
@@ -31,6 +32,7 @@ describe("Event API Tests", () => {
       maxPeople: 100,
       totalPeople: 10,
       price: "50",
+      owner: "test@example.com",
     });
     testEventId = testEvent._id.toString();
   });

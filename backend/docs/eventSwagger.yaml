@@ -81,6 +81,8 @@ paths:
                   type: number
                 maxPeople:
                   type: number
+                owner:
+                  type: string
       responses:
         '200':
           description: Event successfully updated
@@ -94,3 +96,26 @@ paths:
           description: Event not found
         '500':
           description: Server error
+
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date-time
+        location:
+          type: string
+        totalPeople:
+          type: number
+        maxPeople:
+          type: number
+        owner:
+          type: string

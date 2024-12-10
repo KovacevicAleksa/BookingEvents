@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
   title: Booking Event API - Admin Routes
-  version: 1.0.0
-  description: Administrative routes for managing users and events
+  version: 1.1.0
+  description: Administrative and public routes for managing users and events
 
 paths:
   /admin/accounts:
@@ -48,9 +48,54 @@ paths:
         '500':
           description: Server error
 
-  /delete/users/{id}:
-    delete:
-      summary: Delete a user account (admin only)
+  /view/events:
+    get:
+      summary: Retrieve all events (public access)
+      tags:
+        - Events
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Event'
+        '500':
+          description: Server error
+
+  /view/events/{id}:
+    get:
+      summary: Retrieve a specific event by ID
+      tags:
+        - Events
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            description: ID of the event
+      responses:
+        '200':
+          description: Event found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '404':
+          description: Event not found
+        '500':
+          description: Server error
+
+  /edit/events/{id}:
+    patch:
+      summary: Update an event by ID (admin only)
       tags:
         - Admin
       security:
@@ -61,11 +106,23 @@ paths:
           required: true
           schema:
             type: string
+            description: ID of the event
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventInput'
       responses:
         '200':
-          description: User account successfully deleted
+          description: Successfully updated the event
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Invalid input or event ID format
         '404':
-          description: Account not found
+          description: Event not found
         '500':
           description: Server error
 
@@ -136,3 +193,9 @@ components:
           properties:
             _id:
               type: string
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time

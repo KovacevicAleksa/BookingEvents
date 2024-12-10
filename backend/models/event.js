@@ -37,6 +37,17 @@ const EventSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    owner: {
+      type: String,
+      required: true,
+      validate: {
+        validator: function (v) {
+          // Regex for validating email format
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+        },
+        message: (props) => `${props.value} is not a valid email address!`,
+      },
+    },
   },
   {
     timestamps: true, // Automatically add 'createdAt' and 'updatedAt' timestamps

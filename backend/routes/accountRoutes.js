@@ -1,6 +1,6 @@
 import express from "express";
 import Account from "../models/account.js";
-import { auth } from "../middleware/auth.js";
+import { auth, adminAuth  } from "../middleware/auth.js";
 import { resetAccountLimiter } from "../middleware/resetAccountLimiter.js";
 import { sendEmail } from "../services/emailService.js";
 import mongoose from 'mongoose'; // Added for ObjectId validation
@@ -57,7 +57,7 @@ router.patch("/edit/account/:id", auth, async (req, res) => {
 });
 
 //Edit password
-router.patch("/edit/password/:id", async (req, res) => {
+router.patch("/edit/password/:id", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { password } = req.body;

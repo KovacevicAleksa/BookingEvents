@@ -1,6 +1,6 @@
 import express from "express";
 import Event from "../models/event.js";
-import { auth } from "../middleware/auth.js";
+import { auth, adminAuth } from "../middleware/auth.js";
 import { getOrSetCache, redis } from '../config/redis.js';
 
 const router = express.Router();
@@ -47,7 +47,7 @@ router.get("/view/events/:id", auth, async (req, res) => {
 });
 
 // Route to edit an event by ID - includes cache invalidation
-router.patch("/edit/events/:id", auth, async (req, res) => {
+router.patch("/edit/events/:id", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
@@ -56,7 +56,7 @@ router.patch("/edit/events/:id", auth, async (req, res) => {
       return res.status(400).json({ message: "Invalid event ID format" });
     }
 
-    const allowedFields = ['title', 'description', 'date', 'location', 'totalPeople', 'maxPeople'];
+    const allowedFields = ['title', 'description', 'date', 'location', 'totalPeople', 'maxPeople', 'owner'];
     const sanitizedUpdate = {};
     
     Object.keys(updateData).forEach(key => {

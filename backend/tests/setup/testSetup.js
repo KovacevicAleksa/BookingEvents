@@ -37,8 +37,10 @@ export async function setupTestDatabase() {
     
     // Create test user
     const testUser = new Account({
-      email: "testuser@example.com",
-      password: "testpassword",
+      email: process.env.TEST_EMAIL,
+      password: process.env.TEST_PASS,
+      isAdmin: true,
+      isOrganizer: true,
     });
     const savedUser = await testUser.save();
     

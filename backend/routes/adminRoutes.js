@@ -17,6 +17,7 @@ router.get("/admin/accounts", adminAuth, async (req, res) => {
   }
 });
 
+// Route to add events (admin only)
 router.post(
   "/admin/add/events",
   adminAuth,
@@ -36,6 +37,9 @@ router.post(
 
     // Validate the "date" field to ensure it is a valid ISO8601 date
     body("date").isISO8601().withMessage("Date must be valid."),
+    
+    // Ensure the "owner" field is an email format
+    body("owner").isEmail().withMessage("Owner must be a valid email address.")
   ],
   async (req, res) => {
     // Check if there are validation errors
@@ -45,7 +49,7 @@ router.post(
     }
 
     try {
-      const { price, title, description, location, maxPeople, totalPeople, date } = req.body;
+      const { price, title, description, location, maxPeople, totalPeople, date, owner } = req.body;
 
       // Check if an event with the same title already exists
       const existingEvent = await Event.findOne({ title: title.trim() });
@@ -64,6 +68,7 @@ router.post(
         maxPeople,
         totalPeople,
         date: new Date(date),
+        owner, // Store the owner email
       });
 
       // Save the new event to the database
@@ -152,4 +157,5 @@ router.delete("/delete/events/:id", adminAuth, async (req, res) => {
     session.endSession();
   }
 });
+
 export default router;

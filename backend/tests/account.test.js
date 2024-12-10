@@ -5,13 +5,16 @@ import { setupTestServer, setupTestDatabase, cleanupTest } from './setup/testSet
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import Account from '../models/account.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 describe("Account API Tests", () => {
   let server;
   let authToken;
   let testUser;
   let testAccountId;
-  let testEmail = 'test@example.com';
+  let testEmail = process.env.TEST_EMAIL;
 
   // Setup before all tests
   beforeAll(async () => {
@@ -25,11 +28,13 @@ describe("Account API Tests", () => {
     testUser = dbSetup.testUser;
     
     // Create a test account for use in specific tests
-    const hashedPassword = await bcrypt.hash('TestPass123!', 12);
+    const hashedPassword = await bcrypt.hash(process.env.TEST_PASS, 12);
     const testAccount = await Account.create({
-      email: testEmail,
+      email: process.env.TEST_EMAIL,
       password: hashedPassword,
-      events: []
+      events: [],
+      isAdmin: true,
+      isOrganizer: true,
     });
     testAccountId = testAccount._id.toString();
   });
@@ -38,6 +43,7 @@ describe("Account API Tests", () => {
   afterAll(async () => {
     await Account.deleteMany({ email: `updated@example.com`});
     await Account.deleteMany({ email: `test@example.com`});
+    await Account.deleteMany({ email: process.env.TEST_EMAIL});
     await cleanupTest(server, testUser);
   });
 
@@ -117,10 +123,11 @@ describe("Account API Tests", () => {
   // Tests for PATCH /edit/password/:id endpoint
   describe("PATCH /edit/password/:id", () => {
     it("should update password successfully", async () => {
-      const newPassword = "NewTestPass123!";
+      const newPassword = `${process.env.TEST_PASS}89312`;
       
       const response = await request(app)
         .patch(`/edit/password/${testAccountId}`)
+        .set("Authorization", `Bearer ${authToken}`)
         .send({ password: newPassword });
 
       expect(response.statusCode).toBe(200);
@@ -130,6 +137,7 @@ describe("Account API Tests", () => {
     it("should reject weak password", async () => {
       const response = await request(app)
         .patch(`/edit/password/${testAccountId}`)
+        .set("Authorization", `Bearer ${authToken}`)
         .send({ password: "weak" });
 
       expect(response.statusCode).toBe(400);
@@ -139,7 +147,8 @@ describe("Account API Tests", () => {
     it("should return 400 for invalid ID format", async () => {
       const response = await request(app)
         .patch("/edit/password/invalidid")
-        .send({ password: "ValidPass123!" });
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({ password: `${process.env.TEST_PASS}` });
 
       expect(response.statusCode).toBe(400);
       expect(response.body.message).toBe("Invalid ID format");

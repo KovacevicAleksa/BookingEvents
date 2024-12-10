@@ -74,7 +74,7 @@ router.post(
       }
 
       const token = jwt.sign(
-        { id: account._id, email: account.email, isAdmin: account.isAdmin, isOrganizer: account.isOrganizer }, // Add isOrganizer to token
+        { id: account._id, email: account.email, isAdmin: account.isAdmin, isOrganizer: account.isOrganizer },
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
       );

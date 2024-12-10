@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import config from "../config/config"
 
-
 function AdminAddEvent() {
   const { user } = useAuth();
   const [eventData, setEventData] = useState({
@@ -13,6 +12,7 @@ function AdminAddEvent() {
     maxPeople: "",
     totalPeople: "",
     date: "",
+    owner: ""  // Added owner field
   });
   const [accountsData, setAccountsData] = useState("");
   const [eventsData, setEventsData] = useState("");
@@ -315,22 +315,35 @@ function AdminAddEvent() {
                   required
                 />
               </div>
-              <div className="m-2 mt-5 mb-5">
-                <button
-                  type="submit"
-                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              <div>
+                <label
+                  htmlFor="owner"
+                  className="block text-sm font-medium text-gray-700"
                 >
-                  Add Event
-                </button>
+                  Owner Email
+                </label>
+                <input
+                  type="email"
+                  id="owner"
+                  name="owner"
+                  value={eventData.owner}
+                  onChange={handleChange}
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+                  required
+                />
               </div>
+              <button
+                type="submit"
+                className="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium py-2 rounded-md shadow-md transition duration-300"
+              >
+                Add Event
+              </button>
             </form>
           </div>
 
           {/* Events Section */}
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-xl mx-auto">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-              Events
-            </h2>
+          <div className="bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Events</h2>
 
             <textarea
               readOnly
@@ -342,7 +355,7 @@ function AdminAddEvent() {
               type="text"
               value={deleteEventId}
               onChange={(e) => setDeleteEventId(e.target.value)}
-              placeholder="Enter event ID to delete"
+              placeholder="Enter Event ID to delete"
               className="w-full p-2 mb-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-indigo-300"
             />
 
@@ -358,4 +371,5 @@ function AdminAddEvent() {
     </div>
   );
 }
+
 export default AdminAddEvent;

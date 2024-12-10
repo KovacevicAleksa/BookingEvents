@@ -3,6 +3,9 @@ import request from 'supertest';
 import app from '../server.js';
 import { setupTestServer, setupTestDatabase, cleanupTest } from './setup/testSetup.js';
 import Account from '../models/account.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 
 describe('Authentication Routes', () => {
@@ -11,8 +14,8 @@ describe('Authentication Routes', () => {
   let authToken;
   let testUser;
 
-  const testEmail = "testuser@example.com";
-  const testPassword = "testpassword";
+  const testEmail = process.env.TEST_EMAIL;
+  const testPassword = process.env.TEST_PASS;
 
   // Before all tests, start the server and set up the test database
   beforeAll(async () => {
@@ -29,6 +32,9 @@ describe('Authentication Routes', () => {
   afterAll(async () => {
     // Delete the test user after tests are finished
     await Account.deleteMany({ email: `newuser@example.com`});
+    await Account.deleteMany({ email: process.env.TEST_PASS});
+
+    
     
     // Clean up the test database and stop the server
     await cleanupTest(server, testUser);

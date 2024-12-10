@@ -31,6 +31,7 @@ describe("Redis Cache Tests", () => {
       description: "This is a test event description",
       location: "Test Location",
       date: new Date(),
+      owner: "admin@gmail.com",
       maxPeople: 100,
       totalPeople: 10,
       price: "50",

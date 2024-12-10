@@ -112,7 +112,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-
   /tickets/{id}:
     get:
       summary: Retrieve a specific ticket by ID
@@ -196,9 +195,21 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                assignedTo:
+                  type: string
+                  description: Email of the user to whom the ticket is assigned
+              example:
+                assignedTo: "user@example.com"
       responses:
         '200':
-          description: Ticket successfully deleted
+          description: Ticket successfully deleted or updated
         '404':
           description: Ticket not found
         '500':
