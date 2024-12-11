@@ -1,26 +1,26 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 import Login from "./routes/Login";
 import Registration from "./routes/Registration";
 import PrivateRoute from "./Components/PrivateRoute";
-import AdminAddEvent from "./routes/AdminAddEvent";
-import HealthCheckDashboard from "./routes/HealthCheck";
-import Unauthorized from "./routes/Unauthorized";
-import ForgotPassword from "./routes/ForgotPassword";
-import ChangePassword from "./routes/ChangePassword";
-import QrCode from "./routes/QrCode";
-import Profile from "./routes/Profile";
-import MyTickets from "./routes/MyTickets";
-import Chat from "./routes/Chat";
 import Header from "./Components/Header";
+import { useAuth } from "./context/AuthContext";
+import config from "./config/config";
 import Card from "./Components/Card";
-import AboutUs from "./routes/AboutUs";
 import konferencija from "./Components/assets/Konferencija.jpg";
 import hoverPhoto from "./Components/assets/hoverPhoto.gif";
-import config from "./config/config";
 
-import { useAuth } from "./context/AuthContext";
-
+// Lazy-loaded components
+const AdminAddEvent = React.lazy(() => import("./routes/AdminAddEvent"));
+const HealthCheckDashboard = React.lazy(() => import("./routes/HealthCheck"));
+const Unauthorized = React.lazy(() => import("./routes/Unauthorized"));
+const ForgotPassword = React.lazy(() => import("./routes/ForgotPassword"));
+const ChangePassword = React.lazy(() => import("./routes/ChangePassword"));
+const QrCode = React.lazy(() => import("./routes/QrCode"));
+const Profile = React.lazy(() => import("./routes/Profile"));
+const MyTickets = React.lazy(() => import("./routes/MyTickets"));
+const Chat = React.lazy(() => import("./routes/Chat"));
+const AboutUs = React.lazy(() => import("./routes/AboutUs"));
 
 // Data component to display events
 function Data() {
@@ -29,23 +29,24 @@ function Data() {
 
   React.useEffect(() => {
     const fetchData = async () => {
-      // Check if the token has expired before making the API call
       if (!checkTokenExpiration()) {
-        return; // Token has expired, don't make the API call
+        return;
       }
 
       try {
-        const response = await fetch(`${config.api.baseURL}${config.api.endpoints.viewevents}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-        });
+        const response = await fetch(
+          `${config.api.baseURL}${config.api.endpoints.viewevents}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${user.token}`,
+            },
+          }
+        );
 
         if (!response.ok) {
           if (response.status === 401) {
-            // Unauthorized, token might have expired
             logout();
             return;
           }
@@ -83,7 +84,7 @@ function Data() {
           />
         ))}
     </div>
-  );  
+  );
 }
 
 export function Events() {
@@ -91,7 +92,7 @@ export function Events() {
 
   return (
     <div>
-      <Header userEmail={user?.email} onLogout={logout}/>
+      <Header userEmail={user?.email} onLogout={logout} />
       <Data />
     </div>
   );
@@ -99,52 +100,54 @@ export function Events() {
 
 function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/registration" element={<Registration />} />
-      <Route path="/unauthorized" element={<Unauthorized />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/change-password/:id" element={<ChangePassword />} />
-      <Route path="/chat/:roomName" element={<Chat />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/my-tickets" element={<MyTickets />} />
-      <Route path="/about-us" element={<AboutUs />} />
+    <Suspense fallback={<div>Loading...</div>}>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/registration" element={<Registration />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/change-password/:id" element={<ChangePassword />} />
+        <Route path="/chat/:roomName" element={<Chat />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/my-tickets" element={<MyTickets />} />
+        <Route path="/about-us" element={<AboutUs />} />
 
-      <Route
-        path="/events"
-        element={
-          <PrivateRoute>
-            <Events />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/admin/addEvent"
-        element={
-          <PrivateRoute adminOnly={true}>
-            <AdminAddEvent />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/admin/healthCheck"
-        element={
-          <PrivateRoute adminOnly={true}>
-            <HealthCheckDashboard />
-          </PrivateRoute>
-        }
-      />
-            <Route
-        path="/qrcode"
-        element={
-          <PrivateRoute organizerOnly={true}>
-            <QrCode />
-          </PrivateRoute>
-        }
-      />
-      <Route path="/" element={<Navigate to="/events" />} />
-      <Route path="*" element={<Navigate to="/events" />} />
-    </Routes>
+        <Route
+          path="/events"
+          element={
+            <PrivateRoute>
+              <Events />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/addEvent"
+          element={
+            <PrivateRoute adminOnly={true}>
+              <AdminAddEvent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/healthCheck"
+          element={
+            <PrivateRoute adminOnly={true}>
+              <HealthCheckDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/qrcode"
+          element={
+            <PrivateRoute organizerOnly={true}>
+              <QrCode />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/" element={<Navigate to="/events" />} />
+        <Route path="*" element={<Navigate to="/events" />} />
+      </Routes>
+    </Suspense>
   );
 }
 
