@@ -1,11 +1,12 @@
 import { jest, describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
-import request from "supertest";
 import app from "../server.js";
 import { setupTestServer, setupTestDatabase, cleanupTest } from './setup/testSetup.js';
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import Account from '../models/account.js';
+import Verification from '../models/verification.js';
 import dotenv from 'dotenv';
+import request from "supertest";
 
 dotenv.config();
 
@@ -15,19 +16,20 @@ describe("Account API Tests", () => {
   let testUser;
   let testAccountId;
   let testEmail = process.env.TEST_EMAIL;
+  let testVerificationCode;
 
-  // Setup before all tests
+  // Setup test environment before running tests
   beforeAll(async () => {
     // Initialize test server
     const serverSetup = await setupTestServer(app);
     server = serverSetup.server;
     
-    // Setup test database and get authentication token
+    // Setup test database
     const dbSetup = await setupTestDatabase();
     authToken = dbSetup.authToken;
     testUser = dbSetup.testUser;
     
-    // Create a test account for use in specific tests
+    // Create test account
     const hashedPassword = await bcrypt.hash(process.env.TEST_PASS, 12);
     const testAccount = await Account.create({
       email: process.env.TEST_EMAIL,
@@ -37,6 +39,14 @@ describe("Account API Tests", () => {
       isOrganizer: true,
     });
     testAccountId = testAccount._id.toString();
+
+    // Create verification code
+    const verificationDoc = await Verification.create({
+      email: testEmail,
+      code: '123456',
+      expireAt: new Date(Date.now() + 15 * 60 * 1000)
+    });
+    testVerificationCode = verificationDoc.code;
   });
 
   // Cleanup after all tests
@@ -44,6 +54,7 @@ describe("Account API Tests", () => {
     await Account.deleteMany({ email: `updated@example.com`});
     await Account.deleteMany({ email: `test@example.com`});
     await Account.deleteMany({ email: process.env.TEST_EMAIL});
+    await Verification.deleteMany({ email: testEmail });
     await cleanupTest(server, testUser);
   });
 
@@ -120,25 +131,64 @@ describe("Account API Tests", () => {
     });
   });
 
-  // Tests for PATCH /edit/password/:id endpoint
-  describe("PATCH /edit/password/:id", () => {
-    it("should update password successfully", async () => {
-      const newPassword = `${process.env.TEST_PASS}89312`;
-      
+  // Tests for GET /edit/password/:email endpoint
+  describe("GET /edit/password/:email", () => {
+    it("should send verification code for existing email", async () => {
       const response = await request(app)
-        .patch(`/edit/password/${testAccountId}`)
-        .set("Authorization", `Bearer ${authToken}`)
-        .send({ password: newPassword });
+        .get(`/edit/password/${testEmail}`)
+        .set("Authorization", `Bearer ${authToken}`);
 
+      expect(response.statusCode).toBe(200);
+      expect(response.body.message).toContain(`Successfully sent ID to ${testEmail}`);
+    });
+
+    it("should return 404 for non-existent email", async () => {
+      const response = await request(app)
+        .get("/edit/password/nonexistent@example.com")
+        .set("Authorization", `Bearer ${authToken}`);
+
+      expect(response.statusCode).toBe(404);
+    });
+  });
+
+  // Tests for PATCH /edit/password endpoint
+  describe("PATCH /edit/password", () => {
+    it("should update password successfully", async () => {
+      // Request verification code
+      const verificationResponse = await request(app)
+        .get(`/edit/password/${testEmail}`)
+        .set("Authorization", `Bearer ${authToken}`);
+    
+      // Fetch generated verification code
+      const verification = await Verification.findOne({ email: testEmail });
+      const generatedCode = verification.code;
+    
+      const newPassword = `${process.env.TEST_PASS}89312`;
+    
+      const response = await request(app)
+        .patch("/edit/password")
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({
+          id: testAccountId,
+          email: testEmail,
+          password: newPassword,
+          code: generatedCode, // Use dynamically generated code
+        });
+    
       expect(response.statusCode).toBe(200);
       expect(response.body.message).toBe("Password updated successfully");
     });
 
     it("should reject weak password", async () => {
       const response = await request(app)
-        .patch(`/edit/password/${testAccountId}`)
+        .patch("/edit/password")
         .set("Authorization", `Bearer ${authToken}`)
-        .send({ password: "weak" });
+        .send({
+          id: testAccountId,
+          email: testEmail,
+          password: "weak",
+          code: testVerificationCode,
+        });
 
       expect(response.statusCode).toBe(400);
       expect(response.body.message).toMatch(/Password must be/);
@@ -146,12 +196,61 @@ describe("Account API Tests", () => {
 
     it("should return 400 for invalid ID format", async () => {
       const response = await request(app)
-        .patch("/edit/password/invalidid")
+        .patch("/edit/password")
         .set("Authorization", `Bearer ${authToken}`)
-        .send({ password: `${process.env.TEST_PASS}` });
+        .send({
+          id: "invalidid",
+          email: testEmail,
+          password: `${process.env.TEST_PASS}`,
+          code: testVerificationCode,
+        });
 
       expect(response.statusCode).toBe(400);
       expect(response.body.message).toBe("Invalid ID format");
+    });
+
+    it("should return 400 if fields are missing", async () => {
+      const response = await request(app)
+        .patch("/edit/password")
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({
+          id: testAccountId,
+          email: testEmail,
+          code: testVerificationCode, // Missing password
+        });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body.message).toBe("All fields are required");
+    });
+
+    it("should return 404 if account is not found", async () => {
+      const response = await request(app)
+        .patch("/edit/password")
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({
+          id: "648a57b1f4f25c1234567890", // Non-existent ID
+          email: testEmail,
+          password: `${process.env.TEST_PASS}`,
+          code: testVerificationCode,
+        });
+
+      expect(response.statusCode).toBe(404);
+      expect(response.body.message).toBe("Account not found in the database");
+    });
+
+    it("should return 400 if verification code is invalid", async () => {
+      const response = await request(app)
+        .patch("/edit/password")
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({
+          id: testAccountId,
+          email: testEmail,
+          password: `${process.env.TEST_PASS}`,
+          code: "wrongcode", // Invalid code
+        });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body.message).toBe("Invalid verification code");
     });
   });
 
@@ -159,7 +258,7 @@ describe("Account API Tests", () => {
   describe("DELETE /remove/account/event/:id", () => {
     let eventId = "event123";
 
-    // Reset events array and add test event before each test
+    // Reset events array before each test
     beforeEach(async () => {
       await Account.findByIdAndUpdate(testAccountId, {
         $set: { events: [eventId] }

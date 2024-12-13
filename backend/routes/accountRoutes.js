@@ -57,99 +57,84 @@ router.patch("/edit/account/:id", auth, async (req, res) => {
   }
 });
 
-describe("PATCH /edit/password", () => {
-  it("should update password successfully", async () => {
-    const newPassword = `${process.env.TEST_PASS}89312`;
+//Edit password
+router.patch("/edit/password", resetAccountLimiter, async (req, res) => {
+  try {
+    const { id, email, password, code } = req.body;
 
-    const response = await request(app)
-      .patch("/edit/password")
-      .set("Authorization", `Bearer ${authToken}`)
-      .send({
-        id: testAccountId,
-        email: testEmail,
-        password: newPassword,
-        code: testVerificationCode,
+    // Validate MongoDB ObjectId early
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid ID format",
       });
+    }
 
-    expect(response.statusCode).toBe(200);
-    expect(response.body.message).toBe("Password updated successfully");
-  });
-
-  it("should reject weak password", async () => {
-    const response = await request(app)
-      .patch("/edit/password")
-      .set("Authorization", `Bearer ${authToken}`)
-      .send({
-        id: testAccountId,
-        email: testEmail,
-        password: "weak",
-        code: testVerificationCode,
+    // Enhanced input validation
+    if (!id || !email || !password || !code) {
+      return res.status(400).json({
+        message: "All fields are required",
       });
+    }
 
-    expect(response.statusCode).toBe(400);
-    expect(response.body.message).toMatch(/Password must be/);
-  });
+    const account = await Account.findOne({ _id: id });
+    if (!account) {
+      return res.status(404).json({ message: "Account not found in the database" });
+    }
 
-  it("should return 400 for invalid ID format", async () => {
-    const response = await request(app)
-      .patch("/edit/password")
-      .set("Authorization", `Bearer ${authToken}`)
-      .send({
-        id: "invalidid",
-        email: testEmail,
-        password: `${process.env.TEST_PASS}`,
-        code: testVerificationCode,
+    const verification = await Verification.findOne({ email });
+    if (!verification) {
+      return res.status(404).json({ message: "Verification not found or expired" });
+    }
+
+    // Password validation
+    if (password.length < 8) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters long",
       });
+    }
 
-    expect(response.statusCode).toBe(400);
-    expect(response.body.message).toBe("Invalid ID format");
-  });
-
-  it("should return 400 if fields are missing", async () => {
-    const response = await request(app)
-      .patch("/edit/password")
-      .set("Authorization", `Bearer ${authToken}`)
-      .send({
-        id: testAccountId,
-        email: testEmail,
-        code: testVerificationCode, // Missing password
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        message:
+          "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character",
       });
+    }
 
-    expect(response.statusCode).toBe(400);
-    expect(response.body.message).toBe("All fields are required");
-  });
+    // Verification code check
+    if (verification.code !== code) {
+      return res.status(400).json({ message: "Invalid verification code" });
+    }
 
-  it("should return 404 if account is not found", async () => {
-    const response = await request(app)
-      .patch("/edit/password")
-      .set("Authorization", `Bearer ${authToken}`)
-      .send({
-        id: "648a57b1f4f25c1234567890", // Nonexistent ID
-        email: testEmail,
-        password: `${process.env.TEST_PASS}`,
-        code: testVerificationCode,
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    const updatedAccount = await Account.updateOne(
+      { _id: id },
+      { $set: { password: hashedPassword } }
+    );
+
+    if (updatedAccount.matchedCount === 0) {
+      return res.status(404).json({
+        message: "Account not found",
       });
+    }
 
-    expect(response.statusCode).toBe(404);
-    expect(response.body.message).toBe("Account not found in the database");
-  });
+    res.status(200).json({
+      message: "Password updated successfully",
+      timestamp: new Date(),
+    });
+  } catch (error) {
+    console.error("Password update error:", {
+      error: error.message,
+      timestamp: new Date(),
+    });
 
-  it("should return 404 if verification code is invalid", async () => {
-    const response = await request(app)
-      .patch("/edit/password")
-      .set("Authorization", `Bearer ${authToken}`)
-      .send({
-        id: testAccountId,
-        email: testEmail,
-        password: `${process.env.TEST_PASS}`,
-        code: "wrongcode", // Invalid code
-      });
-
-    expect(response.statusCode).toBe(400);
-    expect(response.body.message).toBe("Invalid verification code");
-  });
+    res.status(500).json({
+      message: "An error occurred while updating the password",
+    });
+  }
 });
-
 
 //Get account ID
 router.get("/edit/password/:email", resetAccountLimiter, async (req, res) => {
