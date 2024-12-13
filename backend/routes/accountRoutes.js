@@ -5,6 +5,7 @@ import { resetAccountLimiter } from "../middleware/resetAccountLimiter.js";
 import { sendEmail } from "../services/emailService.js";
 import mongoose from 'mongoose'; // Added for ObjectId validation
 import bcrypt from 'bcrypt'; // Added for password hashing
+import Verification from "../models/verification.js"
 
 const router = express.Router();
 
@@ -56,89 +57,124 @@ router.patch("/edit/account/:id", auth, async (req, res) => {
   }
 });
 
-//Edit password
-router.patch("/edit/password/:id", adminAuth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { password } = req.body;
+describe("PATCH /edit/password", () => {
+  it("should update password successfully", async () => {
+    const newPassword = `${process.env.TEST_PASS}89312`;
 
-    // Enhanced input validation
-    if (!id || !password) {
-      return res.status(400).json({ 
-        message: "All fields are required" 
+    const response = await request(app)
+      .patch("/edit/password")
+      .set("Authorization", `Bearer ${authToken}`)
+      .send({
+        id: testAccountId,
+        email: testEmail,
+        password: newPassword,
+        code: testVerificationCode,
       });
-    }
 
-    // Validate MongoDB ObjectId format to prevent injection
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        message: "Invalid ID format"
+    expect(response.statusCode).toBe(200);
+    expect(response.body.message).toBe("Password updated successfully");
+  });
+
+  it("should reject weak password", async () => {
+    const response = await request(app)
+      .patch("/edit/password")
+      .set("Authorization", `Bearer ${authToken}`)
+      .send({
+        id: testAccountId,
+        email: testEmail,
+        password: "weak",
+        code: testVerificationCode,
       });
-    }
 
-    // Password strength validation
-    if (password.length < 8) {
-      return res.status(400).json({
-        message: "Password must be at least 8 characters long"
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toMatch(/Password must be/);
+  });
+
+  it("should return 400 for invalid ID format", async () => {
+    const response = await request(app)
+      .patch("/edit/password")
+      .set("Authorization", `Bearer ${authToken}`)
+      .send({
+        id: "invalidid",
+        email: testEmail,
+        password: `${process.env.TEST_PASS}`,
+        code: testVerificationCode,
       });
-    }
 
-    // Regular expression to check password complexity
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(password)) {
-      return res.status(400).json({
-        message: "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character"
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe("Invalid ID format");
+  });
+
+  it("should return 400 if fields are missing", async () => {
+    const response = await request(app)
+      .patch("/edit/password")
+      .set("Authorization", `Bearer ${authToken}`)
+      .send({
+        id: testAccountId,
+        email: testEmail,
+        code: testVerificationCode, // Missing password
       });
-    }
 
-    // Generate salt and hash the password manually
-    const salt = await bcrypt.genSalt(12);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe("All fields are required");
+  });
 
-    // Update the password directly using updateOne to bypass the pre-save middleware
-    const updatedAccount = await Account.updateOne(
-      { _id: id },
-      { $set: { password: hashedPassword } }
-    );
-
-    if (updatedAccount.matchedCount === 0) {
-      return res.status(404).json({ 
-        message: "Account not found" 
+  it("should return 404 if account is not found", async () => {
+    const response = await request(app)
+      .patch("/edit/password")
+      .set("Authorization", `Bearer ${authToken}`)
+      .send({
+        id: "648a57b1f4f25c1234567890", // Nonexistent ID
+        email: testEmail,
+        password: `${process.env.TEST_PASS}`,
+        code: testVerificationCode,
       });
-    }
 
-    // Return success without exposing sensitive data
-    res.status(200).json({ 
-      message: "Password updated successfully",
-      timestamp: new Date()
-    });
+    expect(response.statusCode).toBe(404);
+    expect(response.body.message).toBe("Account not found in the database");
+  });
 
-  } catch (error) {
-    // Log error safely without exposing sensitive details
-    console.error("Password update error:", {
-      error: error.message,
-      timestamp: new Date()
-    });
+  it("should return 404 if verification code is invalid", async () => {
+    const response = await request(app)
+      .patch("/edit/password")
+      .set("Authorization", `Bearer ${authToken}`)
+      .send({
+        id: testAccountId,
+        email: testEmail,
+        password: `${process.env.TEST_PASS}`,
+        code: "wrongcode", // Invalid code
+      });
 
-    res.status(500).json({ 
-      message: "An error occurred while updating the password"
-    });
-  }
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe("Invalid verification code");
+  });
 });
+
 
 //Get account ID
 router.get("/edit/password/:email", resetAccountLimiter, async (req, res) => {
   try {
     const { email } = req.params;
 
-    const account = await Account.findOne({ email: email });
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const account = await Account.findOne({ email });
+
     if (!account) {
       return res.status(404).json({ message: "Account not found" });
     }
 
-    if (!account.id) {
-      return res.status(400).json({ message: "Account ID not found" });
-    }
+    const code = Math.floor(100000 + Math.random() * 900000).toString(); // Generate 6-digit code
+
+    // Create or update the verification document
+    await Verification.findOneAndUpdate(
+      { email },
+      { code, expireAt: new Date(Date.now() + 15 * 60 * 1000) },
+      { upsert: true } // Create if not exists
+    );
+
 
     await sendEmail(
       account.email,
@@ -152,6 +188,7 @@ router.get("/edit/password/:email", resetAccountLimiter, async (req, res) => {
               <p>We received a request to reset the password for your account associated with this email address.</p>
               <p>If you requested this password reset, please click the link below to reset your password:</p>
               <p>ID: ${account.id}</p>
+              <p>Your verification code is: <strong>${code}</strong></p><p>This code will expire in 15 minutes.</p>
               <p>http://localhost/change-password/${account.id}</p>
               <div style="text-align: center; margin: 20px 0;">
                 <a href="http://localhost/change-password/${account.id}"
@@ -170,7 +207,7 @@ router.get("/edit/password/:email", resetAccountLimiter, async (req, res) => {
 
     console.log("Account ID sent to email");
 
-    res.status(200).json({ message: "Successfully sent ID to email" });
+    res.status(200).json({ message: `Successfully sent ID to ${email}` });
   } catch (error) {
     console.error("Error in /edit/password/:email route:", error);
     res.status(500).json({ message: "Internal server error" });
