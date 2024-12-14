@@ -32,7 +32,7 @@ describe('Authentication Routes', () => {
   afterAll(async () => {
     // Delete the test user after tests are finished
     await Account.deleteMany({ email: `newuser@example.com`});
-    await Account.deleteMany({ email: process.env.TEST_PASS});
+    await Account.deleteMany({ email: process.env.TEST_EMAIL});
 
     
     
