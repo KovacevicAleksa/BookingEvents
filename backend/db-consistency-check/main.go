@@ -7,40 +7,52 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
+	// Load environment variables
+	loadEnv()
 
-	// Load environment variables from .env file
+	// Connect to MongoDB
+	client := connectMongoDB()
+	defer client.Disconnect(context.Background())
+
+	// Select the collection
+	collection := client.Database("Node").Collection("events")
+
+	// Check for duplicate titles
+	checkDuplicateTitles(collection)
+
+	// Check for missing required fields
+	requiredFields := []string{"owner", "id", "price", "title", "description", "location", "maxPeople", "totalPeople", "date"}
+	checkMissingFields(collection, requiredFields)
+}
+
+// Loads environment variables from the .env file
+func loadEnv() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
+}
 
-	// Access environment variables
+// Connects to MongoDB and returns the client
+func connectMongoDB() *mongo.Client {
 	MONGODB_URI := os.Getenv("MONGODB_URI")
-
-	// Establishing MongoDB connection
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(MONGODB_URI))
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer client.Disconnect(context.Background()) // Ensure the connection is closed when main function finishes
+	return client
+}
 
-	// Choosing the collection "events" from the "Node" database
-	collection := client.Database("Node").Collection("events")
-
-	// Corrected aggregation pipeline
+// Checks for duplicate titles and prints them
+func checkDuplicateTitles(collection *mongo.Collection) {
 	pipeline := mongo.Pipeline{
-		{
-			{Key: "$group", Value: bson.M{"_id": "$title", "count": bson.M{"$sum": 1}}},
-		},
-		{
-			{Key: "$match", Value: bson.M{"count": bson.M{"$gt": 1}}},
-		},
+		{{Key: "$group", Value: bson.M{"_id": "$title", "count": bson.M{"$sum": 1}}}},
+		{{Key: "$match", Value: bson.M{"count": bson.M{"$gt": 1}}}},
 	}
 
 	cursor, err := collection.Aggregate(context.Background(), pipeline)
@@ -57,26 +69,27 @@ func main() {
 		}
 		fmt.Printf("Title: %s, Count: %v\n", result["_id"], result["count"])
 	}
-	if err := cursor.Err(); err != nil {
-		log.Fatal(err)
+}
+
+// Checks for documents missing required fields and prints them
+func checkMissingFields(collection *mongo.Collection, fields []string) {
+	queries := []bson.M{}
+	for _, field := range fields {
+		queries = append(queries, bson.M{field: bson.M{"$exists": false}})
 	}
 
-	// Check for events with missing owners
-	missingOwnerCursor, err := collection.Find(context.Background(), bson.M{"owner": bson.M{"$exists": false}})
+	missingFieldsCursor, err := collection.Find(context.Background(), bson.M{"$or": queries})
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer missingOwnerCursor.Close(context.Background())
+	defer missingFieldsCursor.Close(context.Background())
 
-	fmt.Println("Events with missing owner:")
-	for missingOwnerCursor.Next(context.Background()) {
+	fmt.Println("Documents with missing required fields:")
+	for missingFieldsCursor.Next(context.Background()) {
 		var result bson.M
-		if err := missingOwnerCursor.Decode(&result); err != nil {
+		if err := missingFieldsCursor.Decode(&result); err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println(result)
-	}
-	if err := missingOwnerCursor.Err(); err != nil {
-		log.Fatal(err)
 	}
 }
