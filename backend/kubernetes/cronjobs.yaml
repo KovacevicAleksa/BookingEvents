@@ -4,7 +4,7 @@ metadata:
   name: daily-job
   namespace: default
 spec:
-  schedule: "0 0 * * *"  # Every 24h
+  schedule: "0 0 * * *"  # Every 24h 00:00
   jobTemplate:
     spec:
       template:
@@ -16,7 +16,7 @@ spec:
                 - name: MONGODB_URI
                   valueFrom:
                     secretKeyRef:
-                      name: secret
+                      name: secrets
                       key: MONGODB_URI
           restartPolicy: Never
   successfulJobsHistoryLimit: 1

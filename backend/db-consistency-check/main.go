@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,6 +14,9 @@ import (
 )
 
 func main() {
+	// Print the current date and time
+	printCurrentDateTime()
+
 	// Load environment variables
 	loadEnv()
 
@@ -29,6 +33,13 @@ func main() {
 	// Check for missing required fields
 	requiredFields := []string{"owner", "id", "price", "title", "description", "location", "maxPeople", "totalPeople", "date"}
 	checkMissingFields(collection, requiredFields)
+
+}
+
+// Prints the current date and time
+func printCurrentDateTime() {
+	currentTime := time.Now()
+	fmt.Printf("Program started at: %s\n\n", currentTime.Format("2006-01-02 15:04:05"))
 }
 
 // Loads environment variables from the .env file
