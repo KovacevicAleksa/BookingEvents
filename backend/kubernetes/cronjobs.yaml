@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: daily-job
+  namespace: default
+spec:
+  schedule: "0 0 * * *"  # Every 24h
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: app-container
+              image: kovacevicaleksa/db-consistency-check:latest
+              env:
+                - name: MONGODB_URI
+                  valueFrom:
+                    secretKeyRef:
+                      name: secret
+                      key: MONGODB_URI
+          restartPolicy: Never
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1

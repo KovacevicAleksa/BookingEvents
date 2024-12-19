@@ -1,0 +1,27 @@
+# Use the official Go image with version 1.21 on Alpine Linux for a lightweight environment
+FROM golang:1.21.1-alpine
+
+# Install curl for health checks
+RUN apk add --no-cache curl
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy all Go module files
+COPY go.mod .
+COPY go.sum .
+
+# Download dependencies specified in go.mod
+RUN go mod download
+
+# Copy the source code, including subdirectories like config
+COPY . .
+
+# Build the Go application, outputting an executable named "main"
+RUN go build -o main .
+
+# Expose port 8181 for the application to listen on
+EXPOSE 8181
+
+# Set the command to run the application
+CMD ["./main"]

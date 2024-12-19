@@ -1,6 +1,6 @@
 module db-consistency-check
 
-go 1.23.3
+go 1.21.0
 
 require (
 	github.com/golang/snappy v0.0.4 // indirect

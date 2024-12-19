@@ -1,6 +1,9 @@
 import swaggerJSDoc from "swagger-jsdoc";
 import path from "path";
 import { fileURLToPath } from "url";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,7 +19,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: "http://localhost:8081",
+        url: process.env.FRONTEND_URL,
       },
     ],
     components: {
