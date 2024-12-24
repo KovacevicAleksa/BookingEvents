@@ -12,6 +12,11 @@ const router = express.Router();
 router.get("/accounts", auth, async (req, res) => {
   try {
     const accounts = await Account.find({}).select("-password -_id -events");
+
+    if (!accounts.length) {
+      return res.status(404).json({ message: "No accounts found." });
+    }
+
     res.status(200).json(accounts); // Return the list of accounts
   } catch (error) {
     res.status(500).json({ message: error.message }); // Return an error if something goes wrong
@@ -24,28 +29,51 @@ router.get("/accounts/:id", auth, async (req, res) => {
     const { id } = req.params;
     const account = await Account.findById(id).select("-password"); // Find the account by ID and exclude the password
 
+    if (!account) {
+      return res.status(404).json({ message: "Account not found." });
+    }
+
+    if (!id) {
+      return res.status(404).json({ message: "Id not found." });
+    }
+
     res.status(200).json(account); // Return the account
   } catch (error) {
     res.status(500).json({ message: error.message }); // Return an error if something goes wrong
   }
 });
 
-// Route to edit an account by ID
 router.patch("/edit/account/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
     const { events, ...otherUpdates } = req.body;
 
-    const update = { $push: { events } }; // Add new events to the account's event list
-
-    if (Object.keys(otherUpdates).length > 0) {
-      update.$set = otherUpdates; // Apply other updates to the account
+    // Validate MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid account ID format" });
     }
 
+    // Validate events if provided
+    if (events) {
+      if (!Array.isArray(events)) {
+        return res.status(400).json({ message: "Events must be an array" });
+      }
+    }
+
+    // Build update object
+    const update = {};
+    if (events) {
+      update.$push = { events: { $each: events } }; // Add multiple events
+    }
+    if (Object.keys(otherUpdates).length > 0) {
+      update.$set = otherUpdates; // Add other updates
+    }
+
+    // Find and update account
     const updatedAccount = await Account.findByIdAndUpdate(id, update, {
-      new: true,
-      runValidators: true,
-    }); // Update the account by ID
+      new: true, // Return updated document
+      runValidators: true, // Apply model validation
+    });
 
     if (!updatedAccount) {
       return res.status(404).json({ message: "Account not found" });
@@ -53,7 +81,10 @@ router.patch("/edit/account/:id", auth, async (req, res) => {
 
     res.status(200).json(updatedAccount); // Return the updated account
   } catch (error) {
-    res.status(500).json({ message: error.message }); // Return an error if something goes wrong
+    console.error("Error updating account:", error);
+    res.status(500).json({
+      message: "An error occurred while updating the account. Please try again later.",
+    });
   }
 });
 
@@ -64,16 +95,18 @@ router.patch("/edit/password", resetAccountLimiter, async (req, res) => {
 
     // Validate MongoDB ObjectId early
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({
-        message: "Invalid ID format",
-      });
+      return res.status(400).json({ message: "Invalid ID format" });
     }
 
     // Enhanced input validation
     if (!id || !email || !password || !code) {
-      return res.status(400).json({
-        message: "All fields are required",
-      });
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Invalid email format" });
     }
 
     const account = await Account.findOne({ _id: id });
@@ -97,7 +130,7 @@ router.patch("/edit/password", resetAccountLimiter, async (req, res) => {
     if (!passwordRegex.test(password)) {
       return res.status(400).json({
         message:
-          "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character",
+          "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
       });
     }
 
@@ -106,18 +139,18 @@ router.patch("/edit/password", resetAccountLimiter, async (req, res) => {
       return res.status(400).json({ message: "Invalid verification code" });
     }
 
+    // Hash password
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    // Update account password
     const updatedAccount = await Account.updateOne(
       { _id: id },
       { $set: { password: hashedPassword } }
     );
 
     if (updatedAccount.matchedCount === 0) {
-      return res.status(404).json({
-        message: "Account not found",
-      });
+      return res.status(404).json({ message: "Account not found" });
     }
 
     res.status(200).json({
@@ -125,13 +158,11 @@ router.patch("/edit/password", resetAccountLimiter, async (req, res) => {
       timestamp: new Date(),
     });
   } catch (error) {
-    console.error("Password update error:", {
-      error: error.message,
-      timestamp: new Date(),
-    });
+    console.error("Password update error:", error);
 
     res.status(500).json({
-      message: "An error occurred while updating the password",
+      message: "Something went wrong. Please try again later.",
+      timestamp: new Date(),
     });
   }
 });
