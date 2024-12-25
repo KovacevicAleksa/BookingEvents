@@ -46,7 +46,7 @@ describe('QRCode Routes', () => {
       .set('Authorization', `Bearer ${authToken}`);
 
     expect(response.statusCode).toBe(400);
-    expect(response.body.error).toBe('Text to encode is required');
+    expect(response.body.error).toBe('Valid text to encode is required');
   });
 
   it('should return 500 if there is an error generating the QR code', async () => {
