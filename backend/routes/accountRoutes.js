@@ -104,9 +104,9 @@ router.patch("/edit/password", resetAccountLimiter, async (req, res) => {
     }
 
     // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: "Invalid email format" });
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (email.length > 256 || !emailRegex.test(email)) {
+        return res.status(400).json({ message: "Invalid email format" });
     }
 
     const account = await Account.findOne({ _id: id });

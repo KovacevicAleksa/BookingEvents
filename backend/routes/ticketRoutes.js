@@ -122,10 +122,14 @@ router.patch("/tickets/:id", adminAuth, async (req, res) => {
     }
 
     // Perform the update using Mongoose
-    const updatedTicket = await Ticket.findOneAndUpdate({ _id: id }, updates, {
-      new: true, // Return the updated document
-      runValidators: true, // Ensure updates follow schema rules
-    });
+    const updatedTicket = await Ticket.findOneAndUpdate(
+      { _id: { $eq: id } }, // Use $eq to ensure id is treated as a literal value
+      updates,
+      {
+        new: true, // Return the updated document
+        runValidators: true, // Ensure updates follow schema rules
+      }
+    );
 
     if (!updatedTicket) {
       return res.status(404).json({ message: "Ticket not found" });
