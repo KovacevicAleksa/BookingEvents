@@ -98,7 +98,31 @@ router.patch("/tickets/:id", adminAuth, async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
-    const updatedTicket = await Ticket.findOneAndUpdate({ _id: id }, updates, { // Use _id instead of id
+    // Validate ObjectId
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      console.log(id);
+      return res.status(400).json({ message: "Invalid Ticket ID" });
+    }
+
+    // Validate the request body (updates)
+    if (!updates || Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: "Request body is required and cannot be empty" });
+    }
+
+    // Allowed fields for update
+    const allowedUpdates = ["assignedTo"];
+    const invalidFields = Object.keys(updates).filter(
+      (key) => !allowedUpdates.includes(key)
+    );
+
+    if (invalidFields.length > 0) {
+      return res.status(400).json({
+        message: `Invalid fields in request body: ${invalidFields.join(", ")}`,
+      });
+    }
+
+    // Perform the update using Mongoose
+    const updatedTicket = await Ticket.findOneAndUpdate({ _id: id }, updates, {
       new: true, // Return the updated document
       runValidators: true, // Ensure updates follow schema rules
     });
@@ -109,7 +133,8 @@ router.patch("/tickets/:id", adminAuth, async (req, res) => {
 
     res.status(200).json(updatedTicket); // Return the updated ticket
   } catch (error) {
-    res.status(500).json({ message: error.message }); // Handle errors
+    console.error("Error updating ticket:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
