@@ -105,7 +105,7 @@ router.patch("/edit/password", resetAccountLimiter, async (req, res) => {
 
     // Email validation
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (email.length > 256 || !emailRegex.test(email)) {
+    if (email.length > 256 || !emailRegex.test(email) || typeof email !== "string") {
         return res.status(400).json({ message: "Invalid email format" });
     }
 
@@ -114,7 +114,7 @@ router.patch("/edit/password", resetAccountLimiter, async (req, res) => {
       return res.status(404).json({ message: "Account not found in the database" });
     }
 
-    const verification = await Verification.findOne({ email });
+    const verification = await Verification.findOne({ email: { $eq: email } });
     if (!verification) {
       return res.status(404).json({ message: "Verification not found or expired" });
     }
@@ -135,7 +135,7 @@ router.patch("/edit/password", resetAccountLimiter, async (req, res) => {
     }
 
     // Verification code check
-    if (verification.code !== code) {
+    if (verification.code.trim() !== code.trim()) {
       return res.status(400).json({ message: "Invalid verification code" });
     }
 
@@ -144,12 +144,13 @@ router.patch("/edit/password", resetAccountLimiter, async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Update account password
-    const updatedAccount = await Account.updateOne(
-      { _id: id },
-      { $set: { password: hashedPassword } }
+    const updatedAccount = await Account.findByIdAndUpdate(
+      id,
+      { $set: { password: hashedPassword } },
+      { new: true }
     );
 
-    if (updatedAccount.matchedCount === 0) {
+    if (!updatedAccount) {
       return res.status(404).json({ message: "Account not found" });
     }
 
@@ -158,7 +159,7 @@ router.patch("/edit/password", resetAccountLimiter, async (req, res) => {
       timestamp: new Date(),
     });
   } catch (error) {
-    console.error("Password update error:", error);
+    console.error("Password update error:", error.message, error.stack);
 
     res.status(500).json({
       message: "Something went wrong. Please try again later.",
