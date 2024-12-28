@@ -26,3 +26,9 @@ yarn-error.log*
 secret.yaml
 test-email-secret.yaml
 jwt-secret.yaml
+
+.terraform/
+*.tfstate
+*.tfstate.backup
+secret.tf
+.terraform.lock.hcl

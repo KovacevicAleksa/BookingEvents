@@ -96,7 +96,10 @@ router.post("/tickets", auth, async (req, res) => {
 router.patch("/tickets/:id", adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
+    const updates = {};
+    if (req.body.assignedTo && typeof req.body.assignedTo === 'string') {
+      updates.assignedTo = req.body.assignedTo;
+    }
 
     // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(id)) {
