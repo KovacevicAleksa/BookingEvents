@@ -18,7 +18,7 @@
   "description": "",
   "dependencies": {
     "@kubernetes/client-node": "^0.22.2",
-    "@syncfusion/ej2-barcode-generator": "^27.2.5",
+    "@syncfusion/ej2-barcode-generator": "^28.1.37",
     "bcrypt": "^5.1.1",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
