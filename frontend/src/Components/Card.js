@@ -36,19 +36,20 @@ function Card(props) {
           Authorization: `Bearer ${user.token}`,
         },
         body: JSON.stringify({
-          events: eventId,
+          events: [eventId],
         }),
       });
-
+  
       if (!response.ok) {
-        throw new Error("Network response was not ok");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Network response was not ok");
       }
-
+  
       const data = await response.json();
       console.log("Response:", data);
     } catch (error) {
       console.error("Error:", error);
-      throw error; // Re-throw the error so it can be caught by the caller
+      throw error;
     }
   }
 

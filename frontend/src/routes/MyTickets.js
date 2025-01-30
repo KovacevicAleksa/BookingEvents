@@ -25,8 +25,9 @@ function MyTickets() {
       const response = await fetch(`${config.api.baseURL}/tickets/filter`, {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${localStorage.getItem("token")}`,
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("token")}`,
+
         },
         body: JSON.stringify({ assignedTo: userId }),
       });
