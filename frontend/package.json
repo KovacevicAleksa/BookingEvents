@@ -11,7 +11,6 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
-    "react-scripts": "^5.0.1",
     "recharts": "^2.13.3",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
@@ -55,6 +54,7 @@
     "eslint-plugin-storybook": "^0.11.0",
     "jest": "^27.5.1",
     "prop-types": "^15.8.1",
+    "react-scripts": "^5.0.1",
     "tailwindcss": "^3.4.15",
     "webpack": "^5.93.0"
   },
