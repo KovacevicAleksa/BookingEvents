@@ -34,20 +34,25 @@ CREATE INDEX idx_messages_room_id_global ON message_system.messages (room_id, cr
 CREATE INDEX idx_messages_user_id_global ON message_system.messages (user_id, created_at DESC);
 CREATE INDEX idx_messages_created_at_global ON message_system.messages (created_at DESC);
 
--- Partition for October 2024
-CREATE TABLE message_system.messages_oct_2024
+-- PARTITION Q1 2025 (Jan-Mar)
+CREATE TABLE message_system.messages_q1_2025
     PARTITION OF message_system.messages
-    FOR VALUES FROM ('2024-10-01 00:00:00+00') TO ('2024-11-01 00:00:00+00');
+    FOR VALUES FROM ('2025-01-01 00:00:00+00') TO ('2025-04-01 00:00:00+00');
 
--- Partition for November 2024
-CREATE TABLE message_system.messages_nov_2024
+-- PARTITION Q2 2025 (Apr-Jun)
+CREATE TABLE message_system.messages_q2_2025
     PARTITION OF message_system.messages
-    FOR VALUES FROM ('2024-11-01 00:00:00+00') TO ('2024-12-01 00:00:00+00');
+    FOR VALUES FROM ('2025-04-01 00:00:00+00') TO ('2025-07-01 00:00:00+00');
 
--- Partition for December 2024
-CREATE TABLE message_system.messages_dec_2024
+-- PARTITIONQ 3 2025 (Jul-Sep)
+CREATE TABLE message_system.messages_q3_2025
     PARTITION OF message_system.messages
-    FOR VALUES FROM ('2024-12-01 00:00:00+00') TO ('2025-01-01 00:00:00+00');
+    FOR VALUES FROM ('2025-07-01 00:00:00+00') TO ('2025-10-01 00:00:00+00');
+
+-- PARTITION Q4 2025 (Oct-Dec)
+CREATE TABLE message_system.messages_q4_2025
+    PARTITION OF message_system.messages
+    FOR VALUES FROM ('2025-10-01 00:00:00+00') TO ('2026-01-01 00:00:00+00');
 
 CREATE TABLE message_system.messages_default
     PARTITION OF message_system.messages
