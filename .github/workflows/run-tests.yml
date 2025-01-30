@@ -16,7 +16,7 @@ jobs:
       - name: Set up Node.js # Step to set up Node.js environment
         uses: actions/setup-node@v3 # GitHub Action that sets up Node.js
         with:
-          node-version: "16" # Specifies the Node.js version to use (version 16)
+          node-version: "22" # Specifies the Node.js version to use (version 22)
 
       # Cache npm packages to speed up installation
       - name: Cache npm packages
@@ -49,7 +49,7 @@ jobs:
 
       - name: Upload test results # Step to upload test results if tests fail
         if: failure() # Only runs if previous steps failed
-        uses: actions/upload-artifact@v3 # GitHub Action to upload artifacts
+        uses: actions/upload-artifact@v4 # GitHub Action to upload artifacts
         with:
           name: test-results # The name of the uploaded artifact
           path: ./test-results # Path to the test results folder

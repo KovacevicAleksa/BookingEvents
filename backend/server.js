@@ -91,7 +91,7 @@ app.use((req, res, next) => {
 
 // CORS configuration
 const corsOptions = {
-  origin: "http://localhost", // Allow only requests from your frontend
+  origin: ["http://localhost", "http://localhost:8081"], // Allow only requests from your frontend
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE"], // Allowed methods
   allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
   credentials: true, // Allow cookies to be sent with requests
