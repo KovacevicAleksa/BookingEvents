@@ -91,7 +91,7 @@ app.use((req, res, next) => {
 
 // CORS configuration
 const corsOptions = {
-  origin: ['http://localhost', 'http://localhost:8081'],
+  origin: ['http://localhost', 'http://localhost:8081', 'http://localhost:3000'],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
     'Origin',
@@ -110,7 +110,7 @@ const corsOptions = {
 // Initialize Socket.IO
 const io = new Server(httpServer, {
   cors: {
-    origin: ['http://localhost', 'http://localhost:8081'],
+    origin: ['http://localhost', 'http://localhost:8081', 'http://localhost:3000'],
     methods: ['GET', 'POST'],
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization']
