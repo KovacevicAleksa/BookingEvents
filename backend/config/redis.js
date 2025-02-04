@@ -26,66 +26,65 @@ const redis = process.env.NODE_ENV === 'test'
       port: process.env.REDIS_PORT || 6379,
       password: process.env.REDIS_PASSWORD,
       username: process.env.REDIS_USERNAME || 'default',
-      
-      // Security settings
-      tls: process.env.REDIS_TLS === 'true',
-      
-      // Connection retry strategy
+
+      // Faster failure detection if Redis is unavailable
+      connectTimeout: 1000, // 1s
+      maxRetriesPerRequest: 2, // 2 retry
+      enableReadyCheck: false, // Disables long readiness checks
       retryStrategy: (times) => {
-        // Exponential backoff with max delay of 2 seconds
-        return Math.min(times * 50, 2000);
+        console.warn(`Redis reconnect attempt ${times}`);
+        return times > 3 ? null : 100; // Stop retrying after 2 attempts
       },
-      
-      // Connection reliability settings
-      maxRetriesPerRequest: 5,
-      enableReadyCheck: true,
-      retryOnAuthFailure: true,
-      
-      // Connection timeouts
-      connectTimeout: 10000, // 10 seconds
-      keepAlive: 10000,
-      
-      // Error handling configuration
-      showFriendlyErrorStack: process.env.NODE_ENV !== 'production',
-      
-      // Reconnect if we get a READONLY error
+
+      // Avoid reconnection if Redis is unreachable
       reconnectOnError: (err) => {
-        return err.message.includes('READONLY');
-      }
+        console.error("Redis error detected:", err.message);
+        return false; // Do not attempt reconnect
+      },
     });
 
-
-//Get data from cache or set it if it doesn't exist
+/**
+ * Get data from cache or set it if it doesn't exist
+ * Falls back to database if Redis is unavailable
+ */
 const getOrSetCache = async (key, cb) => {
+  let redisAvailable = true;
+
+  // Quick check if Redis is available
   try {
-    // Try to get data from cache
-    const data = await redis.get(key);
-    if (data != null) {
-      return JSON.parse(data);
-    }
-    
-    // If no cached data, fetch fresh data
-    const freshData = await cb();
-    if (!freshData) {
-      return null; // Handle non-existent data gracefully
-    }
-    
-    // Store fresh data in cache
-    await redis.setex(
-      key,
-      DEFAULT_EXPIRATION,
-      JSON.stringify(freshData)
-    );
-    
-    return freshData;
-  } catch (error) {
-    // Silently fall back to callback on Redis errors
-    return await cb();
+    await redis.ping();
+  } catch (err) {
+    console.warn("Redis not available, using database fallback");
+    redisAvailable = false;
   }
+
+  if (redisAvailable) {
+    try {
+      // Attempt to get data from cache
+      const data = await redis.get(key);
+      if (data != null) {
+        return JSON.parse(data);
+      }
+    } catch (error) {
+      console.warn("Redis error, falling back to database");
+    }
+  }
+
+  // If Redis is unavailable, fetch data directly from the database
+  const freshData = await cb();
+  if (redisAvailable) {
+    try {
+      await redis.setex(key, DEFAULT_EXPIRATION, JSON.stringify(freshData));
+    } catch (error) {
+      console.warn("Failed to cache data");
+    }
+  }
+  return freshData;
 };
 
-
-//@returns {Promise<boolean>} Resolved with connection status
+/**
+ * @returns {Promise<boolean>} Resolved with connection status
+ */
 const healthCheck = async () => {
   try {
     await redis.ping();
@@ -103,7 +102,7 @@ const healthCheck = async () => {
 redis.on('error', (error) => {
   if (process.env.NODE_ENV !== 'test') {
     console.error('Redis Error:', error);
-    
+
     // Special handling for authentication failures
     if (error.message.includes('WRONGPASS')) {
       console.error('Authentication failed - please verify Redis credentials');
