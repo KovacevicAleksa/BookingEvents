@@ -7,7 +7,7 @@ function AboutUs() {
       <div className="relative h-2/3">
         <img
           className="w-full h-full object-cover"
-          src="https://via.placeholder.com/800x400?text=Team+Photo"
+          src="https://github.com/user-attachments/assets/f59f4fde-c4c6-4118-bf26-755064981064"
           alt="Our Team"
         />
         <div className="absolute inset-0 bg-gray-900 opacity-50"></div>
