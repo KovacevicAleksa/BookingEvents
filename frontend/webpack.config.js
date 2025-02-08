@@ -18,5 +18,15 @@ module.exports = {
       os: require.resolve("os-browserify/browser"),
       crypto: require.resolve("crypto-browserify"),
     }
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        enforce: "pre",
+        use: ["source-map-loader"],
+        exclude: /node_modules/,
+      },
+    ],
   }
 };
