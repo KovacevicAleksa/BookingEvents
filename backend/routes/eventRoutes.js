@@ -2,6 +2,9 @@ import express from "express";
 import Event from "../models/event.js";
 import { auth, adminAuth } from "../middleware/auth.js";
 import { getOrSetCache, redis } from '../config/redis.js';
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const router = express.Router();
 
@@ -77,11 +80,11 @@ router.patch("/edit/events/:id", adminAuth, async (req, res) => {
     if (!updatedEvent) {
       return res.status(404).json({ message: "Event not found" });
     }
-
-    // Invalidate both the specific event cache and the all events cache
-    await redis.del(`event:${id}`);
-    await redis.del('events');
-
+    
+    if (typeof redis !== 'undefined' && redis && !process.env.DISABLE_REDIS) {
+      await redis.del(`event:${id}`);
+      await redis.del('events');
+    }
     res.status(200).json(updatedEvent);
   } catch (error) {
     res.status(500).json({ message: error.message });
