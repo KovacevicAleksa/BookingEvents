@@ -48,7 +48,7 @@ const redis = process.env.NODE_ENV === 'test'
  * Falls back to database if Redis is unavailable
  */
 const getOrSetCache = async (key, cb) => {
-  let redisAvailable = true;
+  let redisAvailable = process.env.DISABLE_REDIS !== "true";
 
   // Quick check if Redis is available
   try {
