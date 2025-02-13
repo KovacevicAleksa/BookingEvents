@@ -52,23 +52,25 @@ function CardData() {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-900">
         {Array.isArray(eventData) &&
-          eventData.map((event) => (
-            <Card
-              key={event._id}
-              price={event.price}
-              title={event.title}
-              description={event.description}
-              location={event.location}
-              photo={konferencija || "https://github.com/user-attachments/assets/f59f4fde-c4c6-4118-bf26-755064981064"}
-              hoverPhoto={hoverPhoto || "https://github.com/user-attachments/assets/a181e3fa-f86f-418e-8286-6f533e93c6c5"}
-              attendees={`/${event.maxPeople}`}
-              date={event.date}
-              eventId={event._id}
-              totalPeople={event.totalPeople}
-            />
-          ))}
+          eventData
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .map((event) => (
+              <Card
+                key={event._id}
+                price={event.price}
+                title={event.title}
+                description={event.description}
+                location={event.location}
+                photo={konferencija || "https://github.com/user-attachments/assets/f59f4fde-c4c6-4118-bf26-755064981064"}
+                hoverPhoto={hoverPhoto || "https://github.com/user-attachments/assets/a181e3fa-f86f-418e-8286-6f533e93c6c5"}
+                attendees={`/${event.maxPeople}`}
+                date={event.date}
+                eventId={event._id}
+                totalPeople={event.totalPeople}
+              />
+            ))}
       </div>
-    );
+    );    
   }
 
 export default CardData
