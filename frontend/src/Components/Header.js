@@ -2,12 +2,10 @@ import React, { useState } from "react";
 
 function Header({ userEmail, onLogout, onSortChange }) {
   const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
-  const [sortOption, setSortOption] = useState("");
 
   const handleSortOptionClick = (option) => {
-    setSortOption(option);
     setIsSortMenuOpen(false);
-    onSortChange(option);
+    onSortChange(option); // Prosleđujemo izabranu opciju roditeljskoj komponenti
   };
 
   return (
@@ -69,7 +67,7 @@ function Header({ userEmail, onLogout, onSortChange }) {
               onClick={() => setIsSortMenuOpen(!isSortMenuOpen)}
               className="px-4 py-2 bg-amber-600 text-white rounded-full shadow hover:bg-amber-800 hover:shadow-lg transition duration-300"
             >
-              Sort by
+              Sort
             </button>
 
             {/* Sort Menu */}

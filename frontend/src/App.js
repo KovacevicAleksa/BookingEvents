@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useState} from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
 import Login from "./routes/Login";
 import Registration from "./routes/Registration";
@@ -21,11 +21,16 @@ const AboutUs = React.lazy(() => import("./routes/AboutUs"));
 
 export function Events() {
   const { logout, user } = useAuth();
+  const [sortOption, setSortOption] = useState("date-desc");
+
+  const handleSortChange = (option) => {
+    setSortOption(option);
+  };
 
   return (
     <div>
-      <Header userEmail={user?.email} onLogout={logout} />
-      <CardData />
+      <Header userEmail={user?.email} onLogout={logout} onSortChange={handleSortChange} />
+      <CardData sortOption={sortOption} />
     </div>
   );
 }
