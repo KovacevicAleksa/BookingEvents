@@ -32,6 +32,7 @@
     "k8s-DUS": "npm run delete-k8s && npm run update-all && npm run all-k8s"
   },
   "dependencies": {
+    "@yudiel/react-qr-scanner": "^2.1.0",
     "concurrently": "^9.1.0",
     "npm-run-all": "^4.1.5"
   }
