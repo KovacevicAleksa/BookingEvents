@@ -19,7 +19,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: process.env.FRONTEND_URL,
+        url: "http://localhost:8081",
       },
     ],
     components: {

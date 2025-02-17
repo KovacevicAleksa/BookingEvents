@@ -1,0 +1,155 @@
+openapi: 3.0.0
+info:
+  title: Booking Event API - Report Routes
+  version: 1.0.0
+  description: API routes for managing user reports
+
+paths:
+  /report:
+    get:
+      summary: Retrieve all reports
+      tags:
+        - Reports
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successfully retrieved reports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Report'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    post:
+      summary: Submit a new report
+      tags:
+        - Reports
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - reportText
+                - category
+              properties:
+                email:
+                  type: string
+                  format: email
+                reportText:
+                  type: string
+                  minLength: 10
+                category:
+                  type: string
+                  enum: ["Sexual Harassment", "False Information", "Spam", "Hate Speech", "Other"]
+              example:
+                email: "user@example.com"
+                reportText: "This user is spreading false information."
+                category: "False Information"
+      responses:
+        '201':
+          description: Report successfully submitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+        '400':
+          description: Missing required fields
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /report/{id}:
+    delete:
+      summary: Delete a report by ID
+      tags:
+        - Reports
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Report successfully deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Report not found
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Report:
+      type: object
+      properties:
+        _id:
+          type: string
+        email:
+          type: string
+          format: email
+        reportText:
+          type: string
+        category:
+          type: string
+          enum: ["Sexual Harassment", "False Information", "Spam", "Hate Speech", "Other"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      example:
+        _id: "64123abcd5678"
+        email: "user@example.com"
+        reportText: "This user is spreading false information."
+        category: "False Information"
+        createdAt: "2023-12-05T12:00:00Z"
+        updatedAt: "2023-12-05T12:00:00Z"
+
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      example:
+        message: "An error occurred"
+
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      example:
+        message: "Operation successful"
