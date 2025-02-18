@@ -47,6 +47,7 @@ describe("Report API Tests", () => {
       email: "testuser@example.com",
       reportText: "This is a test report with enough characters.",
       category: "Spam",
+      reportBy: "testuser@example.com",
     });
     testReportId = testReport._id.toString();
   });
@@ -84,6 +85,7 @@ describe("Report API Tests", () => {
         email: "validuser@example.com",
         reportText: "A detailed and valid report text.",
         category: "Hate Speech",
+        reportBy: "reportBy@gmail.com",
       };
 
       const response = await request(app)
@@ -109,7 +111,7 @@ describe("Report API Tests", () => {
       const response = await request(app)
         .post("/report")
         .set("Authorization", `Bearer ${regularToken}`)
-        .send({ email: "user@example.com", reportText: "Valid text", category: "InvalidCategory" });
+        .send({ email: "user@example.com", reportText: "Valid text", category: "InvalidCategory",reportBy: "reportBy@gmail.com"});
 
       expect(response.statusCode).toBe(500);
     });

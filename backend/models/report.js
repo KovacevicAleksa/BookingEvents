@@ -24,6 +24,16 @@ const ReportSchema = new mongoose.Schema(
         "Other",
       ],
     },
+    status: {
+      type: String,
+      enum: ["Pending", "In Progress", "Resolved", "Closed"],
+      default: "Pending", // Default status is 'Pending'
+    },
+    reportBy: {
+      type: String,
+      required: true,
+      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
+    },
   },
   {
     timestamps: true, // Automatically adds createdAt and updatedAt fields

@@ -1,6 +1,6 @@
 import express from "express";
 import { auth, adminAuth } from "../middleware/auth.js";
-import mongoose from "mongoose"; // For ObjectId validation
+import mongoose from "mongoose";
 import Report from "../models/report.js";
 
 const router = express.Router();
@@ -17,14 +17,14 @@ router.get("/report", adminAuth, async (req, res) => {
 
 // Route to add a new report
 router.post("/report", auth, async (req, res) => {
-  const { email, reportText, category } = req.body;
+  const { email, reportText, category, reportBy } = req.body;
 
-  if (!email || !reportText || !category) {
+  if (!email || !reportText || !category || !reportBy) {
     return res.status(400).json({ error: "All fields are required" });
   }
 
   try {
-    const newReport = new Report({ email, reportText, category });
+    const newReport = new Report({ email, reportText, category, reportBy, status: "Pending" });
     await newReport.save();
     res.status(201).json({ message: "Report submitted successfully", newReport });
   } catch (error) {
