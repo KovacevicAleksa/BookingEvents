@@ -44,6 +44,7 @@ paths:
                 - email
                 - reportText
                 - category
+                - reportBy
               properties:
                 email:
                   type: string
@@ -54,10 +55,17 @@ paths:
                 category:
                   type: string
                   enum: ["Sexual Harassment", "False Information", "Spam", "Hate Speech", "Other"]
+                reportBy:
+                  type: string
+                status:
+                  type: string
+                  enum: ["Pending", "Reviewed", "Resolved"]
               example:
                 email: "user@example.com"
                 reportText: "This user is spreading false information."
                 category: "False Information"
+                reportBy: "admin@example.com"
+                status: "Pending"
       responses:
         '201':
           description: Report successfully submitted
@@ -124,6 +132,11 @@ components:
         category:
           type: string
           enum: ["Sexual Harassment", "False Information", "Spam", "Hate Speech", "Other"]
+        reportBy:
+          type: string
+        status:
+          type: string
+          enum: ["Pending", "Reviewed", "Resolved"]
         createdAt:
           type: string
           format: date-time
@@ -135,6 +148,8 @@ components:
         email: "user@example.com"
         reportText: "This user is spreading false information."
         category: "False Information"
+        reportBy: "admin@example.com"
+        status: "Pending"
         createdAt: "2023-12-05T12:00:00Z"
         updatedAt: "2023-12-05T12:00:00Z"
 

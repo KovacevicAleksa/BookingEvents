@@ -53,8 +53,9 @@ describe("Report API Tests", () => {
   });
 
   afterAll(async () => {
-    await Report.deleteOne({ "email": "testuser@example.com"});
-    await Account.deleteOne({ "email": "regular@test.com"});
+    await Account.deleteMany({ email: "regular@test.com" });
+    await Report.deleteMany({ email: "validuser@example.com" });
+    await Report.deleteMany({ email: "testuser@example.com" });
     await cleanupTest(server);
   });
 
