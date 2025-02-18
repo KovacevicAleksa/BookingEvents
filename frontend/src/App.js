@@ -18,6 +18,8 @@ const Profile = React.lazy(() => import("./routes/Profile"));
 const MyTickets = React.lazy(() => import("./routes/MyTickets"));
 const Chat = React.lazy(() => import("./routes/Chat"));
 const AboutUs = React.lazy(() => import("./routes/AboutUs"));
+const Report = React.lazy(() => import("./routes/Report.js"));
+
 
 export function Events() {
   const { logout, user } = useAuth();
@@ -48,6 +50,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/my-tickets" element={<MyTickets />} />
         <Route path="/about-us" element={<AboutUs />} />
+        <Route path="/report" element={<Report />} />
 
         <Route
           path="/events"
