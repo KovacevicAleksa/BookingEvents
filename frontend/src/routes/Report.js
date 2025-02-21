@@ -44,6 +44,7 @@ function Report() {
       }
   
       setSuccess("Report submitted successfully");
+      localStorage.removeItem("reportedEmail");
       setFormData(prev => ({ ...prev, reportText: "", category: "Other" }));
     } catch (err) {
       setError(err.message || "An unexpected error occurred");
@@ -122,7 +123,7 @@ function Report() {
               type="email"
               id="email"
               name="email"
-              // value={}
+              value={localStorage.getItem("reportedEmail")}
               onChange={handleChange}
               required
               style={{

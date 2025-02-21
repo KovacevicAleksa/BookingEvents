@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from "react"; // Import necessary hooks from React
 import io from "socket.io-client"; // Import Socket.IO client
-import { useParams } from "react-router-dom"; // Import useParams to get URL parameters
-import config from "../config/config";
+import { useParams, useNavigate } from "react-router-dom"; // Import useParams and useNavigate to get URL parameters and navigate between pages
+import config from "../config/config"; // Import configuration file
 
 const Chat = () => {
   // Get roomName from URL parameters
   const { roomName } = useParams();
+  // Initialize navigation hook
+  const navigate = useNavigate();
   // State to manage the socket connection
   const [socket, setSocket] = useState(null);
   // State to manage the current message input
@@ -20,9 +22,7 @@ const Chat = () => {
 
   const initializeSocket = useCallback(() => {
     // Create a new socket connection
-    const newSocket = io(`${config.api.baseURL}`, {
-      withCredentials: true,
-    });
+    const newSocket = io(`${config.api.baseURL}`, { withCredentials: true });
     setSocket(newSocket); // Store the socket connection in state
 
     // Event listener for successful connection
@@ -91,13 +91,23 @@ const Chat = () => {
     }
   };
 
+  // Function to handle reporting a message
+  const handleReport = (msg) => {
+    // Confirm with the user before reporting
+    if (window.confirm(`Do you want to report the message from ${msg.email}?`)) {
+      localStorage.setItem("reportedEmail", msg.email);
+      navigate("/report"); // Redirect to the /report page upon confirmation
+      
+    }
+  };
+
   // Function to format timestamp into a readable time string
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
-  // Formating date
+  // Function to format timestamp into a readable date string
   const formatDate = (timestamp) => {
     const date = new Date(timestamp);
     return date.toLocaleDateString([], {
@@ -107,31 +117,38 @@ const Chat = () => {
     });
   };
 
-  // Function for grouping messages by days
+  // Function for grouping messages by days and rendering them
   const renderMessages = () => {
     let lastDate = null;
 
     return messages.map((msg, index) => {
       const currentDate = formatDate(msg.timestamp);
-      const showDate = currentDate !== lastDate;
-      lastDate = currentDate;
+      const showDate = currentDate !== lastDate; // Check if date should be displayed
+      lastDate = currentDate; // Update last date for next iteration
 
       return (
-        <div key={index}>
+        <div key={index} className="relative group">
           {/* Date */}
           {showDate && (
             <div className="text-center my-4">
               <span className="text-sm text-gray-500">{currentDate}</span>
             </div>
           )}
-          <div className="mb-2 p-3 border rounded-lg shadow-sm bg-white">
-            <div className="flex items-center mb-1">
+
+          {/* Message block */}
+          <div className="mb-2 p-3 border rounded-lg shadow-sm bg-white relative">
+            <div className="flex justify-between items-center mb-1">
               <strong className="text-blue-700">{msg.email}:</strong>
+              {/* Report button redirects to /report page upon confirmation */}
+              <button
+                onClick={() => handleReport(msg)}
+                className="text-red-500 text-sm hover:underline"
+              >
+                Report
+              </button>
             </div>
             <p className="mb-1 text-gray-700">{msg.text || msg.message}</p>
-            <span className="text-xs text-gray-500">
-              {formatTime(msg.timestamp)}
-            </span>
+            <span className="text-xs text-gray-500">{formatTime(msg.timestamp)}</span>
           </div>
         </div>
       );
@@ -143,19 +160,18 @@ const Chat = () => {
       <div className="bg-indigo-600 text-white py-4 px-6 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">
-            {decodeURIComponent(roomName).toUpperCase()}
+            {decodeURIComponent(roomName).toUpperCase()} {/* Display room name */}
           </h1>
           <p className="text-sm bg-indigo-500 px-3 py-1 rounded-full">
-            Active Users: {activeUsers}
+            Active Users: {activeUsers} {/* Display active users */}
           </p>
         </div>
       </div>
 
       {/* Message List */}
       <ul className="flex-grow overflow-y-auto p-4 bg-gray-200">
-        {renderMessages()}
-        {/* Add a reference to the bottom of the messages list */}
-        <div ref={messagesEndRef}></div>
+        {renderMessages()} {/* Render all messages */}
+        <div ref={messagesEndRef}></div> {/* Reference for auto-scroll */}
       </ul>
 
       {/* Message Input */}
@@ -167,13 +183,13 @@ const Chat = () => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="flex-grow p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder="Type a message..."
+              placeholder="Type a message..." // Input placeholder
             />
             <button
               type="submit"
               className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition duration-300"
             >
-              Send
+              Send {/* Send button */}
             </button>
           </form>
         </div>
