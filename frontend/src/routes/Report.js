@@ -22,21 +22,27 @@ function Report() {
     e.preventDefault();
     setError("");
     setSuccess("");
-
+  
     try {
-      const response = await fetch(`${config.api.baseURL}/reports`, {
+      const response = await fetch("http://localhost:8081/report", {
         method: "POST",
         headers: {
           'Authorization': `Bearer ${localStorage.getItem("token")}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          email: formData.email,
+          reportText: formData.reportText,
+          category: formData.category,
+          reportBy: localStorage.getItem("userEmail"),
+        }),
       });
-
+  
       if (!response.ok) {
-        throw new Error("Failed to submit report");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to submit report");
       }
-
+  
       setSuccess("Report submitted successfully");
       setFormData(prev => ({ ...prev, reportText: "", category: "Other" }));
     } catch (err) {
@@ -116,7 +122,7 @@ function Report() {
               type="email"
               id="email"
               name="email"
-              value={formData.email}
+              // value={}
               onChange={handleChange}
               required
               style={{
