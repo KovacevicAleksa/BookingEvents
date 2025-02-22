@@ -25,6 +25,14 @@ const AccountSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    banDate: {
+      type: Date,
+      default: null,
+    },
+    banCount: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt fields
