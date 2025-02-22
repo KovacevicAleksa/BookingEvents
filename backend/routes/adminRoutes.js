@@ -157,5 +157,39 @@ router.delete("/delete/events/:id", adminAuth, async (req, res) => {
     session.endSession();
   }
 });
+// Route to update banDate and automatically increment banCount for a user account (admin only)
+router.patch("/admin/update/ban/:id", adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { banDate } = req.body;
+
+    // Validate the provided banDate
+    if (banDate && isNaN(Date.parse(banDate))) {
+      return res.status(400).json({ message: "Invalid banDate format." });
+    }
+
+    // Find the account by ID
+    const account = await Account.findById(id);
+    if (!account) {
+      return res.status(404).json({ message: "Account not found" });
+    }
+
+    // Update banDate if provided
+    if (banDate) {
+      account.banDate = new Date(banDate); // Update banDate
+    }
+
+    // Increment the banCount by 1
+    account.banCount += 1;
+
+    // Save the updated account
+    const updatedAccount = await account.save();
+
+    res.status(200).json({ message: "Account updated successfully", account: updatedAccount });
+  } catch (error) {
+    console.error("Error updating account:", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
+  }
+});
 
 export default router;
