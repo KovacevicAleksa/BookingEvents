@@ -19,6 +19,7 @@ const MyTickets = React.lazy(() => import("./routes/MyTickets"));
 const Chat = React.lazy(() => import("./routes/Chat"));
 const AboutUs = React.lazy(() => import("./routes/AboutUs"));
 const Report = React.lazy(() => import("./routes/Report.js"));
+const ReportManagement = React.lazy(() => import("./routes/ReportManagement.js"));
 
 
 export function Events() {
@@ -73,6 +74,14 @@ function App() {
           element={
             <PrivateRoute adminOnly={true}>
               <HealthCheckDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/reportManagement"
+          element={
+            <PrivateRoute adminOnly={true}>
+              <ReportManagement />
             </PrivateRoute>
           }
         />
