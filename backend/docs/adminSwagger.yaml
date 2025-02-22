@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Booking Event API - Admin Routes
-  version: 1.1.0
+  version: 1.2.0
   description: Administrative and public routes for managing users and events
 
 paths:
@@ -156,8 +156,75 @@ paths:
         '500':
           description: Server error
 
+  /admin/update/ban/{id}:
+    patch:
+      summary: Update banDate and increment banCount for a user account (admin only)
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            description: ID of the user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                banDate:
+                  type: string
+                  format: date-time
+                  description: New ban date for the account (optional)
+      responses:
+        '200':
+          description: Account updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  account:
+                    $ref: '#/components/schemas/Account'
+        '400':
+          description: Invalid banDate format
+        '404':
+          description: Account not found
+        '500':
+          description: Internal server error
+
 components:
   schemas:
+    Account:
+      type: object
+      properties:
+        _id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        isAdmin:
+          type: boolean
+        banDate:
+          type: string
+          format: date-time
+        banCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
     EventInput:
       type: object
       required:
@@ -199,3 +266,9 @@ components:
             updatedAt:
               type: string
               format: date-time
+
+securitySchemes:
+  bearerAuth:
+    type: http
+    scheme: bearer
+    bearerFormat: JWT
