@@ -6,6 +6,7 @@ export default function ReportManagement() {
   const [banDuration, setBanDuration] = useState("24h");
   const [isLoading, setIsLoading] = useState(false);
   const [accountInfo, setAccountInfo] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchReports();
@@ -55,30 +56,53 @@ export default function ReportManagement() {
   };
 
   const handleBanUser = async () => {
-    if (!selectedReport) return;
+    if (!selectedReport || !accountInfo) return;
     setIsLoading(true);
 
     const token = localStorage.getItem("token");
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:8081/admin/ban/${selectedReport._id}`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          duration: banDuration,
-          reason: `Banned for ${selectedReport.category}`
-        })
-      });
+      if (banDuration === "permanent") {
+        // Handle permanent ban by deleting the account
+        const deleteResponse = await fetch(`http://localhost:8081/delete/users/${accountInfo._id}`, {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          }
+        });
 
-      if (!response.ok) throw new Error("Failed to ban user");
+        if (!deleteResponse.ok) throw new Error("Failed to delete user");
+      } else {
+        // Handle temporary ban
+        const banDate = new Date();
+        const hours = parseInt(banDuration);
+        banDate.setHours(banDate.getHours() + hours);
+
+        const banResponse = await fetch(`http://localhost:8081/admin/update/ban/${accountInfo._id}`, {
+          method: "PATCH",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            banDate: banDate.toISOString()
+          })
+        });
+
+        if (!banResponse.ok) throw new Error("Failed to ban user");
+      }
+
       await fetchReports();
-      await fetchAccountInfo(selectedReport.email);
+      if (banDuration !== "permanent") {
+        await fetchAccountInfo(selectedReport.email);
+      } else {
+        setSelectedReport(null);
+        setAccountInfo(null);
+      }
     } catch (error) {
-      console.error("Error banning user:", error);
+      console.error("Error managing user:", error);
     } finally {
       setIsLoading(false);
     }
@@ -147,14 +171,14 @@ export default function ReportManagement() {
                 <option value="72h">72 Hours</option>
                 <option value="168h">1 Week</option>
                 <option value="720h">30 Days</option>
-                <option value="permanent">Permanent</option>
+                <option value="permanent">Permanent Ban (Delete Account)</option>
               </select>
               <button
                 onClick={handleBanUser}
                 disabled={isLoading}
-                className="w-full p-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                className={`w-full p-2 ${banDuration === "permanent" ? 'bg-red-800' : 'bg-red-600'} text-white rounded hover:bg-red-700 disabled:opacity-50`}
               >
-                {isLoading ? "Processing..." : "Ban User"}
+                {isLoading ? "Processing..." : banDuration === "permanent" ? "Permanently Ban & Delete" : "Ban User"}
               </button>
             </div>
           </div>
