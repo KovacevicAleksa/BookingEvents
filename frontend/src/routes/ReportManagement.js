@@ -108,6 +108,38 @@ export default function ReportManagement() {
     }
   };
 
+  const handleDeleteReport = async () => {
+    if (!selectedReport) return;
+    setIsLoading(true);
+
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const response = await fetch(`http://localhost:8081/report/${selectedReport._id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete report");
+      }
+
+      // Remove deleted report from state
+      setReports(reports.filter(report => report._id !== selectedReport._id));
+      setSelectedReport(null);
+      setAccountInfo(null);
+    } catch (error) {
+      console.error("Error deleting report:", error);
+      setError("Failed to delete report. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getRemainingBanTime = (banDate) => {
     if (!banDate) return null;
     const now = new Date();
@@ -233,6 +265,18 @@ export default function ReportManagement() {
             <p className="text-gray-300 whitespace-pre-wrap">
               {selectedReport.reportText}
             </p>
+            
+            {/* Delete Report Button */}
+            <div className="mt-6">
+              <button
+                onClick={handleDeleteReport}
+                disabled={isLoading}
+                className="w-full p-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+              >
+                {isLoading ? "Processing..." : "Delete Report"}
+              </button>
+              {error && <p className="text-red-400 mt-2 text-sm">{error}</p>}
+            </div>
           </div>
         ) : (
           <p className="text-gray-400">Select a report to view details</p>
