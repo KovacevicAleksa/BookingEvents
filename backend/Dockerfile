@@ -1,8 +1,8 @@
 # Use Node.js LTS version with Alpine Linux to ensure a lightweight and stable environment
 FROM node:lts-alpine
 
-# Install curl
-RUN apk add --no-cache curl
+# Install build dependencies needed for bcrypt
+RUN apk add --no-cache curl python3 make g++ py3-pip
 
 # Set environment to production to optimize performance and exclude development dependencies
 ENV NODE_ENV=production
