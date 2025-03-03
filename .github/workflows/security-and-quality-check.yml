@@ -20,7 +20,7 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4.2  # Check out the repository code
+      uses: actions/checkout@v4  # Check out the repository code
       with:
         fetch-depth: 0  # Fetch all history for all branches
 
@@ -37,7 +37,7 @@ jobs:
         category: "/language:javascript"  # Specify the category for the analysis
 
     - name: Setup Node.js
-      uses: actions/setup-node@v4.2  # Set up Node.js environment
+      uses: actions/setup-node@v4  # Set up Node.js environment
       with:
         node-version: '20'  # Specify the Node.js version
         cache: 'npm'  # Cache npm dependencies
