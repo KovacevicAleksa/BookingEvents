@@ -73,6 +73,25 @@ router.post(
         return res.status(500).json({ message: "Internal server error" });
       }
 
+      // Check if the account is banned
+      if (account.banCount >= 1) {
+        const currentDate = new Date();
+        const banDuration = account.banDate - currentDate;
+
+        if (banDuration > 0) {
+          const secondsLeft = Math.floor(banDuration / 1000);
+          const minutesLeft = Math.floor(secondsLeft / 60);
+          const hoursLeft = Math.floor(minutesLeft / 60);
+          const daysLeft = Math.floor(hoursLeft / 24);
+
+          console.error(`Account is banned for ${daysLeft} days, ${hoursLeft % 24} hours, ${minutesLeft % 60} minutes.`);
+          return res.status(403).json({
+            message: `Account is banned for ${daysLeft} days, ${hoursLeft % 24} hours, ${minutesLeft % 60} minutes.`,
+          });
+        }
+      }
+
+      // If the account is not banned, proceed to create JWT token
       const token = jwt.sign(
         { id: account._id, email: account.email, isAdmin: account.isAdmin, isOrganizer: account.isOrganizer },
         process.env.JWT_SECRET,
@@ -93,9 +112,7 @@ router.post(
       });
     } catch (error) {
       console.error("Login error:", error);
-      res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
+      res.status(500).json({ message: "Internal server error", error: error.message });
     }
   }
 );
