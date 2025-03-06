@@ -32,8 +32,8 @@ function Header({ userEmail, onLogout, onSortChange }) {
           <h1 className="text-3xl font-bold text-white">Event Booking</h1>
         </div>
 
-        {/* Navigation Links */}
-        <div className="hidden md:flex space-x-6 text-gray-300">
+        {/* Navigation Links - Now Centered */}
+        <div className="hidden md:flex space-x-6 text-gray-300 absolute left-1/2 transform -translate-x-1/2">
           <a
             href="/my-tickets"
             className="hover:text-white transition duration-300 text-lg"
