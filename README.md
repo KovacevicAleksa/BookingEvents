@@ -86,10 +86,12 @@ npm run all-node
 
 **Docker/Kubernetes**
 
+*For Kubernetes, you need to install the* **NGINX Ingress Controller**. *This can be done using either* **Helm** *or* **kubectl**.
+
 ```
 npm run docker
 npm run k8s
-npm run k8s-DUS //Delete,Update,Start
+npm run k8s-DUS // Delete,Update,Start
 ```
 
 **Tests**
